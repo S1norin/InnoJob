@@ -1,0 +1,192 @@
+document.addEventListener('DOMContentLoaded', () => {
+    /**
+     * Основной объект приложения, инкапсулирующий всю логику.
+     * Это предотвращает создание глобальных переменных и делает код более модульным.
+     */
+    const app = {
+        // Ссылки на DOM-элементы для быстрого доступа
+        elements: {},
+        // Кэш для всех загруженных вакансий
+        allVacancies: [],
+
+        /**
+         * Инициализация приложения
+         */
+        init() {
+            this.cacheDOMElements();
+            this.bindEvents();
+            this.fetchAndRenderVacancies();
+        },
+
+        /**
+         * Кэширует все необходимые DOM-элементы один раз при запуске.
+         */
+        cacheDOMElements() {
+            this.elements.vacanciesList = document.getElementById('vacancies-list');
+            this.elements.applyFiltersBtn = document.getElementById('applyFilters');
+            this.elements.filtersPanel = document.getElementById('filtersPanel');
+            this.elements.toggleFilters = document.getElementById('toggleFilters');
+            this.elements.searchBar = document.getElementById('searchBar');
+            // ... вы можете добавить сюда все остальные элементы для чистоты кода
+        },
+
+        /**
+         * Привязывает обработчики событий к элементам.
+         */
+        bindEvents() {
+            // Применение фильтров - единая точка для обновления списка
+            this.elements.applyFiltersBtn.addEventListener('click', () => {
+                this.filterAndRender();
+                this.elements.filtersPanel.classList.remove('active');
+                this.elements.searchBar.classList.remove('active');
+            });
+
+            // Логика открытия/закрытия панели фильтров
+            this.elements.toggleFilters.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.elements.filtersPanel.classList.toggle('active');
+                this.elements.searchBar.classList.toggle('active');
+            });
+            document.addEventListener('click', (e) => {
+                if (!this.elements.filtersPanel.contains(e.target) && e.target !== this.elements.toggleFilters) {
+                    this.elements.filtersPanel.classList.remove('active');
+                    this.elements.searchBar.classList.remove('active');
+                }
+            });
+        },
+
+        /**
+         * Загружает данные с сервера ОДИН РАЗ и инициирует первую отрисовку.
+         */
+        async fetchAndRenderVacancies() {
+            this.setUIState('loading');
+            try {
+                const response = await fetch('http://127.0.0.1:8000/vacancies');
+                if (!response.ok) {
+                    throw new Error(`Ошибка HTTP: ${response.status}`);
+                }
+                this.allVacancies = await response.json();
+                this.filterAndRender(); // Первая отрисовка с фильтрами по умолчанию
+            } catch (error) {
+                console.error('Ошибка при загрузке вакансий:', error);
+                this.setUIState('error', `Не удалось загрузить вакансии. Детали: ${error.message}`);
+            }
+        },
+
+        /**
+         * Собирает текущие значения фильтров из DOM.
+         * @returns {object} - Объект с текущими настройками фильтров.
+         */
+        getFiltersFromDOM() {
+            const formData = new FormData(document.getElementById('filtersForm')); // Предполагается, что фильтры обернуты в <form id="filtersForm">
+            const workFormat = Array.from(formData.keys()).filter(key => key.startsWith('workFormat')).map(key => formData.get(key));
+
+            return {
+                searchQuery: document.getElementById('searchInput').value.toLowerCase(),
+                salaryMin: parseInt(document.getElementById('salaryMin').value, 10),
+                salaryMax: parseInt(document.getElementById('salaryMax').value, 10),
+                experience: formData.get('experience') || 'any',
+                workFormat: workFormat.length > 0 ? workFormat : ['remote', 'office', 'hybrid'], // Если ничего не выбрано, не фильтруем
+            };
+        },
+
+        /**
+         * Фильтрует кэшированный список вакансий и вызывает рендеринг.
+         */
+        filterAndRender() {
+            const filters = this.getFiltersFromDOM();
+
+            const filteredVacancies = this.allVacancies.filter(vacancy => {
+                const salaryFrom = vacancy.salary_from ?? 0;
+                const salaryTo = vacancy.salary_to ?? Infinity;
+
+                // Условия для отсеивания. Если любое из них истинно, вакансия не подходит.
+                if (salaryFrom > filters.salaryMax || salaryTo < filters.salaryMin) return false;
+                if (filters.searchQuery && !vacancy.name.toLowerCase().includes(filters.searchQuery)) return false;
+                if (filters.experience !== 'any' && vacancy.experience !== filters.experience) return false; // Добавьте поле experience в данные
+                if (vacancy.format && !filters.workFormat.includes(vacancy.format.toLowerCase())) return false;
+
+                return true; // Вакансия прошла все проверки
+            });
+
+            this.renderVacancies(filteredVacancies);
+        },
+
+        /**
+         * Отрисовывает список вакансий на странице.
+         * @param {Array} vacancies - Массив отфильтрованных вакансий для отображения.
+         */
+        renderVacancies(vacancies) {
+            if (vacancies.length === 0) {
+                this.setUIState('empty');
+                return;
+            }
+
+            this.elements.vacanciesList.innerHTML = vacancies
+                .map(vacancy => this.createVacancyCardHTML(vacancy))
+                .join('');
+        },
+
+        /**
+         * Создает HTML-разметку для одной карточки вакансии.
+         * @param {object} vacancy - Объект вакансии.
+         * @returns {string} - HTML-строка карточки.
+         */
+        createVacancyCardHTML(vacancy) {
+            // Безопасная обработка зарплаты
+            let salaryText = 'Зарплата не указана';
+            if (vacancy.salary_from || vacancy.salary_to) {
+                const from = vacancy.salary_from ? `от ${vacancy.salary_from}` : '';
+                const to = vacancy.salary_to ? `до ${vacancy.salary_to}` : '';
+                salaryText = `Зарплата: ${from} ${to}`.trim();
+            }
+
+            // Сборка тегов
+            const tags = (vacancy.skills?.split(',') ?? []).map(skill => skill.trim());
+            if (vacancy.format && vacancy.format !== "no data") {
+                tags.push(vacancy.format);
+            }
+
+            // Использование оператора '??' для подстановки значений по умолчанию
+            return `
+                <div class="job-card">
+                    <div class="job-header">
+                        <img src="${vacancy.logo ?? 'logo.png'}" alt="Лого компании" class="company-logo">
+                        <p class="company-name">${vacancy.company ?? 'Название компании'}</p>
+                    </div>
+                    <div class="job-content">
+                        <h3 class="job-title">${vacancy.name ?? 'Название вакансии'}</h3>
+                        <p class="job-salary">${salaryText}</p>
+                        <p class="job-description">${vacancy.description ?? 'Описание отсутствует.'}</p>
+                        <div class="job-tags">
+                            ${tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                        </div>
+                        <button class="apply-button">Просмотреть вакансию</button>
+                    </div>
+                </div>
+            `;
+        },
+
+        /**
+         * Управляет состоянием интерфейса (загрузка, ошибка, пусто).
+         * @param {'loading'|'error'|'empty'} state - Текущее состояние.
+         * @param {string} [message=''] - Сообщение для состояния ошибки.
+         */
+        setUIState(state, message = '') {
+            const list = this.elements.vacanciesList;
+            switch (state) {
+                case 'loading':
+                    list.innerHTML = '<p class="loading">Загрузка вакансий...</p>';
+                    break;
+                case 'error':
+                    list.innerHTML = `<p class="error">${message}</p>`;
+                    break;
+                case 'empty':
+                    list.innerHTML = '<div class="empty-state"><i class="fas fa-briefcase"></i><p>Нет вакансий, соответствующих фильтрам</p></div>';
+                    break;
+            }
+        }
+    };
+
+    app.init();
+});

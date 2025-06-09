@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация и загрузка резюме</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .container {
+            max-width: 500px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #0056b3;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="file"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #0056b3;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #004494;
+        }
+        .error {
+            color: red;
+            margin-top: 5px;
+        }
+        .success {
+            color: green;
+            margin-top: 5px;
+        }
+        .form-footer {
+            margin-top: 15px;
+            text-align: center;
+        }
+        #uploadSection {
+            display: none;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        .file-info {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Регистрация и загрузка резюме</h1>
+        <form id="registrationForm">
+            <div class="form-group">
+                <label for="name">Имя:</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Пароль:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit">Зарегистрироваться</button>
+            <div id="message" class="form-footer"></div>
+        </form>
+
+        <div id="uploadSection">
+            <h2>Загрузите ваше резюме (PDF)</h2>
+            <form id="uploadForm">
+                <div class="form-group">
+                    <label for="pdfFile">Выберите PDF файл:</label>
+                    <input type="file" id="pdfFile" name="pdfFile" accept=".pdf" required>
+                    <div class="file-info" id="fileInfo"></div>
+                </div>
+                <button type="submit">Загрузить резюме</button>
+                <div id="uploadMessage" class="form-footer"></div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let registeredEmail = null;
+
+        document.getElementById('registrationForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const messageDiv = document.getElementById('message');
+
+            messageDiv.textContent = '';
+            messageDiv.className = 'form-footer';
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        email: email,
+                        password: password
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    messageDiv.textContent = 'Регистрация успешна! Теперь загрузите ваше резюме.';
+                    messageDiv.className = 'form-footer success';
+                    registeredEmail = email;
+                    document.getElementById('uploadSection').style.display = 'block';
+                } else {
+                    messageDiv.textContent = data.detail || 'Ошибка при регистрации';
+                    messageDiv.className = 'form-footer error';
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                messageDiv.textContent = 'Ошибка соединения с сервером';
+                messageDiv.className = 'form-footer error';
+            }
+        });
+
+        // Handle file selection
+        document.getElementById('pdfFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const fileInfo = document.getElementById('fileInfo');
+
+            if (file) {
+                if (file.type === 'application/pdf') {
+                    fileInfo.textContent = `Выбран файл: ${file.name} (${(file.size / 1024).toFixed(2)} KB)`;
+                    fileInfo.className = 'file-info';
+                } else {
+                    fileInfo.textContent = 'Пожалуйста, выберите файл в формате PDF.';
+                    fileInfo.className = 'file-info error';
+                    e.target.value = ''; // Clear the file input
+                }
+            }
+        });
+
+        // Handle PDF upload
+        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            if (!registeredEmail) {
+                alert('Пожалуйста, сначала зарегистрируйтесь.');
+                return;
+            }
+
+            const fileInput = document.getElementById('pdfFile');
+            const file = fileInput.files[0];
+            const uploadMessage = document.getElementById('uploadMessage');
+
+            if (!file) {
+                uploadMessage.textContent = 'Пожалуйста, выберите файл.';
+                uploadMessage.className = 'form-footer error';
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('pdfFile', file);
+            formData.append('email', registeredEmail);
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/upload-cv', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    uploadMessage.textContent = 'Резюме успешно загружено!';
+                    uploadMessage.className = 'form-footer success';
+                    // Reset the form after successful upload
+                    document.getElementById('uploadForm').reset();
+                    document.getElementById('fileInfo').textContent = '';
+                } else {
+                    uploadMessage.textContent = data.detail || 'Ошибка при загрузке файла';
+                    uploadMessage.className = 'form-footer error';
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                uploadMessage.textContent = 'Ошибка соединения с сервером';
+                uploadMessage.className = 'form-footer error';
+            }
+        });
+    </script>
+</body>
+</html>
