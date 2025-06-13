@@ -2,8 +2,7 @@ import psycopg2
 from fastapi import FastAPI, HTTPException, status, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from config import db_host, db_name, db_user, db_password, origins, db_port
-from database import DB
-from base_models import UserCreate
+from database import VacancyManager
 import os
 import uuid
 
@@ -21,7 +20,7 @@ app.add_middleware(
 
 def connect_to_db():
     global database
-    database = DB(host=db_host, dbname=db_name, user=db_user,
+    database = VacancyManager(host=db_host, dbname=db_name, user=db_user,
                             password=db_password, port=db_port)
 
 # Call initialize_db() when the app starts

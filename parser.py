@@ -1,6 +1,8 @@
 import requests
 from config import params
-from base_models import Vacancy
+
+def get_data_from_url(url):
+    return requests.get(url)
 
 def get_main_data():
     print("Запрос вакансий с HH.ru...")
@@ -9,32 +11,37 @@ def get_main_data():
     api_data = response.json()
     print(f"Получено {len(api_data.get('items', []))} вакансий с HH.ru.")
     vacancies = list()
+
     for vacancy_hh in api_data.get('items', []):
         name = vacancy_hh.get("name")
         salary = vacancy_hh.get("salary")
-        salary_from = salary.get("from") if salary else None
-        salary_to = salary.get("to") if salary else None
+        salary_from = salary.get("from", "None") if salary is not None else None
+        salary_to = salary.get("to", "None") if salary is not None else None
+        salary_mode = vacancy_hh.get('salary_range').get('mode').get(name) if vacancy_hh.get('salary_range') is not None else "no data"
+        salary_currency = salary.get('currency') if salary is not None else 'no data'
 
-        working_days_info = vacancy_hh.get("working_days")
+        experience = vacancy_hh.get('experience', {}).get("name", 'no data')
+
         form = "no data"
-        if working_days_info and isinstance(working_days_info, list) and len(working_days_info) > 0:
-            form = working_days_info[0].get("name", "no data")
 
         url_alternate = vacancy_hh.get("alternate_url")  # Ссылка на вакансию на сайте
         url_api_details = vacancy_hh.get("url")  # URL для API деталей вакансии
 
         description_full = "Описание не загружено"
+        picture = "#"
         requirements_list = []
 
         if url_api_details:
             try:
                 # print(f"Запрос деталей для: {name} ({url_api_details})")
-                response_details = get_dtat_from_url(url_api_details)
+                response_details = get_data_from_url(url_api_details)
                 response_details.raise_for_status()
                 data_details = response_details.json()
+
+
                 description_full = data_details.get("description", "Описание отсутствует")
-                requirements_list = [skill.get("name") for skill in data_details.get("key_skills", []) if
-                                     skill.get("name")]
+                requirements_list = [skill.get("name") for skill in data_details.get("key_skills", [])]
+                picture = data_details.get('employer').get('logo_url').get('90',) if data_details.get('employer').get('logo_url') is not None else "#"
             except requests.exceptions.RequestException as e:
                 print(f"Ошибка при запросе деталей вакансии {name} ({url_api_details}): {e}")
             except ValueError as e:
@@ -42,11 +49,21 @@ def get_main_data():
         else:
             print(f"Отсутствует URL для деталей вакансии: {name}")
 
+        # for i in vacancy_hh.keys():
+        #     print(f"{i}: {vacancy_hh[i]}")
+        # break
         # print(f"Добавление вакансии из API: {name}")
-        vacancies.append(Vacancy(name = name, salary_from = salary_from, salary_to = salary_to,
-                                 form = form, description_full = description_full,
-                                 url_alternate = url_alternate, requirements_list = requirements_list))
-    return vacancies
 
-def get_dtat_from_url(url):
-    return requests.get(url)
+        vacancies.append({"name": name,
+                          "salary_from": salary_from,
+                          "salary_to": salary_to,
+                          "salary_currency": salary_currency,
+                          "salary_mode": salary_mode,
+                          "experience": experience,
+                          "form":  form,
+                          "description": description_full,
+                          "link": url_alternate,
+                          "picture": picture if picture is not None else "#",
+                          "requirements_list": requirements_list
+                          })
+    return vacancies

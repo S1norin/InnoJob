@@ -1,251 +1,115 @@
 import psycopg2
-from psycopg2 import Binary
-from parser import *
+from parser import get_main_data
 
 
-# Как эту хуйню юзать:
-# При инициализации передаешь ей хост, имя бд, юзера, пароль, порт
-# класс создает подключение и курсор и все делает за вас
-# Что вам нужно юзать:
-# 1) get_vac_list возвращает список
-#   [
-#       Имя
-#       Нижняя граница зарплаты
-#       Верхняя граница зарплаты
-#       Формат
-#       Описание (в тегах HTML)
-#       Ссылка на вакансию
-#       [Список ключевых навыков]
-#   ]
-# 2) update - думаю, понятно, что функция делает. Если есть еще вопросы, занесите банку сгущенки в 5-512
-
-class DB:
+# Интерфейс для работы с вакансиями
+class VacancyManager:
     def __init__(self, host, dbname, user, password, port):
-        try:
-            self.host = host
-            self.dbname = dbname
-            self.user = user
-            self.password = password
-            self.port = port
+        # Объявляю переменные, которые в последствии могут понадобиться для работы
+        self.host = host
+        self.dbname = dbname
+        self.user = user
+        self.password = password
+        self.port = port
+        self.db_params = {'host': host, 'dbname': dbname, 'user': user, 'password': password, 'port': port}
 
-            self.conn = psycopg2.connect(host=host, dbname=dbname, user=user,
-                                         password=password, port=port)
-            self.cur = self.conn.cursor()
-            self.update()
-        except Exception as e:
-            print(f"Ошибка при инициализации DB: {e}")  # Более информативное сообщение
+        # Создание таблиц
+        self._create_tables_if_not_exists()
 
+
+    # Создаёт подключение для дальнейшей работы
+    def _get_connection(self):
+        return psycopg2.connect(**self.db_params)
+
+    # Удобная функция для создания таблиц (в случае отсутствия оных)
+    def _create_tables_if_not_exists(self):
+        query = """
+        CREATE TABLE IF NOT EXISTS vacancy (
+            id SERIAL PRIMARY KEY,
+            name TEXT NOT NULL,
+            salary_from INTEGER,
+            salary_to INTEGER,
+            salary_currency TEXT,
+            salary_mode TEXT,
+            experience TEXT,
+            format TEXT,
+            description TEXT,
+            link TEXT,
+            picture TEXT
+        );
+        CREATE TABLE IF NOT EXISTS requirements (
+            id SERIAL PRIMARY KEY,
+            vacancy_id INTEGER REFERENCES vacancy(id) ON DELETE CASCADE, 
+            requirement TEXT NOT NULL
+        );"""
+        with self._get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(query)
+                conn.commit()
+
+
+    # Функция для получения данных о всех вакансиях
     def get_vac_list(self):
-        request = "SELECT id, name, salary_from, salary_to, format, description, link FROM Vacancy"
-        self.cur.execute(request)
-        vac_tuples = self.cur.fetchall()  # Получаем список кортежей
-
-        data_for_fastapi = []
-        if not vac_tuples:
-            return []
-
-        for vac_row_tuple in vac_tuples:
-            # Преобразуем кортеж в словарь
-            vac_dict = {
-                "id": vac_row_tuple[0],
-                "name": vac_row_tuple[1],
-                "salary_from": vac_row_tuple[2],
-                "salary_to": vac_row_tuple[3],
-                "format": vac_row_tuple[4],  # Убедитесь, что имя поля 'format' используется последовательно
-                "description": vac_row_tuple[5],
-                "link": vac_row_tuple[6]
-            }
-
-            # Получаем требования для текущей вакансии
-            self.cur.execute("SELECT requirement FROM Requirements WHERE Vacancy_id = %s", (vac_dict["id"],))
-            requirements_list = [req[0] for req in self.cur.fetchall()]
-            vac_dict["requirements"] = requirements_list
-
-            data_for_fastapi.append(vac_dict)
-
-        return data_for_fastapi
-
-    def add_vac(self, name, salary_from, salary_to, form, description, link, requirements):
-        sql_insert_vacancy = """
-            INSERT INTO Vacancy (name, salary_from, salary_to, format, description, link)
-            VALUES (%s, %s, %s, %s, %s, %s) RETURNING id;
+        query = """
+            SELECT v.id, v.name, v.salary_from, v.salary_to, v.salary_currency, v.salary_mode, v.experience, v.format, v.description, v.link, v.picture, r.requirement
+            FROM vacancy v
+            LEFT JOIN requirements r ON v.id = r.vacancy_id
+            ORDER BY v.id;
         """
-        db_salary_from = salary_from if salary_from is not None else None
-        db_salary_to = salary_to if salary_to is not None else None
+        vacancies = []
+        with self._get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(query)
+                for row in cur.fetchall():
+                    vac_id, name, s_from, s_to, s_cur, s_mod, exp, fmt, desc, link, pic, req = row
+                    vac = {
+                            "id": vac_id,
+                            "name": name,
+                            "salary_from": s_from,
+                            "salary_to": s_to,
+                            "salary_currency": s_cur,
+                            "salary_mode": s_mod,
+                            "experience": exp,
+                            "format": fmt,
+                            "description": desc,
+                            "link": link,
+                            "picture": pic,
+                            "requirements": req if req else []
+                        }
+                    try:
+                        vacancies.index(vac) # Проверка на уникальность. Если не найдёт - вызовет ValueError, except его перехватит и добавит
+                    except ValueError:
+                        vacancies.append(vac)
+        return vacancies
 
-        try:
-            self.cur.execute(sql_insert_vacancy, (name, db_salary_from, db_salary_to, form, description, link))
-            vac_id = self.cur.fetchone()[0]
+    # Функция для обновления списка вакансий
+    def update_vacancies_from_source(self):
+        # Гарантированно обнуляет таблицы
+        with self._get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "DROP TABLE IF EXISTS requirements, vacancy CASCADE;")
+                conn.commit()
 
-            if vac_id and requirements:  # Проверяем, что requirements не пустой
-                sql_insert_requirement = "INSERT INTO Requirements (vacancy_id, requirement) VALUES (%s, %s);"
-                for req_item in requirements:
-                    self.cur.execute(sql_insert_requirement, (vac_id, req_item))
-            self.conn.commit()
-        except psycopg2.Error as e:
-            print(f"Ошибка psycopg2 при добавлении вакансии '{name}': {e}")
-            self.conn.rollback()  # Откатываем транзакцию в случае ошибки
-        except Exception as e:
-            print(f"Непредвиденная ошибка при добавлении вакансии '{name}': {e}")
-            self.conn.rollback()
+        # Пересоздаём таблицы
+        self._create_tables_if_not_exists()
 
-    def add_user(self, name, email, password):
-        sql_insert_user = """
-            INSERT INTO Users (name, email, password, cv_name, cv_pdf)
-            VALUES (%s, %s, %s, %s, %s) RETURNING id;
-        """
-        try:
-            self.cur.execute(sql_insert_user, (name, email, password, None, None))
-            self.conn.commit()
-            return self.cur.fetchone()[0]
-        except psycopg2.IntegrityError as e:
-            if "unique_email" in str(e):
-                print(f"User with email '{email}' already exists")
-                raise ValueError("Email address already in use") from e
-            else:
-                print(f"Database error: {e}")
-                self.conn.rollback()
-                raise
-        except psycopg2.Error as e:
-            print(f"Непредвиденная ошибка при добавлении пользователя '{name}': {e}")
-            self.conn.rollback()
-            raise
-        except Exception as e:
-            print(f"Непредвиденная ошибка при добавлении пользователя '{name}': {e}")
-            self.conn.rollback()
-            raise
-
-    def add_cv(self, user_email, pdf_path, pdf_name):
-        try:
-            with open(pdf_path, 'rb') as f:
-                pdf_data = f.read()
-
-            self.cur.execute("SELECT id FROM users WHERE email = %s", (user_email,))
-            user_result = self.cur.fetchone()
-
-            if not user_result:
-                raise ValueError(f"No user found with email {user_email}")
-
-            user_id = user_result[0]
-
-            # Insert PDF document
-            self.cur.execute(
-                """UPDATE Users 
-                   SET cv_name = %s, cv_pdf = %s 
-                   WHERE id = %s""",
-                (pdf_name, Binary(pdf_data), user_id))
-
-            self.conn.commit()
-
-            doc_id = self.cur.fetchone()[0]
-            self.conn.commit()
-
-            print(f"Successfully inserted PDF with ID {doc_id} for user {user_email}")
-            return doc_id
-
-        except Exception as e:
-            if 'conn' in locals(): self.conn.rollback()
-            print(f"Error inserting PDF: {e}")
-            raise
-
-    def get_cv(self, user_email, output_path):
-        self.cur.execute("SELECT id FROM users WHERE email = %s", (user_email,))
-        user_result = self.cur.fetchone()
-
-        if not user_result:
-            raise ValueError(f"No user found with email {user_email}")
-
-        user_id = user_result[0]
-        self.cur.execute(
-            "SELECT file_name, file_data FROM pdf_documents WHERE id = %s",
-            (user_id,)
-        )
-
-        file_name, file_data = self.cur.fetchone()
-
-        with open(output_path, 'wb') as file:
-            file.write(file_data)
-        return file_name
-
-    def close(self):
-        if self.cur:
-            self.cur.close()
-        if self.conn:
-            self.conn.close()
-        print("Соединение с БД закрыто.")
-
-    def update(self):
-        try:
-            self.cur.execute("DROP TABLE IF EXISTS Requirements CASCADE")
-            self.cur.execute("DROP TABLE IF EXISTS Vacancy CASCADE")
-            self.cur.execute("DROP TABLE IF EXISTS Users CASCADE")
-            self.cur.execute(
-                """CREATE TABLE Vacancy (
-                    id SERIAL PRIMARY KEY,
-                    name TEXT NOT NULL,
-                    salary_from INTEGER,
-                    salary_to INTEGER,
-                    format TEXT,
-                    description TEXT,
-                    link TEXT
-                );""")
-            self.cur.execute(
-                """CREATE TABLE Requirements (
-                    id SERIAL PRIMARY KEY,
-                    vacancy_id INTEGER REFERENCES Vacancy(id) ON DELETE CASCADE,
-                    requirement TEXT NOT NULL
-                );""")
-            self.cur.execute(
-                """CREATE TABLE Users (
-                    id SERIAL PRIMARY KEY,
-                    name TEXT NOT NULL,
-                    email TEXT NOT NULL UNIQUE,
-                    password TEXT NOT NULL,
-                   cv_name VARCHAR(255),
-                   cv_pdf BYTEA
-              );""")
-            self.conn.commit()
-            print("Таблицы Vacancy и Requirements пересозданы.")
-
-            vacancies = get_main_data()
-
-            for vacancy in vacancies:
-                data_for_db = (
-                    vacancy.name,
-                    vacancy.salary_from,
-                    vacancy.salary_to,
-                    vacancy.form,
-                    vacancy.description_full,
-                    vacancy.url_alternate
-                )
-
-                # Insert into Vacancy table
-                self.cur.execute(
-                    """
-                    INSERT INTO Vacancy (name, salary_from, salary_to, format, description, link)
-                    VALUES (%s, %s, %s, %s, %s, %s)
-                    RETURNING id;
-                    """,
-                    data_for_db
-                )
-                vacancy_id = self.cur.fetchone()[0]
-
-                # Insert requirements separately
-                for skill in vacancy.requirements_list:
-                    self.cur.execute(
-                        "INSERT INTO Requirements (vacancy_id, requirement) VALUES (%s, %s)",
-                        (vacancy_id, skill)
-                    )
-
-            print("Вакансии с HH.ru обработаны.")
-
-            print("Метод update завершен.")
-
-        except psycopg2.Error as e:
-            print(f"Ошибка psycopg2 в методе update: {e}")
-            if self.conn:
-                self.conn.rollback()
-        except Exception as e:
-            print(f"Непредвиденная ошибка в методе update: {e}")
-            if self.conn:
-                self.conn.rollback()
+        with self._get_connection() as conn:
+            with conn.cursor() as cur:
+                vacancies_from_parser = get_main_data()  # Получаем данные при помощи парсера
+                for vacancy in vacancies_from_parser:
+                    try:
+                        cur.execute(
+                            "INSERT INTO vacancy (name, salary_from, salary_to, salary_currency, salary_mode, experience, format, description, link, picture) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id;",
+                            (vacancy.get("name"), vacancy.get('salary_from'), vacancy.get('salary_to'), vacancy.get('salary_currency'), vacancy.get('salary_mode'), vacancy.get('experience'), vacancy.get('form'), vacancy.get('description'), vacancy.get('link'), vacancy.get('picture'))
+                        )
+                    except Exception as e:
+                        print(e)
+                        break
+                    vacancy_id = cur.fetchone()[0]  # Получаем айди
+                    for skill in vacancy.get('requirements', []):  # Добавляем требования, если имеются
+                        cur.execute(
+                            "INSERT INTO requirements (vacancy_id, requirement) VALUES (%s, %s);",
+                            (vacancy_id, skill)
+                        )
+        print("Данные о вакансиях успешно обновлены.")
