@@ -42,17 +42,6 @@ class VacancyManager:
             id SERIAL PRIMARY KEY,
             vacancy_id INTEGER REFERENCES vacancy(id) ON DELETE CASCADE, 
             requirement TEXT NOT NULL
-        );
-        CREATE TABLE IF NOT EXISTS users (
-            id SERIAL PRIMARY KEY,
-            login TEXT UNIQUE,
-            password TEXT
-        );
-        CREATE TABLE IF NOT EXISTS resumes (
-            id SERIAL PRIMARY KEY,
-            user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-            file_name TEXT,
-            pdf BYTEA
         );"""
 
         with self._get_connection() as conn:
@@ -126,24 +115,3 @@ class VacancyManager:
                             (vacancy_id, skill)
                         )
         print("Данные о вакансиях успешно обновлены.")
-
-    # Возвращает True если юзер с такими параметрами существует
-    def check_user(self, login, password):
-        with self._get_connection() as conn:
-            with conn.cursor() as cur:
-                query = "SELECT id FROM users WHERE login=%s, password=%s;"
-                cur.execute(query, (login, password))
-                res = cur.fetchall()
-        return bool(res)
-
-    # Добавляет пользователя с такими данными. В случае, если пользователь с таким логином существует, возвращает False, Если нет - True
-    def add_user(self, login, password):
-        with self._get_connection() as conn:
-            with conn.cursor() as cur:
-                try:
-                    query = "INSERT INTO users (login, password) VALUES (%s, %s);"
-                    cur.execute(query, (login, password))
-                    return True
-                except psycopg2.errors.UniqueViolation as e:
-                    print("Пользователь с данным логином уже существует")
-                    return False
