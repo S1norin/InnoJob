@@ -1,6 +1,7 @@
 import psycopg2
 
 from parser import get_main_data
+from config import *
 
 
 # Интерфейс для работы с вакансиями
@@ -115,3 +116,7 @@ class VacancyManager:
                             (vacancy_id, skill)
                         )
         print("Данные о вакансиях успешно обновлены.")
+
+db = VacancyManager(db_host, db_name, db_user, db_password, db_port)
+db.update_vacancies_from_source()
+print(len(db.get_vac_list()))
