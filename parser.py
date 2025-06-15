@@ -40,11 +40,23 @@ def get_main_data():
 
         for vacancy_hh in api_data.get('items', []):
             name = vacancy_hh.get("name")
+
+            area = vacancy_hh.get('area').get('name')
+            emp = vacancy_hh.get('employer').get('id')
+
             salary = vacancy_hh.get("salary")
-            salary_from = salary.get("from", "None") if salary is not None else None
-            salary_to = salary.get("to", "None") if salary is not None else None
-            salary_mode = vacancy_hh.get('salary_range').get('mode').get(name) if vacancy_hh.get('salary_range') is not None else "no data"
-            salary_currency = salary.get('currency') if salary is not None else 'no data'
+            salary_from, salary_to = None, None
+            salary_currency = 'no data'
+            salary_mode = "no data"
+
+            if salary is not None:
+                salary_from = salary.get("from")
+                salary_to = salary.get("to")
+                salary_currency = salary.get('currency')
+
+            if vacancy_hh.get('salary_range') is not None:
+                salary_mode = vacancy_hh.get('salary_range').get('mode').get(name)
+
 
             experience = vacancy_hh.get('experience', {}).get("name", 'no data')
 
@@ -74,7 +86,7 @@ def get_main_data():
                     description_full = data_details.get("description", "Описание отсутствует")
                     requirements_list = [skill.get("name") for skill in data_details.get("key_skills", [])]
                     picture = data_details.get('employer').get('logo_url').get('90',) if data_details.get('employer').get('logo_url') is not None else "#"
-                    print(f'Получено: {name}')
+                    # print(f'Получено: {name}')
                 except ValueError as e:
                     print(f"Ошибка декодирования JSON для вакансии {name} ({url_api_details}): {e}")
             else:
@@ -82,6 +94,8 @@ def get_main_data():
 
             vacancies.append({
                 "name": name,
+                'city': area,
+                "employer_id": emp,
                 "salary_from": salary_from,
                 "salary_to": salary_to,
                 "salary_currency": salary_currency,
@@ -95,3 +109,20 @@ def get_main_data():
             })
         sleep(0.1)
     return vacancies
+
+def get_employer_data(e_id):
+    response = requests.get(f'https://api.hh.ru/employers/{e_id}').json()
+    data = {
+        'emp_id': response.get('id'),
+        'name': response.get('name'),
+        'logo': response.get('logo_urls').get('90') if response.get("logo_urls") is not None else "#"
+    }
+    return data
+
+def get_area_data(a_id):
+    response = requests.get(f'https://api.hh.ru/areas/{a_id}').json()
+    data = {
+        'area_id': response.get('id'),
+        'name': response.get('name')
+    }
+    return data
