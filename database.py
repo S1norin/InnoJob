@@ -95,7 +95,6 @@ class VacancyManager:
                             vac)  # Проверка на уникальность. Если не найдёт - вызовет ValueError, except его перехватит и добавит
                     except ValueError:
                         vacancies.append(vac)
-                    print(vac)
         return vacancies
 
     # Функция для обновления списка вакансий
