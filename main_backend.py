@@ -44,7 +44,7 @@ def get_vacancies():
 async def test():
     return {"message": "Hello World"}
 
-"""
+
 @app.post("/register", status_code=status.HTTP_201_CREATED)
 async def register_user(user_data: UserCreate):
     try:
@@ -136,4 +136,4 @@ async def upload_cv(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Internal server error: {str(e)}"
-        )"""
+        )
