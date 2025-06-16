@@ -9,7 +9,8 @@ employer_ids = [
     '1272806', '4499572', '4949743', '1441807', '3091070', '2300703', '5855834', '10202226', '1009889', '618292',
     '11675594', '10958322', '3590333', '2436044', '4470289', '41862', '9041158', '11380393', '4476030', '4899433',
     '5624188', '4811345', '4858306', '4255949', '5925142', '2337948', '5396549', '11537930', '2073427', '5224941',
-    '10084292']
+    '10084292'
+]
 
 
 def get_params():
@@ -41,7 +42,7 @@ def get_main_data():
         for vacancy_hh in api_data.get('items', []):
             name = vacancy_hh.get("name")
 
-            area = vacancy_hh.get('area').get('name')
+            area = vacancy_hh.get('area').get('id')
             emp = vacancy_hh.get('employer').get('id')
 
             salary = vacancy_hh.get("salary")
@@ -119,7 +120,7 @@ def get_employer_data(e_id):
     }
     return data
 
-def get_area_data(a_id):
+def get_city_data(a_id):
     response = requests.get(f'https://api.hh.ru/areas/{a_id}').json()
     data = {
         'area_id': response.get('id'),
