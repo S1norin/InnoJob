@@ -3,7 +3,7 @@ from database import VacancyManager
 from config import db_host, db_name, db_user, db_password, origins, db_port
 from fastapi.responses import StreamingResponse
 import io
-from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File, Form
+from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File, Form, Request
 from fastapi.concurrency import run_in_threadpool
 from databaseUsers import UserManager
 from Extra_classes import *
@@ -20,23 +20,19 @@ app.add_middleware(
 )
 
 
-def connect_to_db():
-    global vacancy_manager
-    global user_manager
-    vacancy_manager = VacancyManager(host=db_host, dbname=db_name, user=db_user, password=db_password, port=db_port)
-    user_manager = UserManager(host=db_host, dbname=db_name, user=db_user, password=db_password, port=db_port)
-
-
-def get_user_manager():
-    return user_manager
-
-def get_vacancy_manager():
-    return vacancy_manager
-
-# Call initialize_db() when the app starts
 @app.on_event("startup")
 async def startup_event():
-    connect_to_db()
+    # Создаем экземпляры и кладем их в "рюкзак" приложения
+    app.state.vacancy_manager = VacancyManager(host=db_host, dbname=db_name, user=db_user, password=db_password, port=db_port)
+    app.state.user_manager = UserManager(host=db_host, dbname=db_name, user=db_user, password=db_password, port=db_port)
+    print("Подключение к БД установлено и менеджеры готовы!")
+
+
+def get_user_manager(request: Request) -> UserManager:
+    return request.app.state.user_manager
+
+def get_vacancy_manager(request: Request) -> VacancyManager:
+    return request.app.state.vacancy_manager
 
 
 @app.get("/vacancies")
