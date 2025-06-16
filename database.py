@@ -210,3 +210,17 @@ class VacancyManager:
                 cur.execute(requests)
                 data = [i[0] for i in cur.fetchall()]
                 return data
+
+    def get_cities(self):
+        requests = f"SELECT name FROM cities"
+        with self._get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(requests)
+                data = [i[0] for i in cur.fetchall()]
+                return data
+
+
+db = VacancyManager(db_host, db_name, db_user, db_password, db_port)
+# print(db.get_vac_list())
+print(len(db.get_employers()))
+print(len(db.get_cities()))

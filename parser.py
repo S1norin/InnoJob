@@ -36,7 +36,11 @@ def get_main_data():
     vacancies = []
     for par in params:
         response = requests.get("https://api.hh.ru/vacancies", params=par)
-        response.raise_for_status()
+
+        while response.status_code == 403:
+            sleep(2)
+            response = requests.get("https://api.hh.ru/vacancies", params=par)
+
         api_data = response.json()
 
         for vacancy_hh in api_data.get('items', []):
