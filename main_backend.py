@@ -40,11 +40,35 @@ def get_vacancies():
         print(f"Error fetching vacancies: {e}")
         return []
 
+@app.get("/cities")
+def get_cities():
+    try:
+        if database is None:
+            raise Exception("Database not connected")
+        cities = database.get_cities()
+        return cities
+    except Exception as e:
+        print(f"Error fetching cities: {e}")
+        return []
+
+
+@app.get("/companies")
+def get_companies():
+    try:
+        if database is None:
+            raise Exception("Database not connected")
+        companies = database.get_employers()
+        return companies
+    except Exception as e:
+        print(f"Error fetching companies: {e}")
+        return []
+
+
 @app.get("/test")
 async def test():
     return {"message": "Hello World"}
 
-
+"""
 @app.post("/register", status_code=status.HTTP_201_CREATED)
 async def register_user(user_data: UserCreate):
     try:
@@ -135,5 +159,5 @@ async def upload_cv(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Internal server error: {str(e)}"
-        )
+            detail=f"Internal server error: {str(e)}")
+"""

@@ -10,8 +10,8 @@ params = {
 
 db_host="localhost"
 db_name="postgres"
-db_user="sinorin"
-db_password="123"
+db_user="postgres"
+db_password="9tMFDmqkbaB3"
 db_port=5432
 
 telegram_api_id, telegram_api_hash = '', ''

@@ -3,3 +3,4 @@ __pycache__
 temp_uploads
 anon.session
 .DS_Store
+config.py
