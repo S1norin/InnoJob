@@ -1,20 +1,22 @@
-import asyncio
-from config import telegram_api_id, telegram_api_hash
-from telethon import TelegramClient, utils
-import requests
+from telethon.sync import TelegramClient
+from telethon.sessions import StringSession
+try:
+    from config import telegram_session, telegram_api_id, telegram_api_hash
+except:
+    print("Dalbaeb sozdai config")
 
-# client = TelegramClient("anon", telegram_api_id, telegram_api_hash)
-#
-# async def get_sinorin_message():
-#         chat = await client.get_input_entity('sins_of_rin')
-#         async for message in client.iter_messages(chat):
-#                 return(message)
-#
-# print(get_sinorin_message())
-# Note the import from telethon.sync
 
-with TelegramClient("anon", telegram_api_id, telegram_api_hash) as client:
-    # No 'async' or 'await' is needed here.
-    for message in client.iter_messages('sins_of_rin', limit=1):
-        print(f"Sender ID: {message.sender_id}")
-        print(f"Message Text: {message.text}")
+def parse_channel(channel_name, limit=10):
+    with TelegramClient(StringSession(telegram_session), telegram_api_id, telegram_api_hash) as client:
+        messages = client.get_messages(channel_name, limit=limit)
+        return [m.text for m in messages if m.text]
+
+
+# Example usage
+if __name__ == "__main__":
+    channel = "telegram"
+    messages = parse_channel(channel, 10)
+
+    for text in messages:
+        print(f"Message: {text}")
+        print(f"====================================================")
