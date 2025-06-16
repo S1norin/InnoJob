@@ -22,6 +22,7 @@ def connect_to_db():
     global database
     database = VacancyManager(host=db_host, dbname=db_name, user=db_user,
                             password=db_password, port=db_port)
+    database.update_vacancies_from_source()
 
 # Call initialize_db() when the app starts
 @app.on_event("startup")
