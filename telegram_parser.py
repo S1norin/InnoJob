@@ -2,8 +2,10 @@ from telethon.sync import TelegramClient
 from telethon.sessions import StringSession
 try:
     from config import telegram_session, telegram_api_id, telegram_api_hash
+    if not telegram_session:
+        raise ImportError("Dalbaeb exception")
 except:
-    print("Dalbaeb sozdai config")
+    print("Dalbaeb sozdai config s sessiei")
 
 
 def parse_channel(channel_name, limit=10):
