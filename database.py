@@ -172,7 +172,8 @@ class VacancyManager:
                 data = get_employer_data(emp)
                 self.add_employer(data)
             except Exception:
-                print(f"Работодатель {emp} уже присутствует в БД")
+                pass
+            #     print(f"Работодатель {emp} уже присутствует в БД")
 
     def find_employer(self, e_id):
         request = f"""SELECT id FROM employers WHERE employer_id={e_id}"""
