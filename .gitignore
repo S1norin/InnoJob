@@ -2,10 +2,5 @@
 __pycache__
 temp_uploads
 anon.session
-<<<<<<< HEAD
 .DS_Store
 config.py
-=======
-config.py
-.DS_Store
->>>>>>> a7c0a5b9b8ad3d5b5be6893603904822dd182825
