@@ -407,11 +407,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     <div class="card-details">
                         <div class="detail-item">
-                            <img src="pics/location.png" alt="Location">
+                            <img src="../pics/location.png" alt="Location">
                             <span>${vacancy.city ?? 'No city'}</span>
                         </div>
                         <div class="detail-item">
-                            <img src="pics/salary.png" alt="Salary">
+                            <img src="../pics/salary.png" alt="Salary">
                             <span>${salaryText}</span>
                         </div>
                         <div class="job-type-tag">${vacancy.format ?? 'Формат работы'}</div>

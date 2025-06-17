@@ -1,7 +1,6 @@
 import psycopg2
 
-from parser import get_main_data, get_employer_data, get_city_data, employer_ids
-from config import *
+from parsers.parser import get_main_data, get_employer_data, get_city_data, employer_ids
 
 
 # Интерфейс для работы с вакансиями

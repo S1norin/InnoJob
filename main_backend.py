@@ -1,11 +1,11 @@
 from fastapi.middleware.cors import CORSMiddleware
-from database import VacancyManager
+from database.database import VacancyManager
 from config import db_host, db_name, db_user, db_password, origins, db_port
 from fastapi.responses import StreamingResponse
 import io
 from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File, Form, Request
 from fastapi.concurrency import run_in_threadpool
-from databaseUsers import UserManager
+from database.databaseUsers import UserManager
 from Extra_classes import *
 
 app = FastAPI()
