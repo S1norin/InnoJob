@@ -9,7 +9,7 @@
 }
 
 body{
-    background-color: #D9D9D9;
+    background-color: #f2f2f2;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -81,7 +81,7 @@ body{
 
 
 .other_body{
-background-color: #D9D9D9;
+background-color: #f2f2f2;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -125,11 +125,11 @@ background-color: #D9D9D9;
 
 .search-container input[type="text"] {
     flex-grow: 1;
-    background-color: #D9D9D9;
+    background-color: #f2f2f2;
     color: #555;
     margin-right: 10px;
     box-shadow: inset 2px 2px 4px #b5b5b5,
-                inset -2px -2px 4px #efefef;
+                inset -2px -2px 4px #ffffff;
      outline: none;
 }
 
@@ -138,12 +138,12 @@ background-color: #D9D9D9;
     align-items: center;
     justify-content: center;
     /* gap: 8px; */
-    background-color: #00bb00;
     color: white;
     padding: 0 25px;
     cursor: pointer;
     white-space: nowrap;
     transition: background-color 0.2s;
+    background-color: #00bb00;
     box-shadow: inset 2px 2px 4px #009a00,
                 inset -2px -2px 4px #11ff11;
     letter-spacing: 0.4px;
@@ -159,7 +159,7 @@ background-color: #D9D9D9;
 .main_content{
     display: flex;
     align-items: flex-start;
-    background-color: #D9D9D9;
+    background-color: #f2f2f2;
     flex-direction: row;
     min-height: 100vh;
     width: 100%;
@@ -199,12 +199,12 @@ background-color: #D9D9D9;
     position: relative;
     /* justify-content: center; */
     align-items: center;
-    background-color: #D9D9D9;
+    background-color: #f2f2f2;
     border-radius: 50px;
     padding: 5px 10px;
     gap: 2px;
     box-shadow: inset 2px 2px 4px #b5b5b5,
-                inset -2px -2px 4px #efefef;
+                inset -2px -2px 4px #ffffff;
 
 }
 
@@ -276,7 +276,7 @@ background-color: #D9D9D9;
     border: 1px solid #b0b0b0;
     border-radius: 4px;
     margin-right: 12px;
-    background-color: #D9D9D9;
+    background-color: #f2f2f2;
     transition: background-color 0.2s, border-color 0.2s;
     position: relative;
     top: 3px;
@@ -299,7 +299,7 @@ background-color: #D9D9D9;
 hr {
     border: none;
     height: 1px;
-    background-color: #D9D9D9;
+    background-color: #f2f2f2;
     margin: 5px 0;
 }
 
@@ -315,9 +315,9 @@ hr {
     border-radius: 20px;
     text-align: center;
     font-size: 13px;
-    background-color: #D9D9D9;
+    background-color: #f2f2f2;
     box-shadow: inset 2px 2px 4px #b5b5b5,
-                inset -2px -2px 4px #efefef;
+                inset -2px -2px 4px #ffffff;
     outline: none;
     border: none;
     color:#333;
@@ -325,17 +325,22 @@ hr {
 
 .show-more-btn {
     background-color: #adc4ab;
-    color: #3f4c3e;
     border-radius: 15px;
     padding: 4px 12px;
     font-size: 16px;
     cursor: pointer;
+    color: white;
     margin-top: 15px;
-    box-shadow: inset 2px 2px 4px #556554,
-                inset -2px -2px 4px #c3e8bf;
+    background-color: #00bb00;
+    box-shadow: inset 2px 2px 4px #009a00,
+                inset -2px -2px 4px #11ff11;
     letter-spacing: 0.4px;
     outline: none;
     border: none;
+}
+
+.all_jobs button:hover {
+    background-color: #008c00;
 }
 
 /* CARDS */
@@ -343,7 +348,7 @@ hr {
 
 .cards{
     flex-grow: 1;
-    background-color: #D9D9D9;
+    background-color: #f2f2f2;
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -411,24 +416,25 @@ hr {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    background-color: #D9D9D9;
-    color: #555;
+    background-color: #f2f2f2;
     cursor: pointer;
+    color: white;
     white-space: nowrap;
     transition: background-color 0.2s;
-    box-shadow: inset 2px 2px 4px #b5b5b5,
-                inset -2px -2px 4px #efefef;
+    background-color: #00bb00;
+    box-shadow: inset 2px 2px 4px #009a00,
+                inset -2px -2px 4px #11ff11;
     letter-spacing: 0.4px;
 }
 
 .all_jobs button:hover {
-    background-color: #a2a2a2;
+    background-color: #008c00;
 }
 
 /* VACANCIES */
 
 .vacancies{
-    background-color: #D9D9D9;
+    background-color: #f2f2f2;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -466,7 +472,7 @@ hr {
 .logo-place {
     width: clamp(50px, 17.5%, 70px);
     aspect-ratio: 1 / 1;
-    background-color: #D9D9D9;
+    background-color: #f2f2f2;
     border-radius: 21.4%;
     flex-shrink: 0;
 
@@ -526,7 +532,7 @@ hr {
 .job-type-tag, .skill-tag {
     background-color: #e0e0e0;
      box-shadow: inset 2px 2px 4px #b5b5b5,
-                inset -2px -2px 4px #efefef;
+                inset -2px -2px 4px #ffffff;
     border-radius: 1rem;
     font-size: clamp(0.8rem, 1.2vw, 0.95rem);
     padding: 0.3rem 0.8rem;
@@ -542,7 +548,7 @@ hr {
 
 
 .card-description {
-    background-color: #D9D9D9;
+    background-color: #f2f2f2;
     width: 100%;
     height: 60%;
     border-radius: 1rem;
@@ -550,7 +556,7 @@ hr {
     overflow-y: auto;
     box-sizing: border-box;
     box-shadow: inset 2px 2px 4px #b5b5b5,
-                inset -2px -2px 4px #efefef;
+                inset -2px -2px 4px #ffffff;
 }
 
 .card-description p {
