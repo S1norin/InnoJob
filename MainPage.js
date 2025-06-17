@@ -32,6 +32,8 @@ document.addEventListener('DOMContentLoaded', () => {
             this.elements.filterContainer = document.querySelector('.filters-conteiner');
             this.elements.salaryInputs = document.querySelectorAll('.salary-inputs input');
             this.elements.clearFiltersBtn = document.getElementById('clear-filters');
+            this.elements.searchInput = document.getElementById('search-input');
+
         },
 
         bindEvents() {
@@ -73,8 +75,8 @@ document.addEventListener('DOMContentLoaded', () => {
             this.allVacancies.forEach(vacancy => {
                 if (vacancy.format) jobTypesSet.add(vacancy.format.toLowerCase());
                 if (vacancy.experience) experiencesSet.add(vacancy.experience.toLowerCase());
-                if (vacancy.location) locationsSet.add(vacancy.location.toLowerCase());
-                if (vacancy.company) companiesSet.add(vacancy.company.toLowerCase());
+                if (vacancy.city) locationsSet.add(vacancy.city.toLowerCase());
+                if (vacancy.employer) companiesSet.add(vacancy.employer.toLowerCase());
             });
 
             const sortExperience = (a, b) => {
@@ -140,12 +142,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     createCheckboxes(variantsContainer, jobTypesSet);
                 } else if (header.includes('experience')) {
                     createCheckboxes(variantsContainer, experiencesSet, true);
-                } else if (header.includes('location')) {
+                } else if (header.includes('city') || header.includes('location')) {
                     createCheckboxes(variantsContainer, locationsSet);
-                } else if (header.includes('company')) {
+                } else if (header.includes('employer') || header.includes('company')) {
                     createCheckboxes(variantsContainer, companiesSet);
                 }
             });
+
 
             this.setupShowMoreButtons();
         },
@@ -209,11 +212,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         this.toggleFilter(this.filters.jobTypes, labelText, checkbox.checked);
                     } else if (headerText.includes('experience')) {
                         this.toggleFilter(this.filters.experiences, labelText, checkbox.checked);
-                    } else if (headerText.includes('location')) {
+                    } else if (headerText.includes('city') || headerText.includes('location')) {
                         this.toggleFilter(this.filters.locations, labelText, checkbox.checked);
-                    } else if (headerText.includes('company')) {
+                    } else if (headerText.includes('employer') || headerText.includes('company')) {
                         this.toggleFilter(this.filters.companies, labelText, checkbox.checked);
                     }
+
+
 
                     this.currentPage = 1;
                     this.renderVacancies();
@@ -253,6 +258,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             this.elements.salaryInputs[0].value = '';
             this.elements.salaryInputs[1].value = '';
+            this.elements.searchInput.value = '';
+            this.searchTerm = '';
+            this.populateFilters();
+            this.renderVacancies();
+
 
             this.filters = {
                 jobTypes: new Set(),
@@ -272,19 +282,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         bindSearchEvents() {
             const searchInput = document.getElementById('search-input');
-            const searchButton = document.getElementById('search-button');
-
-            searchButton.addEventListener('click', () => {
-                this.searchTerm = searchInput.value.trim().toLowerCase();
-                this.currentPage = 1;
-                this.renderVacancies();
-            });
+            this.elements.searchInput = searchInput;
 
             searchInput.addEventListener('input', () => {
                 this.searchTerm = searchInput.value.trim().toLowerCase();
                 this.currentPage = 1;
                 this.renderVacancies();
             });
+
         },
 
         renderVacancies() {
@@ -310,13 +315,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (this.filters.locations.size > 0) {
                 filteredVacancies = filteredVacancies.filter(v =>
-                    this.filters.locations.has((v.location ?? '').toLowerCase())
+                    this.filters.locations.has((v.city ?? '').toLowerCase())
                 );
             }
 
             if (this.filters.companies.size > 0) {
                 filteredVacancies = filteredVacancies.filter(v =>
-                    this.filters.companies.has((v.company ?? '').toLowerCase())
+                    this.filters.companies.has((v.employer ?? '').toLowerCase())
                 );
             }
 
@@ -392,17 +397,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 <div class="vacancy-card">
                     <div class="card-header">
-                        <div class="logo-place"><img src="pics/SEZ.png" alt="Company Logo"></div>
+                        <div class="logo-place"></div>
+
                         <div class="job-title-info">
                             <h2>${vacancy.name ?? 'Vacancy Name'}</h2>
-                            <span>${vacancy.company ?? 'Company'}</span>
+                            <span>${vacancy.employer ?? 'Company'}</span>
                         </div>
                     </div>
 
                     <div class="card-details">
                         <div class="detail-item">
                             <img src="pics/location.png" alt="Location">
-                            <span>${vacancy.location ?? 'No location'}</span>
+                            <span>${vacancy.city ?? 'No city'}</span>
                         </div>
                         <div class="detail-item">
                             <img src="pics/salary.png" alt="Salary">

@@ -484,7 +484,7 @@ hr {
 
 .job-title-info h2 {
     margin: 0 0 0.75rem 0;
-    font-size: clamp(1.2rem, 2vw, 1.5rem);
+    font-size: clamp(1.1rem, 2vw, 1.1rem);
     line-height: 1.35;
     overflow: hidden;
     text-overflow: ellipsis;
