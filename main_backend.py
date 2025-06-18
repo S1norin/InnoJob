@@ -1,8 +1,10 @@
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from database.database import VacancyManager
 from config import db_host, db_name, db_user, db_password, origins, db_port
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, FileResponse
 import io
+import uvicorn
 from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File, Form, Request
 from fastapi.concurrency import run_in_threadpool
 from database.databaseUsers import UserManager
@@ -19,6 +21,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Mount the static directories
+app.mount("/web", StaticFiles(directory="web"), name="web")
+app.mount("/pics", StaticFiles(directory="pics"), name="pics")
+
+if "__name__" == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+    
 
 @app.on_event("startup")
 async def startup_event():
@@ -34,6 +43,9 @@ def get_user_manager(request: Request) -> UserManager:
 def get_vacancy_manager(request: Request) -> VacancyManager:
     return request.app.state.vacancy_manager
 
+@app.get("/")
+async def read_main():
+    return FileResponse('web/MainPage.html')
 
 @app.get("/vacancies")
 async def get_all_vacancies(db: VacancyManager = Depends(get_vacancy_manager)):
