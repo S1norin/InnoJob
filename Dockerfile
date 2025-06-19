@@ -44,7 +44,7 @@ USER appuser
 # Copy the source code into the container.
 COPY . .
 
-RUN ls
+RUN cp config_template.py config.py
 
 # Expose the port that the application listens on.
 EXPOSE 8080
