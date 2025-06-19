@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
         async fetchAndRenderVacancies() {
             this.setUIState('loading');
             try {
-                const response = await fetch('http://127.0.0.1:8000/vacancies');
+                const response = await fetch('http://localhost:8080/vacancies');
                 if (!response.ok) {
                     throw new Error(`Ошибка HTTP: ${response.status}`);
                 }

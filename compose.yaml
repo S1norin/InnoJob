@@ -12,8 +12,7 @@ services:
     build:
       context: .
     ports:
-      - 63342:63342
-      - 8000:8000
+      - 8080:8000
     depends_on:
       - database
   

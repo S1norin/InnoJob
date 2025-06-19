@@ -25,9 +25,7 @@ app.add_middleware(
 app.mount("/web", StaticFiles(directory="web"), name="web")
 app.mount("/pics", StaticFiles(directory="pics"), name="pics")
 
-if "__name__" == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
-    
+
 
 @app.on_event("startup")
 async def startup_event():
