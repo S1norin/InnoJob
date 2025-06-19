@@ -16,9 +16,9 @@ def parse_channel(channel_name, limit=10):
 
 # Example usage
 if __name__ == "__main__":
-    channel = "telegram"
+    channel = "IUCareerFinder"
     messages = parse_channel(channel, 10)
 
     for text in messages:
         print(f"Message: {text}")
-        print(f"====================================================")
+        print(f"=====================================================")
