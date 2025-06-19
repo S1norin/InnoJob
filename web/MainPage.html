@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ScarEerZ</title>
 
-    <!-- Styles -->
+
     <link rel="stylesheet" href="MainPage.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
-    <!-- Fonts -->
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Jockey+One&display=swap" rel="stylesheet">
@@ -56,8 +56,7 @@
 
     <div class="other_body">
         <div class="search-container">
-            <input type="text" id="search-input" placeholder="Job title, keywords, or skills...">
-            <!-- <button id="search-button">Search Jobs</button> -->
+            <input type="text" id="search-input" placeholder="Название вакансии...">
         </div>
 
         <div class="main_content">
@@ -67,55 +66,52 @@
                     <h2>Filters</h2>
                 </div>
 
-                <!-- Job Type -->
+
                 <div class="filter_section">
-                    <div class="filter_section_header"><h2>Job Type</h2></div>
+                    <div class="filter_section_header"><h2>Тип работы</h2></div>
                     <div class="filter_variants"></div>
-                    <button class="show-more-btn">Show More</button>
+                    <button class="show-more-btn">Показать больше</button>
                 </div>
                 <hr>
 
-                <!-- Required work experience -->
+
                 <div class="filter_section">
-                    <div class="filter_section_header"><h2>Required work experience</h2></div>
+                    <div class="filter_section_header"><h2>Опыт работы</h2></div>
                     <div class="filter_variants"></div>
-                    <button class="show-more-btn">Show More</button>
+                    <button class="show-more-btn">Показать больше</button>
                 </div>
                 <hr>
 
-                <!-- Salary range -->
                 <div class="filter_section">
-                    <div class="filter_section_header"><h2>Salary range</h2></div>
+                    <div class="filter_section_header"><h2>Зарплата</h2></div>
                     <div class="salary-inputs">
-                        <input type="text" placeholder="from...">
-                        <input type="text" placeholder="to...">
+                        <input type="text" placeholder="От...">
+                        <input type="text" placeholder="До...">
                     </div>
                 </div>
                 <hr>
 
-                <!-- Location -->
                 <div class="filter_section">
-                    <div class="filter_section_header"><h2>City</h2></div>
+                    <div class="filter_section_header"><h2>Город</h2></div>
                     <div class="filter_variants"></div>
-                    <button class="show-more-btn">Show More</button>
+                    <button class="show-more-btn">Показать больше</button>
                 </div>
                 <hr>
 
-                <!-- Company -->
                 <div class="filter_section">
-                    <div class="filter_section_header"><h2>Employer</h2></div>
+                    <div class="filter_section_header"><h2>Компания</h2></div>
                     <div class="filter_variants"></div>
-                    <button class="show-more-btn">Show More</button>
+                    <button class="show-more-btn">Показать больше</button>
                 </div>
             </div>
 
             <div class="cards">
                 <div class="all_jobs">
                     <div class="all_jobs_text">
-                        <h2>All Jobs</h2>
-                        <p>Showing x out of y results</p>
+                        <h2>Все вакансии</h2>
+                        <p>Показано x из y результатов</p>
                     </div>
-                    <button id="clear-filters">Clear filters</button>
+                    <button id="clear-filters">Очистить все фильтры</button>
                 </div>
 
                 <div class="vacancies" id="vacancies-list"></div>
@@ -124,7 +120,6 @@
         </div>
     </div>
 
-    <!-- JS -->
     <script src="MainPage.js"></script>
 </body>
 </html>

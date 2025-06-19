@@ -73,10 +73,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const companiesSet = new Set();
 
             this.allVacancies.forEach(vacancy => {
-                if (vacancy.format) jobTypesSet.add(vacancy.format.toLowerCase());
-                if (vacancy.experience) experiencesSet.add(vacancy.experience.toLowerCase());
-                if (vacancy.city) locationsSet.add(vacancy.city.toLowerCase());
-                if (vacancy.employer) companiesSet.add(vacancy.employer.toLowerCase());
+                if (vacancy.format) jobTypesSet.add(vacancy.format);
+                if (vacancy.experience) experiencesSet.add(vacancy.experience);
+                if (vacancy.city) locationsSet.add(vacancy.city);
+                if (vacancy.employer) companiesSet.add(vacancy.employer);
             });
 
             const sortExperience = (a, b) => {
@@ -138,13 +138,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 const header = section.querySelector('h2').textContent.toLowerCase();
                 const variantsContainer = section.querySelector('.filter_variants');
 
-                if (header.includes('job type')) {
+                if (header.includes('тип работы')) {
                     createCheckboxes(variantsContainer, jobTypesSet);
-                } else if (header.includes('experience')) {
+                } else if (header.includes('опыт работы')) {
                     createCheckboxes(variantsContainer, experiencesSet, true);
-                } else if (header.includes('city') || header.includes('location')) {
+                } else if (header.includes('город') || header.includes('location')) {
                     createCheckboxes(variantsContainer, locationsSet);
-                } else if (header.includes('employer') || header.includes('company')) {
+                } else if (header.includes('компания') || header.includes('company')) {
                     createCheckboxes(variantsContainer, companiesSet);
                 }
             });
@@ -164,16 +164,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (variantsContainer.children.length > 5) {
                     showMoreBtn.style.display = 'inline-block';
-                    showMoreBtn.textContent = 'Show More';
-                    variantsContainer.classList.add('collapsed'); // изначально свернут
+                    showMoreBtn.textContent = 'Показать больше';
+                    variantsContainer.classList.add('collapsed');
 
                     showMoreBtn.onclick = () => {
                         if (variantsContainer.classList.contains('collapsed')) {
                             variantsContainer.classList.remove('collapsed');
-                            showMoreBtn.textContent = 'Show Less';
+                            showMoreBtn.textContent = 'Показать меньше';
                         } else {
                             variantsContainer.classList.add('collapsed');
-                            showMoreBtn.textContent = 'Show More';
+                            showMoreBtn.textContent = 'Показать больше';
                         }
                     };
                 } else {
@@ -208,13 +208,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (!section) return;
                     const headerText = section.querySelector('h2').textContent.toLowerCase();
 
-                    if (headerText.includes('job type')) {
+                    if (headerText.includes('тип работы')) {
                         this.toggleFilter(this.filters.jobTypes, labelText, checkbox.checked);
-                    } else if (headerText.includes('experience')) {
+                    } else if (headerText.includes('опыт работы')) {
                         this.toggleFilter(this.filters.experiences, labelText, checkbox.checked);
-                    } else if (headerText.includes('city') || headerText.includes('location')) {
+                    } else if (headerText.includes('город')) {
                         this.toggleFilter(this.filters.locations, labelText, checkbox.checked);
-                    } else if (headerText.includes('employer') || headerText.includes('company')) {
+                    } else if (headerText.includes('компания') || headerText.includes('company')) {
                         this.toggleFilter(this.filters.companies, labelText, checkbox.checked);
                     }
 
@@ -354,7 +354,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             this.renderPagination(filteredVacancies.length);
 
-            this.elements.allJobsText.textContent = `Showing ${Math.min(filteredVacancies.length, end)} out of ${filteredVacancies.length} results`;
+            this.elements.allJobsText.textContent = `Показано ${Math.min(filteredVacancies.length, end)} из ${filteredVacancies.length} результатов`;
         },
 
         renderPagination(totalItems) {
@@ -379,7 +379,7 @@ document.addEventListener('DOMContentLoaded', () => {
         },
 
         createVacancyCardHTML(vacancy) {
-            let salaryText = 'empty';
+            let salaryText = '-';
             if (vacancy.salary_from || vacancy.salary_to) {
                 const from = vacancy.salary_from ? `от ${this.formatSalaryNumber(vacancy.salary_from)}` : '';
                 const to = vacancy.salary_to ? `до ${this.formatSalaryNumber(vacancy.salary_to)}` : '';
@@ -397,7 +397,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 <div class="vacancy-card">
                     <div class="card-header">
-                        <div class="logo-place"></div>
+                        <div class="logo-place">
+                            <img src="${vacancy.picture ?? 'pics/default-logo.png'}" alt="Company Logo">
+                        </div>
 
                         <div class="job-title-info">
                             <h2>${vacancy.name ?? 'Vacancy Name'}</h2>
