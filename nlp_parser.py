@@ -3,6 +3,10 @@ import re
 from spacy.matcher import PhraseMatcher
 import pymorphy3
 
+
+
+
+
 def to_nominative_singular(word):
     word = word.split(" ")
     morph = pymorphy3.MorphAnalyzer()
@@ -68,32 +72,205 @@ def extract_job_title(doc):
     # First look for OCCUPATION entities
     for ent in doc.ents:
         if ent.label_ == "OCCUPATION":
-            return ent.text
+            return ent.text.capitalize()
 
     # Look for keywords in the text
-    job_keywords = ["developer", "менеджер", "специалист", "стажёр", "разработчик", "scientist"]
+    job_keywords = ["developer", "менеджер", "специалист", "стажёр", "разработчик", "scientist", "маркетолог", "дизайнер"]
     for token in doc:
         if token.text.lower() in job_keywords:
             # Get surrounding text (3 words before and after)
-            start = max(0, token.i - 3)
+            start = max(0, token.i)
             end = min(len(doc), token.i + 4)
-            return doc[start:end].text
+            return doc[start:end].text.capitalize()
 
     # Fallback to first noun phrase (English only)
     if doc.lang_ == "en":
         for chunk in doc.noun_chunks:
-            return chunk.text
+            return chunk.text.capitalize()
+
+    if ("стажировк" in doc.text or "Cтажировк" in doc.text):
+        return "Стажёр"
 
     return None
 
 
 def extract_company(doc):
-    starred_companies = re.findall(r"\*\*([^\s*]+)\*\*", doc.text)
-    if starred_companies:
-        return re.sub(r'[\"\'«»“”‘’„‟]', '', starred_companies[0])
-    for ent in doc.ents:
-        if ent.label_ == "ORG":
-            return ent.text
+    companies = [
+        'Атомдата-Иннополис',
+        'Иннополис Девелопмент',
+        'АЙВИС',
+        'АйДи Решения',
+        'АйТиСфера',
+        'Ай Си Спейс',
+        'АйСиЭл Системные Технологии',
+        'АйСиЭл Софт',
+        'АйСиЭл Техно',
+        'АйСиЭл Электроникс',
+        'Ай-Теко Новые Технологии',
+        'АйТуБи',
+        'Ак Барс Цифровые Технологии',
+        'Аллока Аналитика',
+        'А-ТРЭКЕР',
+        'Бастрим',
+        'Батареон',
+        'Би Пи Эм Энвайронмент',
+        'Бипиум',
+        'БРИОЛОДЖИ',
+        'Вайс Сити Системс',
+        'Валадорус Софт',
+        'Вейвз Иннополис',
+        'Визиолоджи Технологии',
+        'ВРМ Групп',
+        'ВФ-Инно',
+        'Гемоскан',
+        'Гросс Диджитал',
+        'Джайвис',
+        'Джетс',
+        'ДжиДиСи Сервисез',
+        'ДиджиталБизФэктори',
+        'ДИОН СОФТ',
+        'Дуглис-СААС',
+        'Единые банковские технологии',
+        'ЕОРА ДАТА ЛАБ',
+        'Зед Софт Лабс',
+        'ЗенКар',
+        'Зинг',
+        'ИВКС',
+        'Индасофт Инновации',
+        'ИнноГеоТех',
+        'Иннодата',
+        'Иннокод',
+        'Иннополис 2023',
+        'Иннософт',
+        'Инностейдж ЦР',
+        'Инференс Технолоджис',
+        'Интеллектуальная видеоаналитика',
+        'ИТ ИКС 5 Технологии',
+        'Итерра-Модули',
+        'ИЦС Платформа',
+        'Касандра Груп',
+        'Контур Инновации',
+        'К-Проекты',
+        'Кьюми АйТи',
+        'Лемон Технолоджис Груп',
+        'Магнит ИТ Лаб',
+        'Маркетплейс-Технологии',
+        'Марс Технологии',
+        'МВС Индата',
+        'Медитека Диджитал',
+        'МедМаркет',
+        'Мобильная платформа',
+        'Мобильное решение',
+        'МОНЕТА ЛАБС',
+        'МТС Лаб',
+        'Навикей',
+        'Национальный Центр Информатизации',
+        'НИХАО',
+        'НовоГен',
+        'Новые облачные технологии',
+        'НПП Связь-Управление',
+        'Оптимус',
+        'Оргнефтехим АйТи',
+        'ОРЛАН Диджитал',
+        'Открытая мобильная платформа',
+        'Оун',
+        'Поуму',
+        'ПРМ Иннополис',
+        'ПСК СМАРТ ПАРК',
+        'Радиус Исследования',
+        'Райхлин Технологии',
+        'Риэль Цифровые Технологии',
+        'РМД',
+        'Роадар',
+        'Робософт',
+        'РТК Софт Лабс',
+        'РуНедра',
+        'Русланд Тех',
+        'Русдронопорт',
+        'РЭДМЭДРОБОТ ИННОВАЦИИ',
+        'Рэйлюкс',
+        'Сайберскейп инвестмент',
+        'СафДекор',
+        'Свежие решения',
+        'СДС Телеком',
+        'Синергия Софт',
+        'Сирин Групп',
+        'СИСТЭМСОФТ',
+        'СКБ Инфоматика',
+        'СМАРТФАРМ',
+        'Сорамитсу Лабс',
+        'СТУДИЯ ЛИДС',
+        'ТА-Информационные Технологии',
+        'ТатИТнефть',
+        'ТатМобайлИнформ СиДиСи',
+        'ТГТ Сервис',
+        'Техкрауд ЭйАй',
+        'ТИИД',
+        'ТРАКИНСТОК',
+        'Транспэрент Технолоджис',
+        'Трендпласт-М',
+        'Умная камера',
+        'Умные решения',
+        'Универсальные ИТ системы',
+        'ФармМедПолис РТ',
+        'ХайРус',
+        'ХайтекПарк',
+        'Цифровой Сервис Провайдер',
+        'ЦОК НТИ',
+        'Эвотэк-Мирай Геномикс',
+        'ЭЛСУР',
+        'ЭНЕРГОСОФТ',
+        'Эттон Груп',
+        'Эттон Нефтегазовые Решения',
+        'Юнителлер-РТИ',
+        'Acronis',
+        'ICL Services',
+        'ICL Soft',
+        'Uniteller',
+        'Эттон',
+        'Cognitive Pilot',
+        'HiRUS',
+        'ТаксНет',
+        'Татнефть Цифровые Технологии',
+        'Сорамитсу Лабс',
+        'Инфоматика',
+        'Sirin',
+        'red_mad_robot',
+        'RoadAR',
+        'Radius-etl.ru',
+        'Headmade',
+        'FIX',
+        'Мемориал',
+        'Lemon Technologies Group',
+        'Qummy',
+        'Контур',
+'Digital Biz Factory'
+    ]
+    text = doc.text
+    for company in companies:
+        if company in text:
+            return company
+
+    text_lower = text.lower()
+    for company in companies:
+        if company.lower() in text_lower:
+            return company
+
+    return None
+
+
+def extract_location(doc):
+    locations = ['Казань', 'Москва', 'Санкт-Петербург', 'Алматы', 'Нижний Новгород', 'Иннополис', 'Екатеринбург', 'Краснодар', 'Челябинск', 'Пермь', 'Ижевск', 'Ульяновск']
+    text = doc.text
+    for location in locations:
+        if location in text:
+            return location
+
+    text_lower = text.lower()
+    for location in locations:
+        if location.lower() in text_lower:
+            return location
+
     return None
 
 
@@ -133,36 +310,16 @@ def extract_work_form(doc):
     return None
 
 
-def extract_requirements(doc):
-    requirements = []
-    # Look for requirement sections
-    for i, sent in enumerate(doc.sents):
-        sent_text = sent.text.lower()
-
-        # Russian keywords
-        if any(kw in sent_text for kw in ["задачи", "требован", "обязанност", "обязательн"]):
-            # Add current and next 5 sentences (typical requirements section)
-            requirements.extend(s.text for s in list(doc.sents)[i:i + 6])
-            break
-
-        # English keywords
-        elif any(kw in sent_text for kw in ["requirements", "qualifications", "must have", "responsibilities"]):
-            requirements.extend(s.text for s in list(doc.sents)[i:i + 6])
-            break
-
-    return requirements
-
-
 def parse_vacancy(text):
     # Process with both pipelines
+    text = text.replace("*", "")
     doc_ru = nlp_ru(text)
-
     # For Russian text, English processing isn't needed
     result = {
         "is_vacancy": is_vacancy(doc_ru),
         "job_title": extract_job_title(doc_ru),
         "company": extract_company(doc_ru),
-        "location": next((to_nominative_singular(ent.text) for ent in doc_ru.ents if ent.label_ == "LOC"), None),
+        "location": extract_location(doc_ru),
         "description": " ".join([sent.text for sent in doc_ru.sents][:3]),
         "work_form": extract_work_form(doc_ru),
     }

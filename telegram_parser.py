@@ -13,18 +13,21 @@ except:
 def parse_channel(channel_name, limit=10):
     with TelegramClient(StringSession(telegram_session), telegram_api_id, telegram_api_hash) as client:
         messages = client.get_messages(channel_name, limit=limit)
-        return [m.text for m in messages if m.text]
+        vacancies = []
+        for m in messages:
+            parsed = parse_vacancy(m.text)
+            parsed['id'] = m.id
+            parsed['link'] = f"https://t.me/{channel_name}/{m.id}"
+            if parsed['is_vacancy']:
+                vacancies.append(parsed)
+        return vacancies
 
 
-# Example usage
+
 if __name__ == "__main__":
-    channel = "IUCareerFinder"
-    messages = parse_channel(channel, 30)
-    vacancies  = ""
-    for text in messages:
-        parsed = parse_vacancy(text)
-        if parsed['is_vacancy']:
-            print(parsed)
-            print("=====================================")
+    vacancies = parse_channel("IUCareerFinder", 30)
+    for vacancy in vacancies:
+        print(vacancy)
+
 
 
