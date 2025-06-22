@@ -16,6 +16,9 @@
     .header-content {
         font-family: "Jockey One", sans-serif;
     }
+    .card_header {
+        font-family: "Jockey One", sans-serif;
+    }
 </style>
 
 <body>
@@ -34,18 +37,21 @@
 
       <div class="other_body">
           <div class="card">
-              <div class="header">
-                  <h2>Log in to your account</h2>
+              <div class="card_header">
+                  <h2>Войти в аккаунт</h2>
               </div>
         
-              <form class="signup-form">
-                  <input type="text" placeholder="Email" required>
-                  <input type="password" placeholder="Password" required>
-                  <button type="submit">Log In</button>
+              <form class="login-form">
+                    <div class="inputs">
+                        <input type="text" placeholder="Email" required>
+                        <input type="password" placeholder="Пароль" required>
+                    </div>
+                  <a href="#">Восстановить пароль</a>
+                  <button type="submit">Войти</button>
               </form>
 
               <div class="login-link">
-                  <p>You don’t have an account? <a href="#">Sign up</a></p>
+                  <p>Ещё нет аккаунта? <a href="#">Зарегестрироваться</a></p>
               </div>
           </div>
       </div>
