@@ -397,10 +397,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 <div class="vacancy-card">
                     <div class="card-header">
-                        <div class="logo-place">
-                            <img src="${vacancy.picture ?? 'pics/default-logo.png'}" alt="Company Logo">
-                        </div>
-
+                        <div class="logo-place"></div>
                         <div class="job-title-info">
                             <h2>${vacancy.name ?? 'Vacancy Name'}</h2>
                             <span>${vacancy.employer ?? 'Company'}</span>
