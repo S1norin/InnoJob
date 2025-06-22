@@ -1,6 +1,7 @@
 import psycopg2
 from psycopg2 import Binary
 import bcrypt
+import time
 #С помощью высших сил я смог написать это как адекватный человек(неточно)
 class UserManager:#Этот черт будет использоваться для работы с бд юзеров
     def __init__(self, host, dbname, user, password, port):
@@ -24,6 +25,9 @@ class UserManager:#Этот черт будет использоваться д�
             name TEXT NOT NULL,
             email TEXT NOT NULL UNIQUE,
             password TEXT NOT NULL,
+            confirmation_code INTEGER,
+            confirmation_code_created_at INTEGER,  
+            is_confirmed BOOLEAN DEFAULT FALSE,
             cv_name VARCHAR(255),
             cv_pdf BYTEA
         );"""
@@ -49,7 +53,7 @@ class UserManager:#Этот черт будет использоваться д�
             print(f"Ошибка БД при добавлении пользователя: {e}")
             raise
 
-    #угадайте что делает данная залупа
+    #угадайте что делает данная
     def check_user(self, email, password):
         query = "SELECT password FROM users WHERE email = %s;"
         try:
@@ -95,3 +99,88 @@ class UserManager:#Этот черт будет использоваться д�
         except psycopg2.Error as e:
             print(f"Ошибка БД при получении резюме: {e}")
             raise
+
+
+    def get_sent_time(self, email):
+        query = "SELECT confirmation_code_created_at FROM users WHERE email = %s"
+        with self._get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(query, (email,))
+                result = cur.fetchone()
+                if result:
+                    return result[0]
+                else:
+                    return None
+
+    def get_confirmation_code(self, email):
+        query = "SELECT confirmation_code FROM users WHERE email = %s"
+        with self._get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(query, (email,))
+                result = cur.fetchone()
+                if result:
+                    return result[0]
+                else:
+                    return None
+
+
+    def get_is_confirmed(self, email):
+        query = "SELECT is_confirmed FROM users WHERE email = %s"
+        with self._get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(query, (email,))
+                result = cur.fetchone()
+                if result:
+                    return bool(result[0])
+                else:
+                    return None
+    
+    def set_confirmed_code(self, user_email, code):
+        query = """
+            UPDATE users 
+            SET confirmation_code = %s, 
+                confirmation_code_created_at = %s 
+            WHERE email = %s
+            """
+        current_time = int(time.time())
+        with self._get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(query, (code, current_time, user_email))
+
+    def confirm_user_and_clear_code(self, user_email):
+        query = """
+            UPDATE users 
+            SET is_confirmed = TRUE,
+                confirmation_code = NULL,
+                confirmation_code_created_at = NULL
+            WHERE email = %s
+        """
+        with self._get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(query, (user_email,))
+
+
+
+    def change_password(self, mail, password):
+        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        query = """
+                UPDATE users 
+                SET password = %s
+                WHERE email = %s
+            """
+        with self._get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(query, (hashed_password, mail))
+
+
+
+    def user_in_base(self, email):
+        query = "SELECT id FROM users WHERE email = %s"
+        with self._get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(query, (email,))
+                result = cur.fetchone()
+                if result:
+                    return True
+                else:
+                    return False
