@@ -1,22 +1,12 @@
-async function hashPassword(password) {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(password);
-    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-}
-
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
 document.querySelector('.login-form').addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    // Сброс всех ошибок
     document.querySelectorAll('input').forEach(input => input.classList.remove('error'));
     document.getElementById('email-error').textContent = '';
     document.getElementById('password-error').textContent = '';
 
-    // Получаем поля
     const firstName = document.getElementById('firstName').value.trim();
     const lastName = document.getElementById('lastName').value.trim();
     const email = document.getElementById('email');
@@ -44,12 +34,10 @@ document.querySelector('.login-form').addEventListener('submit', async (e) => {
 
     if (!isValid) return;
 
-    const hashedPassword = await hashPassword(password.value);
-
     const userData = {
         name: firstName + ' ' + lastName,
         email: email.value.trim(),
-        password: hashedPassword
+        password: password.value
     };
 
     try {
@@ -60,8 +48,8 @@ document.querySelector('.login-form').addEventListener('submit', async (e) => {
         });
 
 
-        if (response.ok) {
-            alert("пашёл нахуй")
+        if (!response.ok) {
+            alert("регистрация прошла успешно")
             goToMainPage()
         } else {
             document.getElementById('email-error').textContent = result.detail || "Ошибка регистрации";

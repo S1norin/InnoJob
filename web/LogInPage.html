@@ -43,19 +43,24 @@
         
               <form class="login-form">
                     <div class="inputs">
-                        <input type="text" placeholder="Email" required>
-                        <input type="password" placeholder="Пароль" required>
+                        <input type="text" id="email" placeholder="Email" required>
+                        <span class="error-message" id="email-error"></span>
+
+                        <input type="password" id="password" placeholder="Пароль" required>
+                        <span class="error-message" id="password-error"></span>
+
                     </div>
                   <a href="#">Восстановить пароль</a>
                   <button type="submit">Войти</button>
               </form>
 
               <div class="login-link">
-                  <p>Ещё нет аккаунта? <a href="#">Зарегестрироваться</a></p>
+                  <p>Ещё нет аккаунта? <a href="SignUpPage.html">Зарегестрироваться</a></p>
               </div>
           </div>
       </div>
 
+    <script src="LogInPage.js"></script>
   </body>
   
 </html>
