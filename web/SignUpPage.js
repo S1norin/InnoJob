@@ -28,8 +28,8 @@ document.querySelector('.login-form').addEventListener('submit', async (e) => {
         isValid = false;
     }
 
-    function goToMainPage() {
-        window.location.href = "MainPage.html";
+    function goToConfirmPage() {
+        window.location.href = "ConfirmPage.html";
     }
 
     if (!isValid) return;
@@ -50,7 +50,7 @@ document.querySelector('.login-form').addEventListener('submit', async (e) => {
 
         if (!response.ok) {
             alert("регистрация прошла успешно")
-            goToMainPage()
+            goToConfirmPage()
         } else {
             document.getElementById('email-error').textContent = result.detail || "Ошибка регистрации";
         }
