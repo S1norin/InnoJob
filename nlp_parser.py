@@ -6,27 +6,29 @@ import pymorphy3
 
 
 
-
+#Хрень которая переводит в ед число им падежа с большой буквы (вспоминаем уроки русского языка 4 класс)
 def to_nominative_singular(word):
     word = word.split(" ")
-    morph = pymorphy3.MorphAnalyzer()
+    morph = pymorphy3.MorphAnalyzer() # Умный чел который умеет определять падежы
     for i, w in enumerate(word):
-        word[i] = morph.parse(w)[0].normal_form.capitalize()
+        word[i] = morph.parse(w)[0].normal_form.capitalize() # Переводим
     return " ".join(word)
 
-# Load models
+# NLP модели для нормального и английского языка
 nlp_en = spacy.load("en_core_web_sm")
 nlp_ru = spacy.load("ru_core_news_sm")
 
-# Create work form matchers
+# Хрень чтобы быстро икать ключевые слова в тексте
 work_form_matcher_en = PhraseMatcher(nlp_en.vocab)
 work_form_matcher_ru = PhraseMatcher(nlp_ru.vocab)
+
 work_forms = ["remote", "hybrid", "office", "удалёнка", "офис", "гибрид"]
 
 # Add patterns to both matchers
 for matcher, nlp in [(work_form_matcher_en, nlp_en), (work_form_matcher_ru, nlp_ru)]:
     patterns = [nlp(text) for text in work_forms]
     matcher.add("WORK_FORM", patterns)
+
 
 # PRE-BUILT VACANCY MATCHERS (FIXED)
 vacancy_matcher_en = PhraseMatcher(nlp_en.vocab)
@@ -290,10 +292,10 @@ def extract_salary(doc):
                 2).isdigit() else None
 
             return {
-                "from": salary_from,
-                "to": salary_to,
-                "currency": match.group(3),
-                "mode": "monthly" if "месяц" in doc.text else "yearly"
+                "salary_from": salary_from,
+                "salary_to": salary_to,
+                "salary_currency": match.group(3),
+                "salary_mode": "monthly" if "месяц" in doc.text else None
             }
     return {}
 
@@ -309,6 +311,16 @@ def extract_work_form(doc):
         return doc[start:end].text
     return None
 
+def extract_expirience(doc):
+    expirience_keywords = ["опыт работы", "опыт", "expirience"]
+    for token in doc:
+        if token.text.lower() in expirience_keywords:
+            # Get surrounding text (3 words before and after)
+            start = max(0, token.i)
+            end = min(len(doc), token.i + 5)
+            return re.sub(r'[^a-zA-Zа-яА-Я0-9\s]', '', doc[start:end].text.capitalize())
+    return None
+
 
 def parse_vacancy(text):
     # Process with both pipelines
@@ -320,17 +332,24 @@ def parse_vacancy(text):
         "job_title": extract_job_title(doc_ru),
         "company": extract_company(doc_ru),
         "location": extract_location(doc_ru),
+        "experience": extract_expirience(doc_ru),
         "description": " ".join([sent.text for sent in doc_ru.sents][:3]),
         "work_form": extract_work_form(doc_ru),
     }
 
     # Add salary data if found
-    salary_data = extract_salary(doc_ru) or {}
+    salary_data = extract_salary(doc_ru) or {
+                "salary_from": None,
+                "salary_to": None,
+                "salary_currency": None,
+                "salary_mode": None
+            }
     result.update(salary_data)
 
     return result
 
 
+#Тест
 if __name__ == '__main__':
     text = """📣 **Стажёр Data Science в Ozon Tech**
 
@@ -343,6 +362,9 @@ if __name__ == '__main__':
 - оценка качества полученной модели, тестирование моделей, познакомится с методами деплоя моделей в прод
 - взаимодействие с бизнес-заказчиками и перевод бизнес-требований в плоскость ML
 
+Зарплата от 0 до 10 рублей
+
+опыт работы 10 вечностей. Кстати иди нахуй
 [👉🏼 **Более подробно о стажировке**](https://job.ozon.ru/vacancy/121749776?__rr=1&abt_att=1)"""
 
     print(parse_vacancy(text))
