@@ -1,8 +1,10 @@
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from database.database import VacancyManager
 from config import *
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, FileResponse
 import io
+import uvicorn
 from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File, Form, Request
 from fastapi.concurrency import run_in_threadpool
 from database.databaseUsers import UserManager
@@ -23,6 +25,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Mount the static directories
+app.mount("/web", StaticFiles(directory="web"), name="web")
+app.mount("/pics", StaticFiles(directory="pics"), name="pics")
+
+
 
 @app.on_event("startup")
 async def startup_event():
@@ -37,6 +44,9 @@ def get_user_manager(request: Request) -> UserManager:
 def get_vacancy_manager(request: Request) -> VacancyManager:
     return request.app.state.vacancy_manager
 
+@app.get("/")
+async def read_main():
+    return FileResponse('web/MainPage.html')
 
 @app.get("/vacancies")
 async def get_all_vacancies(db: VacancyManager = Depends(get_vacancy_manager)):
@@ -91,7 +101,10 @@ async def register_user(user_data: UserCreate, db: UserManager = Depends(get_use
 
 #загрузка гребанного пдф файла
 @app.post("/upload-cv")
-async def upload_cv(db: UserManager = Depends(get_user_manager), email: str = Form(...), pdf_file: UploadFile = File(...)#получаем файл (эта важна)
+async def upload_cv(
+    db: UserManager = Depends(get_user_manager),
+    email: str = Form(...),
+    pdf_file: UploadFile = File(...)#получаем файл (эта важна)
 ):
     pdf_content_bytes = await pdf_file.read()#захерачиваем его в бинарный вид чтобы не сохранять
 
@@ -183,78 +196,3 @@ async def login_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Неверный email или пароль"
         )
-
-
-
-
-async def create_password(user_mail, db: UserManager = Depends(get_user_manager)):
-    code = secrets.randbelow(900000)+100000
-    await run_in_threadpool(db.set_confirmed_code, user_mail, code)
-
-
-async def send_verification(user_mail, db: UserManager = Depends(get_user_manager)):
-    code = await run_in_threadpool(db.get_confirmation_code, user_mail)
-    if not code:
-        raise HTTPException(status_code=400, detail="Код подтверждения не найден")
-    message = EmailMessage()
-    message["From"] = SMTP_USER
-    message["To"] = user_mail
-    message["Subject"] = "Password"
-    message.set_content(f"Ваш код подтверждения: {code}")
-
-    await aiosmtplib.send(
-        message,
-        hostname=SMTP_HOST,
-        port=SMTP_PORT,
-        username=SMTP_USER,
-        password=SMTP_PASSWORD,
-        use_tls=True,
-    )
-
-@app.post("/login/confirm")
-async def check_password(data: ConfirmRequest, db: UserManager = Depends(get_user_manager)):
-    code = await run_in_threadpool(db.get_confirmation_code, data.email)
-    entry = await run_in_threadpool(db.get_sent_time, data.email)
-    if not entry:
-        raise HTTPException(status_code=404, detail="Пароль не пришел или время истекло")
-    if time.time()  - entry >300:
-        raise HTTPException(status_code=400, detail="Время истекло")
-    if int(data.code) != code:
-        raise HTTPException(status_code=400, detail="Неверный код")
-    await run_in_threadpool(db.confirm_user_and_clear_code, data.email)
-    return {"message":"Вход подтвержден", "status": True}
-
-
-@app.post("/write-mail")
-async def write_mail(data:UserMail, db: UserManager = Depends(get_user_manager)):
-    result = await run_in_threadpool(db.user_in_base, data.mail)
-    if result:
-        await create_password(data.mail, db)
-        await send_verification(data.mail, db)
-        return {"access":True, "message":"User in base"}
-    else:
-        return {"access": False, "message": "User not in base"}
-
-
-
-@app.post("/change_password")
-async def change_password(data: NewPassword, db: UserManager = Depends(get_user_manager)):
-    await run_in_threadpool(db.change_password, data.mail, data.new_password)
-    return {"status":True, "message":"Password change"}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
