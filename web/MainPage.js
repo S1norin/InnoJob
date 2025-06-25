@@ -359,14 +359,48 @@ document.addEventListener('DOMContentLoaded', () => {
 
         renderPagination(totalItems) {
             const pageCount = Math.ceil(totalItems / this.itemsPerPage);
+            const current = this.currentPage;
             let html = '';
 
-            for (let i = 1; i <= pageCount; i++) {
-                html += `<button class="page-btn ${i === this.currentPage ? 'active' : ''}" data-page="${i}">${i}</button>`;
+            const createPageBtn = (i, text = null, isHidden = false) => {
+                return `<button class="page-btn ${i === current ? 'active' : ''} ${isHidden ? 'hidden' : ''}" data-page="${i}">${text || i}</button>`;
+            };
+
+            const createEllipsis = (isVisible = true) => {
+                return `<span class="ellipsis ${!isVisible ? 'invisible' : ''}">...</span>`;
+            };
+
+            if (current > 1) {
+                html += createPageBtn(current - 1, '‹');
+            }
+
+            html += createPageBtn(1);
+            html += createPageBtn(2);
+
+            html += createEllipsis(current > 3);
+
+            if (current !== 1 && current !== 2 && current !== pageCount) {
+                html += createPageBtn(current);
+            } else {
+                html += createPageBtn(current, current, true);
+            }
+
+            html += createEllipsis(current < pageCount - 2);
+
+            if (pageCount > 3) {
+                html += createPageBtn(pageCount);
+            } else {
+                html += createPageBtn(pageCount, pageCount, true);
+            }
+
+            if (current < pageCount) {
+                html += createPageBtn(current + 1, '›');
             }
 
             this.elements.pagination.innerHTML = html;
         },
+
+
 
         formatSalaryNumber(number) {
             if (number >= 1_000_000) {
@@ -454,6 +488,23 @@ document.addEventListener('DOMContentLoaded', () => {
             return str.replace(/\b\w/g, char => char.toUpperCase());
         }
     };
+
+    const scrollBtn = document.getElementById('scrollBtn');
+
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 300) {
+            scrollBtn.style.display = 'flex';
+        } else {
+            scrollBtn.style.display = 'none';
+        }
+    });
+
+    scrollBtn.addEventListener('click', () => {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    });
 
     app.init();
 
