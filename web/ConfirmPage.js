@@ -3,14 +3,27 @@ document.addEventListener('DOMContentLoaded', () => {
     const codeInputs = document.querySelectorAll('.code-input');
     const email = localStorage.getItem('emailToConfirm');
 
+    if (!email) {
+        alert("Email не найден. Пожалуйста, зарегистрируйтесь заново.");
+        window.location.href = "SignUpPage.html";
+        return;
+    }
+
     codeInputs.forEach((input, index) => {
         input.addEventListener('input', () => {
             if (input.value.length === 1 && index < codeInputs.length - 1) {
                 codeInputs[index + 1].focus();
             }
         });
+
+        input.addEventListener('keydown', (e) => {
+            if (e.key === "Backspace" && input.value === "" && index > 0) {
+                codeInputs[index - 1].focus();
+            }
+        });
     });
 
+    // Обработка формы
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
@@ -32,6 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (response.ok) {
                 alert("Почта подтверждена!");
+                localStorage.removeItem('emailToConfirm');
                 window.location.href = "LogInPage.html";
             } else {
                 alert(result.detail || "Ошибка подтверждения");
@@ -39,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } catch (err) {
             console.error("Ошибка при подтверждении:", err);
-            alert("Сервер недоступен");
+            alert("Сервер недоступен. Попробуйте позже.");
         }
     });
 });

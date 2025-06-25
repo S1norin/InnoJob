@@ -28,10 +28,6 @@ document.querySelector('.login-form').addEventListener('submit', async (e) => {
         isValid = false;
     }
 
-    function goToConfirmPage() {
-        window.location.href = "ConfirmPage.html";
-    }
-
     if (!isValid) return;
 
     const userData = {
@@ -47,10 +43,12 @@ document.querySelector('.login-form').addEventListener('submit', async (e) => {
             body: JSON.stringify(userData)
         });
 
+        const result = await response.json();
 
-        if (!response.ok) {
-            alert("регистрация прошла успешно")
-            goToConfirmPage()
+        if (response.ok) {
+            localStorage.setItem("emailToConfirm", userData.email);
+            alert("Регистрация прошла успешно. Подтвердите почту.");
+            window.location.href = "ConfirmPage.html";
         } else {
             document.getElementById('email-error').textContent = result.detail || "Ошибка регистрации";
         }
