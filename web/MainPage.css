@@ -646,3 +646,29 @@ hr {
     border: none;
 }
 
+
+#scrollBtn {
+  position: fixed;
+  bottom: 30px;
+  right: 35px;
+  z-index: 1000;
+
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+
+  background-image: url("/pics/topbtn.png");
+  background-size: 50%;
+  background-position: center;
+  background-repeat: no-repeat;
+  
+  background-color: #00bb00;
+  border: none;
+  cursor: pointer;
+  
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+#scrollBtn:hover {
+  background-color: #008c00;
+}
