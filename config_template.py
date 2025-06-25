@@ -14,3 +14,4 @@ SMTP_PASSWORD = "UT397BpgFo82s1YRC8kt"
 
 telegram_api_id=""
 telegram_api_hash=""
+telegram_session=""
