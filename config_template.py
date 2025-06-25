@@ -9,4 +9,3 @@ db_port=5432
 
 telegram_api_id=""
 telegram_api_hash=""
-telegram_session=""
