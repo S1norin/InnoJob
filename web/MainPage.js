@@ -165,7 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (variantsContainer.children.length > 5) {
                     showMoreBtn.style.display = 'inline-block';
                     showMoreBtn.textContent = 'Show More';
-                    variantsContainer.classList.add('collapsed'); // изначально свернут
+                    variantsContainer.classList.add('collapsed');
 
                     showMoreBtn.onclick = () => {
                         if (variantsContainer.classList.contains('collapsed')) {

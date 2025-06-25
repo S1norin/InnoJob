@@ -646,6 +646,9 @@ hr {
     border: none;
 }
 
+.filter_variants.collapsed label:nth-child(n+6) {
+    display: none;
+}
 
 #scrollBtn {
   position: fixed;
@@ -661,11 +664,11 @@ hr {
   background-size: 50%;
   background-position: center;
   background-repeat: no-repeat;
-  
+
   background-color: #00bb00;
   border: none;
   cursor: pointer;
-  
+
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 
