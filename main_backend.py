@@ -1,12 +1,18 @@
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from database.database import VacancyManager
-from config import db_host, db_name, db_user, db_password, origins, db_port
-from fastapi.responses import StreamingResponse
+from config import *
+from fastapi.responses import StreamingResponse, FileResponse
 import io
+import uvicorn
 from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File, Form, Request
 from fastapi.concurrency import run_in_threadpool
 from database.databaseUsers import UserManager
 from Extra_classes import *
+from email.message import EmailMessage
+import aiosmtplib
+import secrets
+import time
 
 app = FastAPI()
 
@@ -19,10 +25,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Mount the static directories
+app.mount("/web", StaticFiles(directory="web"), name="web")
+app.mount("/pics", StaticFiles(directory="pics"), name="pics")
+
+
 
 @app.on_event("startup")
 async def startup_event():
-    # Создаем экземпляры и кладем их в "рюкзак" приложения
     app.state.vacancy_manager = VacancyManager(host=db_host, dbname=db_name, user=db_user, password=db_password, port=db_port)
     app.state.user_manager = UserManager(host=db_host, dbname=db_name, user=db_user, password=db_password, port=db_port)
     print("Подключение к БД установлено и менеджеры готовы!")
@@ -34,6 +44,9 @@ def get_user_manager(request: Request) -> UserManager:
 def get_vacancy_manager(request: Request) -> VacancyManager:
     return request.app.state.vacancy_manager
 
+@app.get("/")
+async def read_main():
+    return FileResponse('web/MainPage.html')
 
 @app.get("/vacancies")
 async def get_all_vacancies(db: VacancyManager = Depends(get_vacancy_manager)):
@@ -77,11 +90,13 @@ async def register_user(user_data: UserCreate, db: UserManager = Depends(get_use
             db.add_new_user,
             name=user_data.name, email=user_data.email, password=user_data.password
         )
-        #я пошутил все так же простто вызываем функцию (но зато как)
+        await create_password(user_data.email, db)
+        await send_verification(user_data.email, db)
         return {"message": "User registered", "user_id": user_id}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
+        print("Ошибка при регистрации:", repr(e))
         raise HTTPException(status_code=500, detail="Internal server error.")
 
 #загрузка гребанного пдф файла
@@ -172,8 +187,10 @@ async def login_user(
         email=login_data.email,
         password=login_data.password
     )
-    if is_correct:#если да то говорим что все круто
+    if is_correct and db.get_is_confirmed(login_data.email):#если да то говорим что все круто
         return {"status": "success", "message": "Вход выполнен успешно"}
+    elif not(db.get_is_confirmed(login_data.email)):
+        return {"status": "error", "message": "Код не подтвержден"}
     else:
         raise HTTPException(#в ином случае ну и пошло все в жопу
             status_code=status.HTTP_401_UNAUTHORIZED,

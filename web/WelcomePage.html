@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>ScarEerZ</title>
+    <link rel="stylesheet" href="/web/WelcomePage.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Jockey+One&display=swap" rel="stylesheet">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bakbak+One&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Jockey+One&display=swap" rel="stylesheet">
+
+<style>
+    .header-content, .btn {
+        font-family: "Jockey One", sans-serif;
+    }
+
+    .main-content h1{
+        font-family: "Bakbak One", sans-serif;
+    }
+</style>
+
+</head>
+<body>
+    <video autoplay muted loop id="Video">
+        <source src="/pics/Background_video.mp4" type="video/mp4">
+        Ваш браузер не поддерживает HTML5 видео.
+    </video>
+
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <a href="/logo">
+                    <img src="/pics/IU.png" alt="IU Logo">
+                </a>
+                <h2>ScarEerZ</h2>
+            </div>
+            <div class="header-right">
+                <a href="LogInPage.html">
+                    <h2>Log In</h2>
+                    </a>
+                <a href="SignUpPage.html">
+                    <h2>Sign Up</h2>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <h1>No scare, just your career<br>– with ScarEerZ!</h1>
+        
+        <div class="button-container">
+            <a href="LogInPage.html" class="btn" onclick="goToPage()">Find the Job</a>
+            <a href="/find-employee" class="btn">Find an Employee</a>
+        </div>
+    </main>
+
+    <script src="WelcomePage.js"></script>
+
+</body>
+</html>
