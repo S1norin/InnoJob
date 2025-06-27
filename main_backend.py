@@ -259,6 +259,7 @@ async def read_login():
 
 # Named function this strange to be similiar to /log_in_page
 @app.get("/sign_up_page")
+async def read_signup():
     # Placeholder, as this page shouldn't be available if user is already authorized
     
     # if authorized():
