@@ -37,7 +37,7 @@ document.querySelector('.login-form').addEventListener('submit', async (e) => {
     console.log("Password:", loginData.password);
 
     try {
-        const response = await fetch('http://localhost:8000/login', {
+        const response = await fetch('http://89.169.35.122:8080/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(loginData)

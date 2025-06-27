@@ -37,7 +37,7 @@ document.querySelector('.login-form').addEventListener('submit', async (e) => {
     };
 
     try {
-        const response = await fetch('http://localhost:8000/users/register', {
+        const response = await fetch('http://89.169.35.122:8080/users/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(userData)
