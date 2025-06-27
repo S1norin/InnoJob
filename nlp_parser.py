@@ -23,6 +23,7 @@ work_form_matcher_en = PhraseMatcher(nlp_en.vocab)
 work_form_matcher_ru = PhraseMatcher(nlp_ru.vocab)
 
 work_forms = ["remote", "hybrid", "office", "удалёнка", "офис", "гибрид"]
+work_forms += [i.capitalize() for i in work_forms]
 
 # Add patterns to both matchers
 for matcher, nlp in [(work_form_matcher_en, nlp_en), (work_form_matcher_ru, nlp_ru)]:
@@ -82,7 +83,7 @@ def extract_job_title(doc):
         if token.text.lower() in job_keywords:
             # Get surrounding text (3 words before and after)
             start = max(0, token.i)
-            end = min(len(doc), token.i + 4)
+            end = min(len(doc), token.i + 3)
             return doc[start:end].text.capitalize()
 
     # Fallback to first noun phrase (English only)
@@ -246,7 +247,8 @@ def extract_company(doc):
         'Lemon Technologies Group',
         'Qummy',
         'Контур',
-'Digital Biz Factory'
+        'Digital Biz Factory',
+        'Ozon Tech'
     ]
     text = doc.text
     for company in companies:
@@ -262,7 +264,7 @@ def extract_company(doc):
 
 
 def extract_location(doc):
-    locations = ['Казань', 'Москва', 'Санкт-Петербург', 'Алматы', 'Нижний Новгород', 'Иннополис', 'Екатеринбург', 'Краснодар', 'Челябинск', 'Пермь', 'Ижевск', 'Ульяновск']
+    locations = ['Innopolis', 'Kazan', 'Казань', 'Москва', 'Санкт-Петербург', 'Алматы', 'Нижний Новгород', 'Иннополис', 'Екатеринбург', 'Краснодар', 'Челябинск', 'Пермь', 'Ижевск', 'Ульяновск']
     text = doc.text
     for location in locations:
         if location in text:
@@ -278,27 +280,53 @@ def extract_location(doc):
 
 def extract_salary(doc):
     salary_patterns = [
-        r"(?:£|\$|€)(\d{1,3}(?:,\d{3})*)(?:\s*-\s*(\d{1,3}(?:,\d{3})*))?\s*(K|k)?",
-        r"(?:з/п|зарплата).*?(\d[\d\s]+)\s*(?:-|до)\s*(\d[\d\s]+)\s*([$€₽руб]|\w+)",
-        r"(\d[\d\s]+)\s*(?:-|до)\s*(\d[\d\s]+)\s*(руб|₽|USD|\$)"
+        # Pattern for ranges with currency
+        r"(?:з\/п|зарплата|оклад|от)\s*(\d[\d\s]*)\s*(?:до|-)\s*(\d[\d\s]*)\s*(р\.|руб|рублей|[$€]|USD|EUR)",
+        # Pattern for single value with currency
+        r"(?:з\/п|зарплата|оклад)\s*(\d[\d\s]*)\s*(р\.|руб|рублей|[$€]|USD|EUR)",
+        # Pattern for ranges without explicit currency (default to руб)
+        r"(\d[\d\s]*)\s*(?:до|-)\s*(\d[\d\s]*)\s*(?=\D|$)",
     ]
 
+    text = doc.text.replace('\xa0', ' ').replace(',', '').replace('.', '')  # Normalize text
+
     for pattern in salary_patterns:
-        matches = re.finditer(pattern, doc.text)
+        matches = re.finditer(pattern, text, re.IGNORECASE)
         for match in matches:
-            # Clean and convert numbers
-            salary_from = int(match.group(1).replace(" ", "").replace(",", "")) if match.group(1) else None
-            salary_to = int(match.group(2).replace(" ", "").replace(",", "")) if match.group(2) and match.group(
-                2).isdigit() else None
+            salary_from = int(match.group(1).replace(' ', '')) if match.group(1) else None
+            salary_to = int(match.group(2).replace(' ', '')) if len(match.groups()) > 1 and match.group(2) else None
+
+            # Currency handling - now returns 'руб' instead of '₽'
+            currency = None
+            if len(match.groups()) > 2 and match.group(3):
+                curr = match.group(3).lower()
+                if curr in ['р', 'р.', 'руб', 'рублей']:
+                    currency = 'руб'  # Changed from '₽' to 'руб'
+                elif curr == '$' or 'usd' in curr:
+                    currency = 'USD'
+                elif curr == '€' or 'eur' in curr:
+                    currency = 'EUR'
+
+            # Default to руб if no currency specified but numbers found
+            if not currency and (salary_from or salary_to):
+                currency = 'руб'  # Changed from '₽' to 'руб'
+
+            # Determine if monthly
+            salary_mode = "monthly" if any(word in text.lower() for word in ["месяц", "month"]) else None
 
             return {
                 "salary_from": salary_from,
                 "salary_to": salary_to,
-                "salary_currency": match.group(3),
-                "salary_mode": "monthly" if "месяц" in doc.text else None
+                "salary_currency": currency,
+                "salary_mode": salary_mode
             }
-    return {}
 
+    return {
+        "salary_from": None,
+        "salary_to": None,
+        "salary_currency": None,
+        "salary_mode": None
+    }
 
 def extract_work_form(doc):
     """Extract work form using pre-built matcher"""
@@ -353,18 +381,20 @@ def parse_vacancy(text):
 if __name__ == '__main__':
     text = """📣 **Стажёр Data Science в Ozon Tech**
 
-Проект генерации фона для товаров во время распродаж
+    Проект генерации фона для товаров во время распродаж
 
-**📌 Задачи: **
-- разработка функционала для классической обработки, сегментации, генерации изображений
-- обучение CV-моделей, продумывание и проверка гипотез, валидация результатов обучения
-- работа с данными - сбор датасета, подготовка фичей
-- оценка качества полученной модели, тестирование моделей, познакомится с методами деплоя моделей в прод
-- взаимодействие с бизнес-заказчиками и перевод бизнес-требований в плоскость ML
+    **📌 Задачи: **
+    - разработка функционала для классической обработки, сегментации, генерации изображений
+    - обучение CV-моделей, продумывание и проверка гипотез, валидация результатов обучения
+    - работа с данными - сбор датасета, подготовка фичей
+    - оценка качества полученной модели, тестирование моделей, познакомится с методами деплоя моделей в прод
+    - взаимодействие с бизнес-заказчиками и перевод бизнес-требований в плоскость ML
 
-Зарплата от 0 до 10 рублей
-
-опыт работы 10 вечностей. Кстати иди нахуй
+    Опыт работы от 20 лет
+    Зарплата от 0 до 10 рублей в месяц
+    Иннополис
+    офис
+    
 [👉🏼 **Более подробно о стажировке**](https://job.ozon.ru/vacancy/121749776?__rr=1&abt_att=1)"""
 
     print(parse_vacancy(text))
