@@ -17,7 +17,10 @@ def get_params():
     params = []
     for i in employer_ids:
         p = {
-            "text": "NOT (уборщица OR менеджер OR разнорабочий OR фасовщик OR инженер OR монтажник OR тендер OR электромонтажник OR поддержка OR маркетолог OR представитель OR Бухгалтер OR юрист OR дизайнер OR продаж OR ремонт OR экономист OR повар OR охране труда OR маляр OR оптик OR сантехник OR оператор OR слесарь OR писатель OR контроллер OR технолог OR техник OR склад OR кладовщик OR комплектовщик OR сборщик OR водитель OR делопроизводитель OR контролёр OR картограф OR модератор OR печати )",
+            # "industry": 7,
+            # "text": "NOT (уборщица OR менеджер OR разнорабочий OR фасовщик OR инженер OR монтажник OR тендер OR электромонтажник OR поддержка OR маркетолог OR представитель OR Бухгалтер OR юрист OR дизайнер OR продаж OR ремонт OR экономист OR повар OR охране труда OR маляр OR оптик OR сантехник OR оператор OR слесарь OR писатель OR контроллер OR технолог OR техник OR склад OR кладовщик OR комплектовщик OR сборщик OR водитель OR делопроизводитель OR контролёр OR картограф OR модератор OR печати OR кухонный OR Marketing OR рисков OR методолог OR растениями OR клиентами OR документационного OR Казначей OR HR)",
+
+            # "professional_roles": "156,160,25,165,96,113,148,114,116,121,124,125",  # IT-роли
             "employer_id": i,
             "per_page": 100,
             "page": 0,
@@ -35,6 +38,7 @@ def get_main_data():
     params = get_params()
     vacancies = []
     for par in params:
+        print(f"Запрос данных работодателя {par.get('employer_id')}")
         response = requests.get("https://api.hh.ru/vacancies", params=par)
 
         while response.status_code == 403:
