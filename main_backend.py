@@ -81,6 +81,29 @@ async def get_companies(db: VacancyManager = Depends(get_vacancy_manager)):
 async def test():
     return {"message": "Hello World"}
 
+async def create_password(user_mail, db: UserManager = Depends(get_user_manager)):
+    code = secrets.randbelow(900000)+100000
+    await run_in_threadpool(db.set_confirmed_code, user_mail, code)
+
+
+async def send_verification(user_mail, db: UserManager = Depends(get_user_manager)):
+    code = await run_in_threadpool(db.get_confirmation_code, user_mail)
+    if not code:
+        raise HTTPException(status_code=400, detail="Код подтверждения не найден")
+    message = EmailMessage()
+    message["From"] = SMTP_USER
+    message["To"] = user_mail
+    message["Subject"] = "Password"
+    message.set_content(f"Ваш код подтверждения: {code}")
+
+    await aiosmtplib.send(
+        message,
+        hostname=SMTP_HOST,
+        port=SMTP_PORT,
+        username=SMTP_USER,
+        password=SMTP_PASSWORD,
+        use_tls=True,
+    )
 
 #уже поинтереснее
 @app.post("/users/register")
@@ -140,6 +163,7 @@ async def upload_cv(
             detail="An internal server error occurred while processing the file."
         )
 
+
 #тыбзим файл
 @app.get("/users/cv/{user_email}")
 async def download_cv(
@@ -196,3 +220,17 @@ async def login_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Неверный email или пароль"
         )
+
+@app.post("/login/confirm")
+async def check_password(data: ConfirmRequest, db: UserManager = Depends(get_user_manager)):
+    code = await run_in_threadpool(db.get_confirmation_code, data.email)
+    entry = await run_in_threadpool(db.get_sent_time, data.email)
+    if not entry:
+        raise HTTPException(status_code=404, detail="Пароль не пришел или время истекло")
+    if time.time() - entry > 300:
+        raise HTTPException(status_code=400, detail="Время истекло")
+    if int(data.code) != code:
+        raise HTTPException(status_code=400, detail="Неверный код")
+    await run_in_threadpool(db.confirm_user_and_clear_code, data.email)
+    return {"message": "Вход подтвержден", "status": True}
+
