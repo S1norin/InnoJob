@@ -45,8 +45,8 @@ def get_vacancy_manager(request: Request) -> VacancyManager:
     return request.app.state.vacancy_manager
 
 @app.get("/")
-async def read_main():
-    return FileResponse('web/MainPage.html')
+async def read_welcome():
+    return FileResponse('web/WelcomePage.html')
 
 @app.get("/vacancies")
 async def get_all_vacancies(db: VacancyManager = Depends(get_vacancy_manager)):
@@ -222,7 +222,13 @@ async def login_user(
         )
 
 
+@app.get("/log_in_page")
+async def read_login():
+    return FileResponse('web/LogInPage.html')
 
+@app.get("/sign_up_page")
+async def read_signin():
+    return FileResponse('web/SignUpPage.html')
 
 async def create_password(user_mail, db: UserManager = Depends(get_user_manager)):
     code = secrets.randbelow(900000)+100000
