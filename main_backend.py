@@ -221,6 +221,33 @@ async def login_user(
             detail="Неверный email или пароль"
         )
 
+
+
+
+async def create_password(user_mail, db: UserManager = Depends(get_user_manager)):
+    code = secrets.randbelow(900000)+100000
+    await run_in_threadpool(db.set_confirmed_code, user_mail, code)
+
+
+async def send_verification(user_mail, db: UserManager = Depends(get_user_manager)):
+    code = await run_in_threadpool(db.get_confirmation_code, user_mail)
+    if not code:
+        raise HTTPException(status_code=400, detail="Код подтверждения не найден")
+    message = EmailMessage()
+    message["From"] = SMTP_USER
+    message["To"] = user_mail
+    message["Subject"] = "Password"
+    message.set_content(f"Ваш код подтверждения: {code}")
+
+    await aiosmtplib.send(
+        message,
+        hostname=SMTP_HOST,
+        port=SMTP_PORT,
+        username=SMTP_USER,
+        password=SMTP_PASSWORD,
+        use_tls=True,
+    )
+
 @app.post("/login/confirm")
 async def check_password(data: ConfirmRequest, db: UserManager = Depends(get_user_manager)):
     code = await run_in_threadpool(db.get_confirmation_code, data.email)
@@ -233,4 +260,38 @@ async def check_password(data: ConfirmRequest, db: UserManager = Depends(get_use
         raise HTTPException(status_code=400, detail="Неверный код")
     await run_in_threadpool(db.confirm_user_and_clear_code, data.email)
     return {"message": "Вход подтвержден", "status": True}
+
+
+@app.post("/write-mail")
+async def write_mail(data:UserMail, db: UserManager = Depends(get_user_manager)):
+    result = await run_in_threadpool(db.user_in_base, data.mail)
+    if result:
+        await create_password(data.mail, db)
+        await send_verification(data.mail, db)
+        return {"access":True, "message":"User in base"}
+    else:
+        return {"access": False, "message": "User not in base"}
+
+
+
+@app.post("/change_password")
+async def change_password(data: NewPassword, db: UserManager = Depends(get_user_manager)):
+    await run_in_threadpool(db.change_password, data.mail, data.new_password)
+    return {"status":True, "message":"Password change"}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
