@@ -64,7 +64,7 @@ async def read_job_listing():
     # if authorized():
     # return FileResponse('web/WelcomePage.html')
 
-    return FileResponse('web/WelcomePage.html')
+    return FileResponse('web/MainPage.html')
 
 # Should be available for all users regardless of auth
 @app.get("/welcome")
@@ -137,7 +137,8 @@ async def register_user(user_data: UserCreate, db: UserManager = Depends(get_use
             name=user_data.name, email=user_data.email, password=user_data.password
         )
         await create_password(user_data.email, db)
-        await send_verification(user_data.email, db)
+        # verification disabled due to email troubles
+        # await send_verification(user_data.email, db)
         return {"message": "User registered", "user_id": user_id}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

@@ -47,8 +47,9 @@ document.querySelector('.login-form').addEventListener('submit', async (e) => {
 
         if (response.ok) {
             localStorage.setItem("emailToConfirm", userData.email);
-            alert("Регистрация прошла успешно. Подтвердите почту.");
-            window.location.href = "ConfirmPage.html";
+            // alert("Регистрация прошла успешно. Подтвердите почту.");
+            alert("Регистрация прошла успешно. ");
+            window.location.href = "/log_in_page";
         } else {
             document.getElementById('email-error').textContent = result.detail || "Ошибка регистрации";
         }
