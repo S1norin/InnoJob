@@ -3,7 +3,6 @@ from fastapi.testclient import TestClient
 from unittest.mock import MagicMock, patch, AsyncMock
 from io import BytesIO
 from main_backend import app
-from Extra_classes import UserCreate, UserLoginRequest, ConfirmRequest
 import time
 
 @pytest.fixture
@@ -37,9 +36,7 @@ def mock_smtp():
 
 @pytest.fixture
 def client(mock_vacancy_manager, mock_user_manager, mock_smtp):
-    # Create test client with app state initialized
     with TestClient(app) as test_client:
-        # Initialize the app state with our mock managers
         test_client.app.state.vacancy_manager = mock_vacancy_manager
         test_client.app.state.user_manager = mock_user_manager
         yield test_client
