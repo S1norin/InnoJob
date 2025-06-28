@@ -135,7 +135,3 @@ def get_city_data(a_id):
         'name': response.get('name')
     }
     return data
-
-
-if __name__ == '__main__':
-    print(get_params())
