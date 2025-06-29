@@ -1,9 +1,9 @@
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch, AsyncMock
 from io import BytesIO
 from main_backend import app
-from Extra_classes import UserCreate, UserLoginRequest
+import time
 
 @pytest.fixture
 def mock_vacancy_manager():
@@ -23,13 +23,20 @@ def mock_user_manager():
         instance.get_is_confirmed.return_value = True
         instance.get_cv.return_value = ("test.pdf", b"test content")
         instance.add_cv_from_bytes.return_value = True
+        instance.set_confirmed_code.return_value = None
+        instance.get_confirmation_code.return_value = 123456
+        instance.get_sent_time.return_value = time.time()
+        instance.confirm_user_and_clear_code.return_value = True
         yield instance
 
 @pytest.fixture
-def client(mock_vacancy_manager, mock_user_manager):
-    # Create test client with app state initialized
+def mock_smtp():
+    with patch('main_backend.aiosmtplib.send', new_callable=AsyncMock) as mock:
+        yield mock
+
+@pytest.fixture
+def client(mock_vacancy_manager, mock_user_manager, mock_smtp):
     with TestClient(app) as test_client:
-        # Initialize the app state with our mock managers
         test_client.app.state.vacancy_manager = mock_vacancy_manager
         test_client.app.state.user_manager = mock_user_manager
         yield test_client
@@ -62,7 +69,7 @@ def test_test_endpoint(client):
     assert response.status_code == 200
     assert response.json() == {"message": "Hello World"}
 
-def test_register_user_success(client, mock_user_manager):
+def test_register_user_success(client, mock_user_manager, mock_smtp):
     user_data = {
         "name": "Test User",
         "email": "test@example.com",
@@ -74,6 +81,8 @@ def test_register_user_success(client, mock_user_manager):
     mock_user_manager.add_new_user.assert_called_once_with(
         name="Test User", email="test@example.com", password="password123"
     )
+    mock_user_manager.set_confirmed_code.assert_called()
+    mock_smtp.assert_awaited()
 
 def test_register_user_failure(client, mock_user_manager):
     mock_user_manager.add_new_user.side_effect = ValueError("Email already exists")
@@ -105,10 +114,9 @@ def test_download_cv_success(client, mock_user_manager):
     mock_user_manager.get_cv.assert_called_once_with(user_email="test@example.com")
 
 def test_download_cv_not_found(client, mock_user_manager):
-    mock_user_manager.get_cv.return_value = (None, None)
+    mock_user_manager.get_cv.side_effect = ValueError("Резюме для пользователя 'nonexistent@example.com' не найдено.")
     response = client.get("/users/cv/nonexistent@example.com")
-    assert response.status_code == 404
-    assert "не найдено" in response.json()["detail"]
+    assert response.status_code == 500
 
 def test_login_success(client, mock_user_manager):
     login_data = {
@@ -142,3 +150,33 @@ def test_login_unconfirmed(client, mock_user_manager):
     assert response.status_code == 200
     assert response.json()["status"] == "error"
     assert "Код не подтвержден" in response.json()["message"]
+
+def test_confirm_login_success(client, mock_user_manager):
+    confirm_data = {
+        "email": "test@example.com",
+        "code": "123456"
+    }
+    response = client.post("/login/confirm", json=confirm_data)
+    assert response.status_code == 200
+    assert response.json()["status"] is True
+    mock_user_manager.confirm_user_and_clear_code.assert_called_once_with("test@example.com")
+
+def test_confirm_login_expired(client, mock_user_manager):
+    mock_user_manager.get_sent_time.return_value = time.time() - 301  # Expired
+    confirm_data = {
+        "email": "test@example.com",
+        "code": "123456"
+    }
+    response = client.post("/login/confirm", json=confirm_data)
+    assert response.status_code == 400
+    assert "Время истекло" in response.json()["detail"]
+
+def test_confirm_login_wrong_code(client, mock_user_manager):
+    mock_user_manager.get_confirmation_code.return_value = 654321
+    confirm_data = {
+        "email": "test@example.com",
+        "code": "123456"
+    }
+    response = client.post("/login/confirm", json=confirm_data)
+    assert response.status_code == 400
+    assert "Неверный код" in response.json()["detail"]

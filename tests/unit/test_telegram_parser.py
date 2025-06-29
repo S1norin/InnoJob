@@ -23,7 +23,6 @@ def test_parse_channel(mocker):
     mock_client = mocker.patch('telegram_parser.TelegramClient')
     mock_instance = mock_client.return_value.__enter__.return_value
 
-    # Setup mock return values
     mock_message = mocker.Mock()
     mock_message.id = 0
     mock_message.text = text
