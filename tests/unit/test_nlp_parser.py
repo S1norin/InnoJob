@@ -1,5 +1,5 @@
 from nlp_parser import to_nominative_singular, is_vacancy, extract_location, extract_company, extract_salary, extract_expirience, extract_job_title ,extract_work_form
-from tests.test_telegram_parser import text
+from tests.unit.test_telegram_parser import text
 import spacy
 
 nlp_ru = spacy.load("ru_core_news_sm")

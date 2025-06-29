@@ -215,7 +215,7 @@ def test_error_cases(test_client):
 
     response = test_client.post("/users/register", json=TEST_USER, timeout=5)
     assert response.status_code == 400
-    assert "already exists" in response.json().get("detail", "")
+    assert "уже существует" in response.json().get("detail", "")
 
 
     response = test_client.post("/login", json={
