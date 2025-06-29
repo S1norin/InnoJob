@@ -44,6 +44,8 @@ unit-test:
   before_script:
     - cp config_template.py config.py
     - pip install -r requirements.txt
+    - python -m spacy download en_core_web_sm
+    - python -m spacy download ru_core_news_sm
   script:
     - pytest tests/unit/ -v --junitxml=unit-test-results.xml
   artifacts:
@@ -64,6 +66,8 @@ integration-test:
   before_script:
     - cp config_template.py config.py
     - pip install -r requirements.txt
+    - python -m spacy download en_core_web_sm
+    - python -m spacy download ru_core_news_sm
   script:
     - pytest tests/integration/ -v --junitxml=integration-test-results.xml
   artifacts:
