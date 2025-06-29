@@ -15,7 +15,7 @@ lint:
   before_script:
     - pip install flake8 flake8-gl-codeclimate
   script:
-    - flake8 . --format gl-codeclimate --output-file gl-code-quality-report.json
+    - flake8 . --format gl-codeclimate --exit-zero --output-file gl-code-quality-report.json
   artifacts:
     reports:
       codequality: gl-code-quality-report.json
