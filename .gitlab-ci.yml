@@ -1,9 +1,27 @@
 variables:
   DOCKER_TLS_CERTDIR: "/certs"
   APP: "scareerz"
+  PYTHON_VERSION: "3.13"
 
 stages:
+  - lint
   - build
+  - unit-test
+  - integration-test
+
+lint:
+  stage: lint
+  image: python:${PYTHON_VERSION}
+  before_script:
+    - pip install flake8
+  script:
+    - flake8 . --statistics --output-file=flake8_report.txt
+  artifacts:
+    reports:
+      codequality: flake8_report.txt
+    paths:
+      - flake8_report.txt
+    expire_in: 1 week
 
 build:
   stage: build
@@ -19,3 +37,35 @@ build:
     - docker tag scareerz-server $HARBOR_HOST/$HARBOR_PROJECT/$APP:latest
     - docker push $HARBOR_HOST/$HARBOR_PROJECT/$APP:$CI_JOB_ID
     - docker push $HARBOR_HOST/$HARBOR_PROJECT/$APP:latest
+
+unit-test:
+  stage: unit-test
+  image: python:${PYTHON_VERSION}
+  before_script:
+    - pip install -r requirements.txt
+  script:
+    - pytest tests/unit/ -v --junitxml=unit-test-results.xml
+  artifacts:
+    reports:
+      junit: unit-test-results.xml
+    expire_in: 2 week
+
+integration-test:
+  stage: integration-test
+  image: python:${PYTHON_VERSION}
+  services:
+    - postgres:latest
+  variables:
+    POSTGRES_DB: test_db
+    POSTGRES_USER: test_user
+    POSTGRES_PASSWORD: test_password
+    DATABASE_URL: "postgresql://test_user:test_password@postgres:5432/test_db"
+  before_script:
+    - pip install -r requirements.txt
+  script:
+    - pytest tests/integration/ -v --junitxml=integration-test-results.xml
+  artifacts:
+    reports:
+      junit: integration-test-results.xml
+    expire_in: 2 week
+
