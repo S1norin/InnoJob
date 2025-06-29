@@ -13,9 +13,9 @@ lint:
   stage: lint
   image: python:${PYTHON_VERSION}
   before_script:
-    - pip install flake8 --exit-zero
+    - pip install flake8
   script:
-    - flake8 . --statistics --output-file=flake8_report.txt
+    - flake8 . --statistics  --exit-zero --output-file=flake8_report.txt
   artifacts:
     reports:
       codequality: flake8_report.txt
