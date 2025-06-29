@@ -48,6 +48,7 @@ def test_db():
 
     admin_conn = psycopg2.connect(
         host=TEST_DB_CONFIG["host"],
+        dbname=TEST_DB_CONFIG["dbname"],
         user=TEST_DB_CONFIG["user"],
         password=TEST_DB_CONFIG["password"],
         port=TEST_DB_CONFIG["port"]
