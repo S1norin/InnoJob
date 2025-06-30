@@ -1,23 +1,20 @@
 import psycopg2
 
-from parsers.parser import get_main_data, get_employer_data, get_city_data, employer_ids
+from parsers.parser import get_main_data, get_employer_data_hh, get_city_data
+from parsers.parser_configs import *
+# from config import *
 
 
 # Интерфейс для работы с вакансиями
 class VacancyManager:
     def __init__(self, host, dbname, user, password, port):
-        # Объявляю переменные, которые в последствии могут понадобиться для работы
-        self.host = host
-        self.dbname = dbname
-        self.user = user
-        self.password = password
-        self.port = port
         self.db_params = {'host': host, 'dbname': dbname, 'user': user, 'password': password, 'port': port}
 
         # Создание таблиц
         self._create_tables_if_not_exists()
-        self.update_employers(employer_ids)
-        self.update_vacancies_from_source()
+        self.update_sources()                # Обновляем источники ДО добавления данных
+        self.update_employers()              # Добавляем работодателей
+        self.update_vacancies_from_source()  # Добавляем вакансии
 
     # Создаёт подключение для дальнейшей работы
     def _get_connection(self):
@@ -25,12 +22,18 @@ class VacancyManager:
 
     # Удобная функция для создания таблиц (в случае отсутствия оных)
     def _create_tables_if_not_exists(self):
-        query = """
+        # Сначала создаём таблицу с источниками (если оных нет)
+        query = """ 
+            CREATE TABLE IF NOT EXISTS sources (
+            id INTEGER PRIMARY KEY,
+            name TEXT
+        );
         CREATE TABLE IF NOT EXISTS employers (
             id SERIAL PRIMARY KEY,
             employer_id INTEGER UNIQUE NOT NULL, 
             name TEXT NOT NULL,
-            logo TEXT
+            logo TEXT,
+            source INTEGER REFERENCES sources(id) ON DELETE CASCADE
         );
         CREATE TABLE IF NOT EXISTS cities (
             id SERIAL PRIMARY KEY,
@@ -60,18 +63,40 @@ class VacancyManager:
 
         with self._get_connection() as conn:
             with conn.cursor() as cur:
-                cur.execute(query)
-                conn.commit()
+                try:
+                    cur.execute(query)
+                except Exception as e:
+                    print(e)
+
+    # Обновляет список источников
+    def update_sources(self):
+        with self._get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute('SELECT id, name FROM sources')
+                existing_sources = {name for _, name in cur.fetchall()}
+
+                to_insert = []
+                for source_id, source_name in sources.items():
+                    if source_name not in existing_sources:
+                        to_insert.append((source_id, source_name))
+
+                if to_insert:
+                    cur.executemany('INSERT INTO sources (id, name) VALUES (%s, %s)', to_insert)
+                    conn.commit()
+
+
+
 
     # Функция для получения данных о всех вакансиях
     def get_vac_list(self):
         query = """
             SELECT v.id, v.name, e.name, c.name, v.salary_from, v.salary_to, 
                    v.salary_currency, v.salary_mode, v.experience, v.format, 
-                   v.description, v.link, e.logo, r.requirement
+                   v.description, v.link, e.logo, s.name, r.requirement
             FROM vacancies v
             JOIN employers e ON v.employer = e.id
             JOIN cities c ON v.city = c.id
+            JOIN sources s ON e.source = s.id
             LEFT JOIN requirements r ON v.id = r.vacancy_id
             ORDER BY v.id;
         """
@@ -80,7 +105,7 @@ class VacancyManager:
             with conn.cursor() as cur:
                 cur.execute(query)
                 for row in cur.fetchall():
-                    vac_id, name, employer, city, s_from, s_to, s_cur, s_mod, exp, fmt, desc, link, pic, req = row
+                    vac_id, name, employer, city, s_from, s_to, s_cur, s_mod, exp, fmt, desc, link, pic, source, req = row
                     vac = {
                         "id": vac_id,
                         "name": name,
@@ -95,6 +120,7 @@ class VacancyManager:
                         "description": desc,
                         "link": link,
                         "picture": pic,
+                        "source": source,
                         "requirements": req if req else []
                     }
                     try:
@@ -107,16 +133,27 @@ class VacancyManager:
         with self._get_connection() as conn:
             with conn.cursor() as cur:
                 cur.execute(
-                    "DROP TABLE IF EXISTS requirements, vacancies, CASCADE;")
+                    "DROP TABLE IF EXISTS requirements, vacancies, employers CASCADE;")
                 conn.commit()
-        self._create_tables_if_not_exists()
 
     def update_vacancies_from_source(self):
-        self.update_tables()
         with self._get_connection() as conn:
             with conn.cursor() as cur:
                 vacancies_from_parser = get_main_data()  # Получаем данные при помощи парсера
                 for vacancy in vacancies_from_parser:
+                    name = vacancy.get("name")
+                    city = self.find_city(vacancy.get('city'))
+                    a=vacancy.get('employer_id')
+                    b = vacancy.get('source')
+                    emp = self.find_employer(a, b)
+                    s_from = vacancy.get('salary_from')
+                    s_to = vacancy.get('salary_to')
+                    currency = vacancy.get('salary_currency')
+                    mode = vacancy.get('salary_mode')
+                    exp = vacancy.get('experience')
+                    form = vacancy.get('form')
+                    desc = vacancy.get('description')
+                    link = vacancy.get('link')
                     try:
                         cur.execute(
                             "INSERT INTO vacancies ("
@@ -132,17 +169,7 @@ class VacancyManager:
                             "description, "
                             "link"
                             ") VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id;",
-                            (vacancy.get("name"),
-                             self.find_city(vacancy.get('city')),
-                             self.find_employer(vacancy.get('employer_id')),
-                             vacancy.get('salary_from'),
-                             vacancy.get('salary_to'),
-                             vacancy.get('salary_currency'),
-                             vacancy.get('salary_mode'),
-                             vacancy.get('experience'),
-                             vacancy.get('form'),
-                             vacancy.get('description'),
-                             vacancy.get('link'))
+                            (name, city, emp, s_from, s_to, currency, mode, exp, form, desc, link)
                         )
                         vacancy_id = cur.fetchone()[0]  # Получаем айди
                         for skill in vacancy.get('requirements', []):  # Добавляем требования, если имеются
@@ -152,30 +179,29 @@ class VacancyManager:
                             )
                     except Exception as e:
                         print(f"Ошибка при обновлении вакансий {e}")
-                        continue
-
-        print("Данные о вакансиях успешно обновлены.")
+        print("Данные о вакансиях обновлены.")
 
     def add_employer(self, data: dict):
-        request = """INSERT INTO employers (employer_id, name, logo) VALUES (%s, %s, %s) RETURNING id"""
+        request = """
+            INSERT INTO employers (employer_id, name, logo, source) 
+            VALUES (%s, %s, %s, %s)
+            ON CONFLICT (employer_id) DO NOTHING
+        """
         with self._get_connection() as conn:
             with conn.cursor() as cur:
-                cur.execute(request, (data.get('emp_id'), data.get('name'), data.get('logo')))
+                cur.execute(request, (data.get('emp_id'), data.get('name'), data.get('logo'), data.get('source')))
                 conn.commit()
 
-
-    def update_employers(self, employer_list):
-        self.update_tables()
-        for emp in employer_list:
+    def update_employers(self):
+        for emp in employer_ids_hh:
             try:
-                data = get_employer_data(emp)
+                data = get_employer_data_hh(emp)
                 self.add_employer(data)
             except Exception:
                 pass
-            #     print(f"Работодатель {emp} уже присутствует в БД")
 
-    def find_employer(self, e_id):
-        request = f"""SELECT id FROM employers WHERE employer_id={e_id}"""
+    def find_employer(self, e_id, source):
+        request = f"""SELECT id FROM employers WHERE employer_id={e_id} AND source={source}"""
         with self._get_connection() as conn:
             with conn.cursor() as cur:
                 try:
@@ -193,13 +219,14 @@ class VacancyManager:
                 try:
                     cur.execute(request)
                     found_id = cur.fetchone()
-                    if found_id:
-                        return found_id[0]
-                    else:
+                    if not found_id:
                         request = 'INSERT INTO cities (city_id, name) VALUES (%s, %s) RETURNING id'
                         data = get_city_data(c_id)
                         cur.execute(request, (data.get('area_id'), data.get('name')))
-                        return cur.fetchone()[0]
+                        found_id = cur.fetchone()
+                        conn.commit()
+                    return found_id[0]
+
                 except Exception as e:
                     print(f"Ошибка при поиске города: {str(e)}")
 
@@ -218,9 +245,14 @@ class VacancyManager:
                 cur.execute(requests)
                 data = [i[0] for i in cur.fetchall()]
                 return data
+
+    def get_sources(self):
+        return ['hh.ru']
 #
 #
 # db = VacancyManager(db_host, db_name, db_user, db_password, db_port)
-# # print(db.get_vac_list())
+# d = db.get_vac_list()
+# print(*[i.get("name") for i in d], sep="\n")
+# print(len(d))
 # print(len(db.get_employers()))
 # print(len(db.get_cities()))
