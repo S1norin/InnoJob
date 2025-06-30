@@ -344,7 +344,7 @@ async def download_photo(
 
         return StreamingResponse(#отправляем ответ
             io.BytesIO(photo_content),  # Содержимое файла
-            media_type="application/png",  # Сообщаем, что это PNG
+            media_type="image/png",  # Сообщаем, что это PNG
             headers=headers  # Добавляем заголовок для скачивания
         )
 
