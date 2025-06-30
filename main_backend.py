@@ -280,6 +280,80 @@ async def change_password(data: NewPassword, db: UserManager = Depends(get_user_
     return {"status":True, "message":"Password change"}
 
 
+@app.post("/upload-photo")
+async def upload_photo(
+    db: UserManager = Depends(get_user_manager),
+    email: str = Form(...),
+    photo: UploadFile = File(...) #получаем фотографию рожи пользователя
+):
+    photo_content_bytes = await photo.read() #захерачиваем его в бинарный вид чтобы не сохранять
+
+    if not photo_content_bytes: #если он пуст то нахер его
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Uploaded file is empty."
+        )
+
+    try:
+        #если не пуст асинхронно вызываем сохранение этого говна
+        await run_in_threadpool(
+            db.add_photo_from_bytes,
+            user_email=email,
+            photo_content=photo_content_bytes,
+            pdf_name=photo.filename
+        )
+        #если все ок то пишем сак эсс и чилим
+        return {
+            "status": "success",
+            "message": "Photo file uploaded successfully",
+            "filename": photo.filename
+        }
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e)
+        )
+    except Exception as e:
+        print(f"Internal server error during CV upload: {e}") # Логируем для отладки
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An internal server error occurred while processing the file."
+        )
+
+@app.get("/users/photo/{user_email}")
+async def download_photo(
+    user_email: str,
+    db: UserManager = Depends(get_user_manager)
+):
+
+    try:
+        file_name, photo_content = await run_in_threadpool(
+            db.get_photo,#вызываем функцию для получения фийла в виде байнари говна
+            user_email=user_email
+        )
+
+        if not photo_content:# ноу контент((
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Фото для пользователя '{user_email}' не найдено."
+            )
+
+        headers = {
+            'Content-Disposition': f'attachment; filename="{file_name}"'#по факту самое сложное для ундерстендинга но на деле не сложно просто создаем описание того что браущеру надо сделать если прям интересно то попроси расшифровать иишку данное говно
+        }
+
+        return StreamingResponse(#отправляем ответ
+            io.BytesIO(photo_content),  # Содержимое файла
+            media_type="application/png",  # Сообщаем, что это PNG
+            headers=headers  # Добавляем заголовок для скачивания
+        )
+
+    except Exception as e:
+        print(f"Ошибка при попытке скачать фото: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Внутренняя ошибка сервера при получении файла."
+        )
 
 
 

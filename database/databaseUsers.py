@@ -29,7 +29,9 @@ class UserManager:#Этот черт будет использоваться д�
             confirmation_code_created_at INTEGER,  
             is_confirmed BOOLEAN DEFAULT FALSE,
             cv_name VARCHAR(255),
-            cv_pdf BYTEA
+            cv_pdf BYTEA,
+            photo_name VARCHAR(255),
+            photo_file BYTEA
         );"""
         with self._get_connection() as conn:#ВНИМАНИЕ ДЛЯ СОХРАНЕНИЕ АДЕКВАТНОСТИ ВАШЕГО КОГДА МЫ ТЕПЕРЬ ИСПОЛЬЗУЕМ ДАННУЮ КОНСТРКЦИЮ
             with conn.cursor() as cur:#ИНАЧЕ ЭТА ХЕРНЯ БУДЕТ УЯЗВИМОЙ Т К ЕЕ НАДО ЗАКРЫВАТЬ (ТО ЧТО ВСЕ МЫ УДАЧНО ПРОДОЛБИЛИ)
@@ -101,6 +103,36 @@ class UserManager:#Этот черт будет использоваться д�
             raise
 
 
+    def add_photo_from_bytes(self, user_email, photo_content, photo_name):
+        query = "UPDATE users SET photo_name = %s, photo_file = %s WHERE email = %s RETURNING id;"#умные запросы в базу данных
+        try:
+            with self._get_connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute(query, (photo_name, Binary(photo_content), user_email))
+                    result = cur.fetchone()
+                    if not result:
+                        raise ValueError(f"Пользователь с email '{user_email}' не найден.")
+                    return result[0]#возвращаем айди юзера (вдруг понадобиться)
+        except psycopg2.Error as e:
+            print(f"Ошибка БД при добавлении фото: {e}")
+            raise
+
+    #прсто получаем файл нейм и его бинарное представление (все интересное смотри в гребанном мейне)
+    def get_photo(self, user_email):
+        query = "SELECT photo_name, photo_file FROM users WHERE email = %s;"
+        try:
+            with self._get_connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute(query, (user_email,))
+                    result = cur.fetchone()
+                    if not result or not result[0]:
+                        return None, None
+                    return result  # Возвращает кортеж (file_name, file_data)
+        except psycopg2.Error as e:
+            print(f"Ошибка БД при получении ajnj: {e}")
+            raise
+
+
     def get_sent_time(self, email):
         query = "SELECT confirmation_code_created_at FROM users WHERE email = %s"
         with self._get_connection() as conn:
@@ -134,7 +166,7 @@ class UserManager:#Этот черт будет использоваться д�
                     return bool(result[0])
                 else:
                     return None
-    
+
     def set_confirmed_code(self, user_email, code):
         query = """
             UPDATE users 
