@@ -47,6 +47,9 @@ document.querySelector('.login-form').addEventListener('submit', async (e) => {
 
         if (response.ok) {
             localStorage.setItem("emailToConfirm", userData.email);
+            localStorage.setItem("userName", firstName);
+            localStorage.setItem("userSurname", lastName);
+            localStorage.setItem("userEmail", userData.email);
             alert("Регистрация прошла успешно. Подтвердите почту.");
             window.location.href = "ConfirmPage.html";
         } else {

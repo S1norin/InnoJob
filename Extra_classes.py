@@ -23,6 +23,7 @@ class NewPassword(BaseModel):
     new_password: str
 
 class UserInfo(BaseModel):
+    name: str
     educationLevel: str
     course: str
     description: str

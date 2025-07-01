@@ -229,7 +229,7 @@ class UserManager:#Этот черт будет использоваться д�
 
 
     def get_user_info(self, email):
-        query = "SELECT id, level_of_education, course, description FROM users WHERE email = %s;"
+        query = "SELECT id, name, level_of_education, course, description FROM users WHERE email = %s;"
         query2 = "SELECT skill FROM skills WHERE user_id = %s;"
         try:
             with self._get_connection() as conn:
@@ -239,18 +239,19 @@ class UserManager:#Этот черт будет использоваться д�
                     if not result:
                         raise ValueError(f"Пользователь с email '{email}' не найден.")
                     id = result[0]
+                    name = result[1]
                     cur.execute(query2, (id,))
-                    result2 = [skill[0] for skill in cur.fetchall()] # эти долбанафты вернули нам словарь кортежей а не словарь строк переделываем
-                    return { # возвращаем словарь чтоб потом в беке сделать распаковку товаров с алиэкспресс
-                        "educationLevel":  result[1],
-                        "course": result[2],
-                        "description": result[3],
+                    result2 = [skill[0] for skill in cur.fetchall()]
+                    return {
+                        "name": name,
+                        "educationLevel":  result[2],
+                        "course": result[3],
+                        "description": result[4],
                         "skills": result2
-                            }
-
+                    }
         except psycopg2.Error as e:
             print(f"Ошибка БД при добавлении информации о пользователе: {e}")
-            conn.rollback() # давай по новой миша все фигня
+            conn.rollback()
             raise
 
     def set_user_info(self, email, educationLevel, course, description, skills):

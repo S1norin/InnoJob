@@ -14,6 +14,7 @@ import aiosmtplib
 import secrets
 import time
 from urllib.parse import quote
+import psycopg2
 
 app = FastAPI()
 
@@ -184,8 +185,10 @@ async def download_cv(
                 detail=f"Резюме для пользователя '{user_email}' не найдено."
             )
 
+        if not file_name:
+            raise HTTPException(status_code=404, detail="File name is missing")
         headers = {
-            'Content-Disposition': f'attachment; filename="{quote(file_name)}"; filename*=UTF-8\'\'{quote(file_name)}'
+            'Content-Disposition': f'attachment; filename=\"{quote(file_name)}\"; filename*=UTF-8\'\'{quote(file_name)}'
         }
 
         return StreamingResponse(#отправляем ответ
@@ -221,33 +224,6 @@ async def login_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Неверный email или пароль"
         )
-
-
-
-
-async def create_password(user_mail, db: UserManager = Depends(get_user_manager)):
-    code = secrets.randbelow(900000)+100000
-    await run_in_threadpool(db.set_confirmed_code, user_mail, code)
-
-
-async def send_verification(user_mail, db: UserManager = Depends(get_user_manager)):
-    code = await run_in_threadpool(db.get_confirmation_code, user_mail)
-    if not code:
-        raise HTTPException(status_code=400, detail="Код подтверждения не найден")
-    message = EmailMessage()
-    message["From"] = SMTP_USER
-    message["To"] = user_mail
-    message["Subject"] = "Password"
-    message.set_content(f"Ваш код подтверждения: {code}")
-
-    await aiosmtplib.send(
-        message,
-        hostname=SMTP_HOST,
-        port=SMTP_PORT,
-        username=SMTP_USER,
-        password=SMTP_PASSWORD,
-        use_tls=True,
-    )
 
 @app.post("/login/confirm")
 async def check_password(data: ConfirmRequest, db: UserManager = Depends(get_user_manager)):
@@ -289,10 +265,13 @@ async def upload_photo(
 ):
     photo_content_bytes = await photo.read() #захерачиваем его в бинарный вид чтобы не сохранять
 
-    if photo.filename[-3:] != 'png' and photo.filename[-3:] != 'jpg':
+    if not photo.filename or len(photo.filename) < 4:
+        raise HTTPException(status_code=400, detail="Invalid photo filename")
+    ext = photo.filename.lower().split('.')[-1]
+    if ext not in ("png", "jpg", "jpeg"):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Photo can be only jpg or png, not {photo.filename[-3:]}"
+            detail=f"Photo can be only jpg, jpeg or png, not {ext}"
         )
 
     if not photo_content_bytes: #если он пуст то нахер его
@@ -345,8 +324,10 @@ async def download_photo(
                 detail=f"Фото для пользователя '{user_email}' не найдено."
             )
 
+        if not file_name:
+            raise HTTPException(status_code=404, detail="File name is missing")
         headers = {
-            'Content-Disposition': f'attachment; filename="{quote(file_name)}"; filename*=UTF-8\'\'{quote(file_name)}'
+            'Content-Disposition': f'attachment; filename=\"{quote(file_name)}\"; filename*=UTF-8\'\'{quote(file_name)}'
         }
 
         return StreamingResponse(#отправляем ответ
