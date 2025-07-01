@@ -1,3 +1,5 @@
+from math import trunc
+
 import requests
 from time import sleep
 
@@ -23,6 +25,7 @@ def get_data_hh():
     print("Запрос вакансий с HH.ru...")
     params = get_params_hh()
     vacancies = []
+
     for par in params:
         print(f"Запрос данных работодателей {par.get('employer_id')}")
         response = requests.get("https://api.hh.ru/vacancies", params=par)
@@ -54,7 +57,9 @@ def get_data_hh():
 
             experience = vacancy_hh.get('experience', {}).get("name", 'no data')
 
-            form = "no data"
+            form = [i['name'] for i in vacancy_hh.get('work_format')]
+            if not form:
+                form = ['Нет данных']
 
             url_alternate = vacancy_hh.get("alternate_url")  # Ссылка на вакансию на сайте
             url_api_details = vacancy_hh.get("url")  # URL для API деталей вакансии
@@ -93,12 +98,12 @@ def get_data_hh():
                 "salary_currency": salary_currency,
                 "salary_mode": salary_mode,
                 "experience": experience,
-                "form": form,
+                "format": form,
                 "source": "1",
                 "description": description_full,
                 "link": url_alternate,
                 "picture": picture if picture is not None else "#",
-                "requirements_list": requirements_list
+                "requirements": requirements_list
             })
         sleep(0.2)
     return vacancies
