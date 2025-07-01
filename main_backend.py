@@ -45,8 +45,31 @@ def get_vacancy_manager(request: Request) -> VacancyManager:
     return request.app.state.vacancy_manager
 
 @app.get("/")
-async def read_main():
+async def read_index():
+    # Still in placeholder condition, as index page should automatically
+    # redirect user to /job_listing if they're authorized
+
+    # if authorized():
+    #   read_job_listing()
+    # else:
+    #  read_welcome() 
+
+    return FileResponse('web/WelcomePage.html')
+
+@app.get("/job_listing")
+async def read_job_listing():
+    # Placeholder, as there should be no access to this page
+    # if user is unauthorized
+
+    # if authorized():
+    # return FileResponse('web/WelcomePage.html')
+
     return FileResponse('web/MainPage.html')
+
+# Should be available for all users regardless of auth
+@app.get("/welcome")
+async def read_welcome():
+    return FileResponse('web/WelcomePage.html')
 
 @app.get("/vacancies")
 async def get_all_vacancies(db: VacancyManager = Depends(get_vacancy_manager)):
@@ -114,7 +137,8 @@ async def register_user(user_data: UserCreate, db: UserManager = Depends(get_use
             name=user_data.name, email=user_data.email, password=user_data.password
         )
         await create_password(user_data.email, db)
-        await send_verification(user_data.email, db)
+        # verification disabled due to email troubles
+        # await send_verification(user_data.email, db)
         return {"message": "User registered", "user_id": user_id}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -222,7 +246,29 @@ async def login_user(
         )
 
 
+# Named function this strange to avoid name collision with /login
+@app.get("/log_in_page")
+async def read_login():
+    # Placeholder, as this page shouldn't be available if user is already authorized
+    
+    # if authorized():
+    #     return FileResponse('web/LogInPage.html')
+    # else:
+    #     pass
 
+    return FileResponse('web/LogInPage.html')
+
+# Named function this strange to be similiar to /log_in_page
+@app.get("/sign_up_page")
+async def read_signup():
+    # Placeholder, as this page shouldn't be available if user is already authorized
+    
+    # if authorized():
+    #     return FileResponse('web/LogInPage.html')
+    # else:
+    #     pass
+
+    return FileResponse('web/SignUpPage.html')
 
 async def create_password(user_mail, db: UserManager = Depends(get_user_manager)):
     code = secrets.randbelow(900000)+100000
