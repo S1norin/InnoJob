@@ -365,9 +365,9 @@ async def download_photo(
 
 @app.post("/write_user_info")
 async def write_user_info(user_email: str, data:UserInfo, db: UserManager = Depends(get_user_manager)):
-    result = await run_in_threadpool(db.user_in_base, user_email)
+    result = await run_in_threadpool(db.user_in_base, user_email) # проверяем что долбанафт есть в базе данных
     if result:
-        await run_in_threadpool(db.set_user_info, user_email, data.educationLevel, data.course, data.description, data.skills)
+        await run_in_threadpool(db.set_user_info, user_email, data.educationLevel, data.course, data.description, data.skills) # запихуиваем всю инфу в таблицу
         return {"access":True, "message":"User in base"}
     else:
         return {"access": False, "message": "User not in base"}
@@ -377,11 +377,11 @@ async def write_user_info(user_email: str, data:UserInfo, db: UserManager = Depe
 @app.get("/user_info")
 async def get_user_info(user_email: str, db: UserManager = Depends(get_user_manager)):
     try:
-        user_info = await run_in_threadpool(db.get_user_info, user_email)#по факту бахаем норм вызов получения джосона и чилим
-        return UserInfo(**user_info)
+        user_info = await run_in_threadpool(db.get_user_info, user_email)# получаем говно в виде словаря
+        return UserInfo(**user_info) # Распихать полученное говно по параметрам модели UserInfo
     except Exception as e:
         print(f"Server error getting user info: {e}")
-        raise HTTPException(status_code=500, detail="Could not fetch vacancies.")
+        raise HTTPException(status_code=500, detail="Could not fetch user info.")
 
 
 

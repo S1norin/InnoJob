@@ -227,16 +227,6 @@ class UserManager:#Этот черт будет использоваться д�
                 else:
                     return False
 
-    def get_user_id(self, email):
-        query = "SELECT id FROM users WHERE email = %s"
-        with self._get_connection() as conn:
-            with conn.cursor() as cur:
-                cur.execute(query, (email,))
-                result = cur.fetchone()
-                if result:
-                    return result[0]
-                else:
-                    return None
 
     def get_user_info(self, email):
         query = "SELECT id, level_of_education, course, description FROM users WHERE email = %s;"
@@ -250,8 +240,8 @@ class UserManager:#Этот черт будет использоваться д�
                         raise ValueError(f"Пользователь с email '{email}' не найден.")
                     id = result[0]
                     cur.execute(query2, (id,))
-                    result2 = [skill[0] for skill in cur.fetchall()]
-                    return {
+                    result2 = [skill[0] for skill in cur.fetchall()] # эти долбанафты вернули нам словарь кортежей а не словарь строк переделываем
+                    return { # возвращаем словарь чтоб потом в беке сделать распаковку товаров с алиэкспресс
                         "educationLevel":  result[1],
                         "course": result[2],
                         "description": result[3],
@@ -260,12 +250,12 @@ class UserManager:#Этот черт будет использоваться д�
 
         except psycopg2.Error as e:
             print(f"Ошибка БД при добавлении информации о пользователе: {e}")
-            conn.rollback()
+            conn.rollback() # давай по новой миша все фигня
             raise
 
     def set_user_info(self, email, educationLevel, course, description, skills):
         query = "UPDATE users SET level_of_education = %s, course = %s, description = %s WHERE email = %s RETURNING id;"  # умные запросы в базу данных
-        delete_query = "DELETE FROM skills WHERE user_id = %s;"
+        delete_query = "DELETE FROM skills WHERE user_id = %s;"  # сносим нафиг все старые скилы которые были у юзера
         query2 = "INSERT INTO skills (user_id, skill) VALUES (%s, %s);"
         try:
             with self._get_connection() as conn:
@@ -275,12 +265,12 @@ class UserManager:#Этот черт будет использоваться д�
                     if not result:
                         raise ValueError(f"Пользователь с email '{email}' не найден.")
                     id = result[0]
-                    cur.execute(delete_query, (id,))
+                    cur.execute(delete_query, (id,)) # сносим нафиг все старые скилы которые были у юзера
                     for skill in skills:
-                        if skill: cur.execute(query2, (id,skill))
+                        if skill: cur.execute(query2, (id,skill))  # вставляем новые
                     conn.commit()
         except psycopg2.Error as e:
             print(f"Ошибка БД при добавлении информации о пользователе: {e}")
-            conn.rollback()
+            conn.rollback() # давай по новой миша все фигня
             raise
 
