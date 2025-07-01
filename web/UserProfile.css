@@ -1,0 +1,510 @@
+body{
+    background-color: #f2f2f2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;      /* Центрирует по горизонтали */
+    /* justify-content: center; */
+    min-height: 100vh;
+    font-family: sans-serif;
+    margin: 0;
+    /* box-sizing: border-box; */
+    gap: 25px;
+    width: 100%;
+
+}
+
+.header{
+width: 100%;
+}
+
+/* ВЕРХНЯЯ ШАПКА */
+
+
+.header-content {
+    overflow: hidden;
+    background-color: #0c194b;
+    width: 100%;
+    height: 40px;
+    padding: 1px 15px;
+    gap: 8px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 0;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.header-left h2 {
+    margin: 0;
+    color: #ffffff;
+    display: flex;
+    align-items: right;
+    gap:1px;
+    font-size: 17px;
+    font-weight: normal;
+}
+
+.header-right h2 {
+    margin: 0;
+    color: #ffffff;
+    display: flex;
+    align-items: right;
+    gap:1px;
+    font-size: 17px;
+    font-weight: normal;
+}
+
+.header-left img {
+    display: block;
+    width: 26px;
+    aspect-ratio: 1 / 1;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.header-right a img {
+    display: block;
+    width: 26px;
+    aspect-ratio: 1 / 1;
+}
+
+.header-content a:hover {
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+
+
+/* OTHER BODY */
+
+
+.other_body{
+    background-color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* min-height: 70vh; */
+    width: 95%;
+    max-width: 730px;
+    font-family: sans-serif;
+    margin: 0 auto;
+    border-radius: 15px;
+    gap: 15px;
+    padding: clamp(12px, 3vw, 20px);
+    /* padding: 3px 30px;  */
+    box-sizing: border-box;
+}
+
+
+/* дальше */
+
+.header-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 0px;
+    margin-top: 0;
+    width: 100%;
+    text-align: center;
+}
+
+.header-info h2 {
+    font-size: 26px;
+    margin-top: 0;
+    font-weight: 600;
+    margin-bottom: 0px;
+}
+
+.header-info p {
+    color: #333;
+    font-size: 16px;
+    margin-bottom: 0px;
+}
+
+
+
+
+.profile-form {
+    background-color: rgb(255, 255, 255);
+    padding: clamp(12px, 3vw, 20px);
+    width: 95%;
+    /* gap: 15px; */
+}
+
+.profile-header {
+    display: flex;
+    gap: 25px;
+    margin-top: 0;
+    margin-bottom: 30px;
+    padding-bottom: 25px;
+    border-bottom: 1px solid #eee;
+    width: 100%;
+}
+
+.profile-image {
+    flex-shrink: 0;
+}
+
+.image-placeholder {
+    width: 120px;
+    height: 120px;
+    background-color: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #999;
+    font-size: 14px;
+}
+
+.profile-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+}
+
+.name-input {
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-weight: 380;
+    font-size: 16px;
+    
+}
+
+.name-input:focus {
+    outline: none;
+    border-color: #00bb00;
+}
+
+.upload-cv-btn {
+    background: none;
+    border: none;
+    color: #666;
+    font-size: 15px;
+    cursor: pointer;
+    text-align: left;
+    margin-left: 15px;
+    padding: 5px 0;
+}
+
+.upload-cv-btn:hover {
+    color: #008c00;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+.form-section {
+    flex-direction: column;
+    display: flex;
+    gap: 25px;
+    margin-top: 0;
+    /* margin-bottom: 30px;
+    padding-bottom: 25px; */
+    width: 100%;
+}
+
+.skills-section {
+    width: 100%;
+}
+
+.skills-section label {
+    display: block;
+    font-weight: 600;
+    /* margin-bottom: 10px; */
+    color: #000000;
+}
+
+.skills-container {
+    position: relative;
+}
+
+.skills-input-wrapper {
+    position: relative;
+}
+
+.skills-input-wrapper.active .dropdown-arrow {
+    transform: translateY(-50%) rotate(180deg);
+}
+
+.skills-search {
+    padding: 10px 15px;
+    font-size: 16px;
+    font-weight: 380;
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: white;
+    color: #666;
+}
+
+.skills-search:focus {
+    outline: none;
+    border-color: #00bb00;
+}
+
+.dropdown-arrow {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #999;
+    pointer-events: none;
+    transition: transform 0.3s ease;
+}
+
+
+.dropdown-arrow {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #999;
+    pointer-events: none; /* <-- Это свойство обязательно! */
+    transition: transform 0.3s ease;
+}
+
+
+
+
+
+
+
+
+
+.skills-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+}
+
+.skills-dropdown.show {
+    display: block;
+}
+
+.skills-option {
+    padding: 12px 15px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s ease;
+}
+
+.skills-option:hover {
+    background-color: #f8f9fa;
+}
+
+.skills-option.selected {
+    background-color: #00bb002c;
+    color: #008c00;
+}
+
+.skills-option.hidden {
+    display: none;
+}
+
+
+
+
+
+
+
+.selected-skills {
+    margin-bottom: 9px;
+    margin-top: 6px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.skill-tag {
+    background-color: #00bb002c;
+    color: #008c00;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid #008c0057;
+}
+
+.skill-remove {
+    background: none;
+    border: none;
+    color: #008c00;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    padding: 0;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.skill-remove:hover {
+    background-color: #008c0057;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.form-row {
+    display: flex;
+    gap: 20px;
+}
+
+.form-group {
+    flex: 1;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: #000000;
+}
+
+.form-select {
+    /* width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    background-color: white;
+    cursor: pointer; */
+
+    padding: 10px 15px;
+    font-size: 16px;
+    font-weight: 380;
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: white;
+    /* color: #333; */
+    color: #666;
+}
+
+.form-select {
+    color: #000000;
+}
+
+.form-select:focus {
+    outline: none;
+    border-color: #00bb00;
+}
+
+.form-select:invalid {
+    color: #666;
+} */
+
+ .form-select option {
+    color: #333;
+}
+
+.form-textarea {
+    width: 100%;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    /* resize: vertical; */
+    min-height: 150px;
+    box-sizing: border-box;
+}
+
+.form-textarea:focus {
+    outline: none;
+    border-color: #00bb00;
+}
+
+.form-actions {
+    text-align: center;
+    /* margin-top: 30px; */
+}
+
+.save-btn {
+    background-color: #00bb00;
+    color: white;
+    border: none;
+    padding: 15px 40px;
+    border-radius: 25px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.save-btn:hover {
+    background-color: #008c00;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
