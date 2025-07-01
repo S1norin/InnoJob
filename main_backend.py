@@ -13,6 +13,7 @@ from email.message import EmailMessage
 import aiosmtplib
 import secrets
 import time
+from urllib.parse import quote
 
 app = FastAPI()
 
@@ -184,7 +185,7 @@ async def download_cv(
             )
 
         headers = {
-            'Content-Disposition': f'attachment; filename="{file_name}"'#по факту самое сложное для ундерстендинга но на деле не сложно просто создаем описание того что браущеру надо сделать если прям интересно то попроси расшифровать иишку данное говно
+            'Content-Disposition': f'attachment; filename="{quote(file_name)}"; filename*=UTF-8\'\'{quote(file_name)}'
         }
 
         return StreamingResponse(#отправляем ответ
@@ -288,6 +289,12 @@ async def upload_photo(
 ):
     photo_content_bytes = await photo.read() #захерачиваем его в бинарный вид чтобы не сохранять
 
+    if photo.filename[-3:] != 'png' and photo.filename[-3:] != 'jpg':
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Photo can be only jpg or png, not {photo.filename[-3:]}"
+        )
+
     if not photo_content_bytes: #если он пуст то нахер его
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -300,7 +307,7 @@ async def upload_photo(
             db.add_photo_from_bytes,
             user_email=email,
             photo_content=photo_content_bytes,
-            pdf_name=photo.filename
+            photo_name=photo.filename
         )
         #если все ок то пишем сак эсс и чилим
         return {
@@ -314,7 +321,7 @@ async def upload_photo(
             detail=str(e)
         )
     except Exception as e:
-        print(f"Internal server error during CV upload: {e}") # Логируем для отладки
+        print(f"Internal server error during photo upload: {e}") # Логируем для отладки
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An internal server error occurred while processing the file."
@@ -339,12 +346,12 @@ async def download_photo(
             )
 
         headers = {
-            'Content-Disposition': f'attachment; filename="{file_name}"'#по факту самое сложное для ундерстендинга но на деле не сложно просто создаем описание того что браущеру надо сделать если прям интересно то попроси расшифровать иишку данное говно
+            'Content-Disposition': f'attachment; filename="{quote(file_name)}"; filename*=UTF-8\'\'{quote(file_name)}'
         }
 
         return StreamingResponse(#отправляем ответ
             io.BytesIO(photo_content),  # Содержимое файла
-            media_type="image/png",  # Сообщаем, что это PNG
+            media_type=f"image/{file_name[-3:]}",  # Сообщаем, что это PNG или JPG
             headers=headers  # Добавляем заголовок для скачивания
         )
 
@@ -356,11 +363,25 @@ async def download_photo(
         )
 
 
+@app.post("/write_user_info")
+async def write_user_info(user_email: str, data:UserInfo, db: UserManager = Depends(get_user_manager)):
+    result = await run_in_threadpool(db.user_in_base, user_email)
+    if result:
+        await run_in_threadpool(db.set_user_info, user_email, data.educationLevel, data.course, data.description, data.skills)
+        return {"access":True, "message":"User in base"}
+    else:
+        return {"access": False, "message": "User not in base"}
 
 
 
-
-
+@app.get("/user_info")
+async def get_user_info(user_email: str, db: UserManager = Depends(get_user_manager)):
+    try:
+        user_info = await run_in_threadpool(db.get_user_info, user_email)#по факту бахаем норм вызов получения джосона и чилим
+        return UserInfo(**user_info)
+    except Exception as e:
+        print(f"Server error getting user info: {e}")
+        raise HTTPException(status_code=500, detail="Could not fetch vacancies.")
 
 
 

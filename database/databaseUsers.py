@@ -28,11 +28,21 @@ class UserManager:#Этот черт будет использоваться д�
             confirmation_code INTEGER,
             confirmation_code_created_at INTEGER,  
             is_confirmed BOOLEAN DEFAULT FALSE,
+            level_of_education TEXT,
+            course TEXT,
+            description TEXT,
             cv_name VARCHAR(255),
             cv_pdf BYTEA,
             photo_name VARCHAR(255),
             photo_file BYTEA
-        );"""
+        );
+        CREATE TABLE IF NOT EXISTS skills (
+            id SERIAL PRIMARY KEY,
+            user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+            skill TEXT NOT NULL
+        );
+        
+        """
         with self._get_connection() as conn:#ВНИМАНИЕ ДЛЯ СОХРАНЕНИЕ АДЕКВАТНОСТИ ВАШЕГО КОГДА МЫ ТЕПЕРЬ ИСПОЛЬЗУЕМ ДАННУЮ КОНСТРКЦИЮ
             with conn.cursor() as cur:#ИНАЧЕ ЭТА ХЕРНЯ БУДЕТ УЯЗВИМОЙ Т К ЕЕ НАДО ЗАКРЫВАТЬ (ТО ЧТО ВСЕ МЫ УДАЧНО ПРОДОЛБИЛИ)
                 cur.execute(create_query)
@@ -216,3 +226,61 @@ class UserManager:#Этот черт будет использоваться д�
                     return True
                 else:
                     return False
+
+    def get_user_id(self, email):
+        query = "SELECT id FROM users WHERE email = %s"
+        with self._get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(query, (email,))
+                result = cur.fetchone()
+                if result:
+                    return result[0]
+                else:
+                    return None
+
+    def get_user_info(self, email):
+        query = "SELECT id, level_of_education, course, description FROM users WHERE email = %s;"
+        query2 = "SELECT skill FROM skills WHERE user_id = %s;"
+        try:
+            with self._get_connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute(query, (email,))
+                    result = cur.fetchone()
+                    if not result:
+                        raise ValueError(f"Пользователь с email '{email}' не найден.")
+                    id = result[0]
+                    cur.execute(query2, (id,))
+                    result2 = [skill[0] for skill in cur.fetchall()]
+                    return {
+                        "educationLevel":  result[1],
+                        "course": result[2],
+                        "description": result[3],
+                        "skills": result2
+                            }
+
+        except psycopg2.Error as e:
+            print(f"Ошибка БД при добавлении информации о пользователе: {e}")
+            conn.rollback()
+            raise
+
+    def set_user_info(self, email, educationLevel, course, description, skills):
+        query = "UPDATE users SET level_of_education = %s, course = %s, description = %s WHERE email = %s RETURNING id;"  # умные запросы в базу данных
+        delete_query = "DELETE FROM skills WHERE user_id = %s;"
+        query2 = "INSERT INTO skills (user_id, skill) VALUES (%s, %s);"
+        try:
+            with self._get_connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute(query, (educationLevel, course, description, email))
+                    result = cur.fetchone()
+                    if not result:
+                        raise ValueError(f"Пользователь с email '{email}' не найден.")
+                    id = result[0]
+                    cur.execute(delete_query, (id,))
+                    for skill in skills:
+                        if skill: cur.execute(query2, (id,skill))
+                    conn.commit()
+        except psycopg2.Error as e:
+            print(f"Ошибка БД при добавлении информации о пользователе: {e}")
+            conn.rollback()
+            raise
+
