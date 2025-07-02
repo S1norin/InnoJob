@@ -56,10 +56,13 @@ document.querySelector('.login-form').addEventListener('submit', async (e) => {
                         localStorage.setItem("userSurname", rest.join(' '));
                     }
                     localStorage.setItem("userEmail", email);
-                    window.location.href = "MainPage.html";
+                    window.location.href = "/job_listing";
                 });
         } else if (result.status === "error" && result.message === "Код не подтвержден") {
             alert("Пожалуйста, подтвердите почту");
+            //  Code verification currently does not work, ignoring it for now
+            //  alert("Пожалуйста, подтвердите почту");
+            window.location.href = "/job_listing";
         } else {
             showError(passwordInput, result.detail || result.message || "Ошибка входа", "password-error");
         }
