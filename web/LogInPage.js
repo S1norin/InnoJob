@@ -37,7 +37,7 @@ document.querySelector('.login-form').addEventListener('submit', async (e) => {
     console.log("Password:", loginData.password);
 
     try {
-        const response = await fetch('http://localhost:8000/login', {
+        const response = await fetch('http://89.169.35.122:8080/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(loginData)
@@ -46,9 +46,11 @@ document.querySelector('.login-form').addEventListener('submit', async (e) => {
         const result = await response.json();
 
         if (response.ok && result.status === "success") {
-            window.location.href = "MainPage.html";
+            window.location.href = "/job_listing";
         } else if (result.status === "error" && result.message === "Код не подтвержден") {
-             alert("Пожалуйста, подтвердите почту");
+            //  Code verification currently does not work, ignoring it for now
+            //  alert("Пожалуйста, подтвердите почту");
+            window.location.href = "/job_listing";
         } else {
             showError(passwordInput, result.detail || result.message || "Ошибка входа", "password-error");
         }
