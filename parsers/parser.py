@@ -3,13 +3,13 @@ from time import sleep
 
 
 employer_ids = [
-    '5970367', '9981358', '11856196', '9756959', '7311', '156424', '10647164', '10491049', '562662', '773061',
-    '4042737', '4468207', '10433406', '59436', '5184662', '4170578', '147672', '3154691', '10831945', '10572529',
-    '3335092', '4376554', '913233', '5079653', '10603974', '2488672', '567799', '9936093', '3565512', '2752199',
-    '1272806', '4499572', '4949743', '1441807', '3091070', '2300703', '5855834', '10202226', '1009889', '618292',
-    '11675594', '10958322', '3590333', '2436044', '4470289', '41862', '9041158', '11380393', '4476030', '4899433',
-    '5624188', '4811345', '4858306', '4255949', '5925142', '2337948', '5396549', '11537930', '2073427', '5224941',
-    '10084292'
+    '5970367', '9981358', '11856196', '9756959', '7311'#, '156424', '10647164', '10491049', '562662', '773061',
+    # '4042737', '4468207', '10433406', '59436', '5184662', '4170578', '147672', '3154691', '10831945', '10572529',
+    # '3335092', '4376554', '913233', '5079653', '10603974', '2488672', '567799', '9936093', '3565512', '2752199',
+    # '1272806', '4499572', '4949743', '1441807', '3091070', '2300703', '5855834', '10202226', '1009889', '618292',
+    # '11675594', '10958322', '3590333', '2436044', '4470289', '41862', '9041158', '11380393', '4476030', '4899433',
+    # '5624188', '4811345', '4858306', '4255949', '5925142', '2337948', '5396549', '11537930', '2073427', '5224941',
+    # '10084292'
 ]
 
 
@@ -17,10 +17,6 @@ def get_params():
     params = []
     for i in employer_ids:
         p = {
-            # "industry": 7,
-            # "text": "NOT (уборщица OR менеджер OR разнорабочий OR фасовщик OR инженер OR монтажник OR тендер OR электромонтажник OR поддержка OR маркетолог OR представитель OR Бухгалтер OR юрист OR дизайнер OR продаж OR ремонт OR экономист OR повар OR охране труда OR маляр OR оптик OR сантехник OR оператор OR слесарь OR писатель OR контроллер OR технолог OR техник OR склад OR кладовщик OR комплектовщик OR сборщик OR водитель OR делопроизводитель OR контролёр OR картограф OR модератор OR печати OR кухонный OR Marketing OR рисков OR методолог OR растениями OR клиентами OR документационного OR Казначей OR HR)",
-
-            # "professional_roles": "156,160,25,165,96,113,148,114,116,121,124,125",  # IT-роли
             "employer_id": i,
             "per_page": 100,
             "page": 0,
@@ -41,8 +37,10 @@ def get_main_data():
         print(f"Запрос данных работодателя {par.get('employer_id')}")
         response = requests.get("https://api.hh.ru/vacancies", params=par)
 
+        delay = 0.2
         while response.status_code == 403:
-            sleep(2)
+            sleep(delay)
+            delay += 0.2
             response = requests.get("https://api.hh.ru/vacancies", params=par)
 
         api_data = response.json()
@@ -68,8 +66,9 @@ def get_main_data():
 
 
             experience = vacancy_hh.get('experience', {}).get("name", 'no data')
-
-            form = "no data"
+            form = [i['name'] for i in vacancy_hh.get('work_format')]
+            if not form:
+                form = ['Нет данных']
 
             url_alternate = vacancy_hh.get("alternate_url")  # Ссылка на вакансию на сайте
             url_api_details = vacancy_hh.get("url")  # URL для API деталей вакансии
@@ -83,12 +82,12 @@ def get_main_data():
                     # print(f"Запрос деталей для: {name} ({url_api_details})")
                     response_details = get_data_from_url(url_api_details)
 
-                    delay = 0
+                    delay = 0.2
 
                     while response_details.status_code == 403:
                         response_details = get_data_from_url(url_api_details)
-                        sleep(1 + delay)
-                        delay += 1
+                        sleep(delay)
+                        delay += 0.2
                     data_details = response_details.json()
 
 
@@ -110,13 +109,13 @@ def get_main_data():
                 "salary_currency": salary_currency,
                 "salary_mode": salary_mode,
                 "experience": experience,
-                "form":  form,
+                "format":  form,
                 "description": description_full,
                 "link": url_alternate,
                 "picture": picture if picture is not None else "#",
-                "requirements_list": requirements_list
+                "requirements": requirements_list
             })
-        sleep(0.1)
+        sleep(0.2)
     return vacancies
 
 def get_employer_data(e_id):
