@@ -13,7 +13,7 @@
 ## Actual Behaviour
 
 
-## Дополнительная информация
+## Additional Information
 - 
 -  
 - 
