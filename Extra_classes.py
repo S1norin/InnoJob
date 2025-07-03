@@ -1,4 +1,5 @@
 from pydantic import BaseModel, EmailStr
+from typing import List
 
 class UserCreate(BaseModel):
     name:str
@@ -20,3 +21,10 @@ class UserMail(BaseModel):
 class NewPassword(BaseModel):
     mail: str
     new_password: str
+
+class UserInfo(BaseModel):
+    name: str
+    educationLevel: str
+    course: str
+    description: str
+    skills: List[str]

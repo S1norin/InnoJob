@@ -13,6 +13,8 @@ from email.message import EmailMessage
 import aiosmtplib
 import secrets
 import time
+from urllib.parse import quote
+import psycopg2
 
 app = FastAPI()
 
@@ -52,7 +54,7 @@ async def read_index():
     # if authorized():
     #   read_job_listing()
     # else:
-    #  read_welcome() 
+    #  read_welcome()
 
     return FileResponse('web/WelcomePage.html')
 
@@ -207,8 +209,10 @@ async def download_cv(
                 detail=f"Резюме для пользователя '{user_email}' не найдено."
             )
 
+        if not file_name:
+            raise HTTPException(status_code=404, detail="File name is missing")
         headers = {
-            'Content-Disposition': f'attachment; filename="{file_name}"'#по факту самое сложное для ундерстендинга но на деле не сложно просто создаем описание того что браущеру надо сделать если прям интересно то попроси расшифровать иишку данное говно
+            'Content-Disposition': f'attachment; filename=\"{quote(file_name)}\"; filename*=UTF-8\'\'{quote(file_name)}'
         }
 
         return StreamingResponse(#отправляем ответ
@@ -250,7 +254,7 @@ async def login_user(
 @app.get("/log_in_page")
 async def read_login():
     # Placeholder, as this page shouldn't be available if user is already authorized
-    
+
     # if authorized():
     #     return FileResponse('web/LogInPage.html')
     # else:
@@ -262,7 +266,7 @@ async def read_login():
 @app.get("/sign_up_page")
 async def read_signup():
     # Placeholder, as this page shouldn't be available if user is already authorized
-    
+
     # if authorized():
     #     return FileResponse('web/LogInPage.html')
     # else:
@@ -326,13 +330,112 @@ async def change_password(data: NewPassword, db: UserManager = Depends(get_user_
     return {"status":True, "message":"Password change"}
 
 
+@app.post("/upload-photo")
+async def upload_photo(
+    db: UserManager = Depends(get_user_manager),
+    email: str = Form(...),
+    photo: UploadFile = File(...) #получаем фотографию рожи пользователя
+):
+    photo_content_bytes = await photo.read() #захерачиваем его в бинарный вид чтобы не сохранять
+
+    if not photo.filename or len(photo.filename) < 4:
+        raise HTTPException(status_code=400, detail="Invalid photo filename")
+    ext = photo.filename.lower().split('.')[-1]
+    if ext not in ("png", "jpg", "jpeg"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Photo can be only jpg, jpeg or png, not {ext}"
+        )
+
+    if not photo_content_bytes: #если он пуст то нахер его
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Uploaded file is empty."
+        )
+
+    try:
+        #если не пуст асинхронно вызываем сохранение этого говна
+        await run_in_threadpool(
+            db.add_photo_from_bytes,
+            user_email=email,
+            photo_content=photo_content_bytes,
+            photo_name=photo.filename
+        )
+        #если все ок то пишем сак эсс и чилим
+        return {
+            "status": "success",
+            "message": "Photo file uploaded successfully",
+            "filename": photo.filename
+        }
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e)
+        )
+    except Exception as e:
+        print(f"Internal server error during photo upload: {e}") # Логируем для отладки
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An internal server error occurred while processing the file."
+        )
+
+@app.get("/users/photo/{user_email}")
+async def download_photo(
+    user_email: str,
+    db: UserManager = Depends(get_user_manager)
+):
+
+    try:
+        file_name, photo_content = await run_in_threadpool(
+            db.get_photo,#вызываем функцию для получения фийла в виде байнари говна
+            user_email=user_email
+        )
+
+        if not photo_content:# ноу контент((
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Фото для пользователя '{user_email}' не найдено."
+            )
+
+        if not file_name:
+            raise HTTPException(status_code=404, detail="File name is missing")
+        headers = {
+            'Content-Disposition': f'attachment; filename=\"{quote(file_name)}\"; filename*=UTF-8\'\'{quote(file_name)}'
+        }
+
+        return StreamingResponse(#отправляем ответ
+            io.BytesIO(photo_content),  # Содержимое файла
+            media_type=f"image/{file_name[-3:]}",  # Сообщаем, что это PNG или JPG
+            headers=headers  # Добавляем заголовок для скачивания
+        )
+
+    except Exception as e:
+        print(f"Ошибка при попытке скачать фото: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Внутренняя ошибка сервера при получении файла."
+        )
+
+
+@app.post("/write_user_info")
+async def write_user_info(user_email: str, data:UserInfo, db: UserManager = Depends(get_user_manager)):
+    result = await run_in_threadpool(db.user_in_base, user_email) # проверяем что долбанафт есть в базе данных
+    if result:
+        await run_in_threadpool(db.set_user_info, user_email, data.educationLevel, data.course, data.description, data.skills) # запихуиваем всю инфу в таблицу
+        return {"access":True, "message":"User in base"}
+    else:
+        return {"access": False, "message": "User not in base"}
 
 
 
-
-
-
-
+@app.get("/user_info")
+async def get_user_info(user_email: str, db: UserManager = Depends(get_user_manager)):
+    try:
+        user_info = await run_in_threadpool(db.get_user_info, user_email)# получаем говно в виде словаря
+        return UserInfo(**user_info) # Распихать полученное говно по параметрам модели UserInfo
+    except Exception as e:
+        print(f"Server error getting user info: {e}")
+        raise HTTPException(status_code=500, detail="Could not fetch user info.")
 
 
 

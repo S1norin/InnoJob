@@ -38,6 +38,9 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     --mount=type=bind,source=requirements.txt,target=requirements.txt \
     python -m pip install -r requirements.txt
 
+RUN python -m spacy download en_core_web_sm && \
+    python -m spacy download ru_core_news_sm
+
 # Switch to the non-privileged user to run the application.
 USER appuser
 
