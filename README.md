@@ -1,4 +1,4 @@
-# Welcome to sprint-2 branch
+# Welcome to sprint-3 branch
 
 # How to start application
 
