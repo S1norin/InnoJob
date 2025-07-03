@@ -1,6 +1,7 @@
 import psycopg2
 
 from parsers.parser import get_main_data, get_employer_data, get_city_data, employer_ids
+from config import *
 
 
 # Интерфейс для работы с вакансиями
@@ -15,6 +16,7 @@ class VacancyManager:
         self.db_params = {'host': host, 'dbname': dbname, 'user': user, 'password': password, 'port': port}
 
         # Создание таблиц
+        self.update_tables()
         self._create_tables_if_not_exists()
         self.update_employers(employer_ids)
         self.update_vacancies_from_source()
@@ -56,6 +58,12 @@ class VacancyManager:
             vacancy_id INTEGER REFERENCES vacancies(id) ON DELETE CASCADE, 
             requirement TEXT NOT NULL
         );
+        
+        CREATE TABLE IF NOT EXISTS formats (
+            id SERIAL PRIMARY KEY,
+            vacancy_id INTEGER REFERENCES vacancies(id) ON DELETE CASCADE,
+            format TEXT NOT NULL
+        );
         """
 
         with self._get_connection() as conn:
@@ -67,12 +75,13 @@ class VacancyManager:
     def get_vac_list(self):
         query = """
             SELECT v.id, v.name, e.name, c.name, v.salary_from, v.salary_to, 
-                   v.salary_currency, v.salary_mode, v.experience, v.format, 
+                   v.salary_currency, v.salary_mode, v.experience, f.format, 
                    v.description, v.link, e.logo, r.requirement
             FROM vacancies v
             JOIN employers e ON v.employer = e.id
             JOIN cities c ON v.city = c.id
             LEFT JOIN requirements r ON v.id = r.vacancy_id
+            LEFT JOIN formats f ON v.id = f.vacancy_id
             ORDER BY v.id;
         """
         vacancies = []
@@ -91,7 +100,7 @@ class VacancyManager:
                         "salary_currency": s_cur,
                         "salary_mode": s_mod,
                         "experience": exp,
-                        "format": fmt,
+                        "format": fmt if fmt else [],
                         "description": desc,
                         "link": link,
                         "picture": pic,
@@ -107,12 +116,10 @@ class VacancyManager:
         with self._get_connection() as conn:
             with conn.cursor() as cur:
                 cur.execute(
-                    "DROP TABLE IF EXISTS requirements, vacancies, CASCADE;")
+                    "DROP TABLE IF EXISTS requirements, vacancies, formats CASCADE;")
                 conn.commit()
-        self._create_tables_if_not_exists()
 
     def update_vacancies_from_source(self):
-        self.update_tables()
         with self._get_connection() as conn:
             with conn.cursor() as cur:
                 vacancies_from_parser = get_main_data()  # Получаем данные при помощи парсера
@@ -128,10 +135,9 @@ class VacancyManager:
                             "salary_currency, "
                             "salary_mode, "
                             "experience, "
-                            "format, "
                             "description, "
                             "link"
-                            ") VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id;",
+                            ") VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id;",
                             (vacancy.get("name"),
                              self.find_city(vacancy.get('city')),
                              self.find_employer(vacancy.get('employer_id')),
@@ -140,7 +146,6 @@ class VacancyManager:
                              vacancy.get('salary_currency'),
                              vacancy.get('salary_mode'),
                              vacancy.get('experience'),
-                             vacancy.get('form'),
                              vacancy.get('description'),
                              vacancy.get('link'))
                         )
@@ -149,6 +154,11 @@ class VacancyManager:
                             cur.execute(
                                 "INSERT INTO requirements (vacancy_id, requirement) VALUES (%s, %s);",
                                 (vacancy_id, skill)
+                            )
+                        for format in vacancy.get('format', []):
+                            cur.execute(
+                                "INSERT INTO formats (vacancy_id, format) VALUES (%s, %s);",
+                                (vacancy_id, format)
                             )
                     except Exception as e:
                         print(f"Ошибка при обновлении вакансий {e}")
@@ -165,7 +175,6 @@ class VacancyManager:
 
 
     def update_employers(self, employer_list):
-        self.update_tables()
         for emp in employer_list:
             try:
                 data = get_employer_data(emp)
@@ -218,9 +227,17 @@ class VacancyManager:
                 cur.execute(requests)
                 data = [i[0] for i in cur.fetchall()]
                 return data
+
+    def get_formats(self):
+        request = 'SELECT format FROM formats'
+        with self._get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(request)
+                return list(set(i[0] for i in cur.fetchall()))
 #
 #
 # db = VacancyManager(db_host, db_name, db_user, db_password, db_port)
+# print(db.get_formats())
 # # print(db.get_vac_list())
 # print(len(db.get_employers()))
 # print(len(db.get_cities()))

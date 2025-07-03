@@ -37,7 +37,7 @@ document.querySelector('.login-form').addEventListener('submit', async (e) => {
     console.log("Password:", loginData.password);
 
     try {
-        const response = await fetch('http://89.169.35.122:8080/login', {
+        const response = await fetch('http://localhost:8000/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(loginData)
@@ -46,8 +46,20 @@ document.querySelector('.login-form').addEventListener('submit', async (e) => {
         const result = await response.json();
 
         if (response.ok && result.status === "success") {
-            window.location.href = "/job_listing";
+            // Fetch user info
+            fetch(`http://localhost:8000/user_info?user_email=${encodeURIComponent(email)}`)
+                .then(res => res.json())
+                .then(userInfo => {
+                    if (userInfo.name) {
+                        const [firstName, ...rest] = userInfo.name.split(' ');
+                        localStorage.setItem("userName", firstName);
+                        localStorage.setItem("userSurname", rest.join(' '));
+                    }
+                    localStorage.setItem("userEmail", email);
+                    window.location.href = "/job_listing";
+                });
         } else if (result.status === "error" && result.message === "Код не подтвержден") {
+            alert("Пожалуйста, подтвердите почту");
             //  Code verification currently does not work, ignoring it for now
             //  alert("Пожалуйста, подтвердите почту");
             window.location.href = "/job_listing";
@@ -69,3 +81,86 @@ function showError(inputElement, message, id) {
     span.textContent = message;
     inputElement.insertAdjacentElement('afterend', span);
 }
+
+const cvInput = document.getElementById('cvInput');
+const uploadCvBtn = document.getElementById('uploadCvBtn');
+const photoInput = document.getElementById('photoInput');
+const uploadPhotoBtn = document.getElementById('uploadPhotoBtn');
+
+// Trigger file input when button is clicked
+uploadCvBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    cvInput.click();
+});
+uploadPhotoBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    photoInput.click();
+});
+
+// Upload CV
+cvInput.addEventListener('change', async function () {
+    const file = cvInput.files[0];
+    if (!file) return;
+    if (file.type !== "application/pdf") {
+        alert("Please select a PDF file.");
+        return;
+    }
+    const email = localStorage.getItem('userEmail');
+    if (!email) {
+        alert("Email пользователя не найден.");
+        return;
+    }
+    const formData = new FormData();
+    formData.append('email', email);
+    formData.append('pdf_file', file);
+
+    try {
+        const response = await fetch('http://localhost:8000/upload-cv', {
+            method: 'POST',
+            body: formData
+        });
+        const result = await response.json();
+        if (result.status === "success") {
+            alert("CV успешно загружено!");
+        } else {
+            alert("Ошибка загрузки CV: " + (result.message || "Неизвестная ошибка"));
+        }
+    } catch (err) {
+        alert("Ошибка соединения с сервером.");
+        console.error(err);
+    }
+});
+
+// Upload Photo
+photoInput.addEventListener('change', async function () {
+    const file = photoInput.files[0];
+    if (!file) return;
+    if (!["image/png", "image/jpeg"].includes(file.type)) {
+        alert("Пожалуйста, выберите JPG или PNG файл.");
+        return;
+    }
+    const email = localStorage.getItem('userEmail');
+    if (!email) {
+        alert("Email пользователя не найден.");
+        return;
+    }
+    const formData = new FormData();
+    formData.append('email', email);
+    formData.append('photo', file);
+
+    try {
+        const response = await fetch('http://localhost:8000/upload-photo', {
+            method: 'POST',
+            body: formData
+        });
+        const result = await response.json();
+        if (result.status === "success") {
+            alert("Фото успешно загружено!");
+        } else {
+            alert("Ошибка загрузки фото: " + (result.message || "Неизвестная ошибка"));
+        }
+    } catch (err) {
+        alert("Ошибка соединения с сервером.");
+        console.error(err);
+    }
+});
