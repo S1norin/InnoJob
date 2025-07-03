@@ -27,22 +27,32 @@ class UserManager:#Этот черт будет использоваться д�
             password TEXT NOT NULL,
             confirmation_code INTEGER,
             confirmation_code_created_at INTEGER,  
-            is_confirmed BOOLEAN DEFAULT FALSE,
+            is_confirmed BOOLEAN DEFAULT FALSE
+        );
+        CREATE TABLE IF NOT EXISTS user_cards (
+            user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+            card_id INT NOT NULL,
             level_of_education TEXT,
-            course TEXT,
+            education TEXT,
+            age INTEGER,
             description TEXT,
             cv_name VARCHAR(255),
             cv_pdf BYTEA,
             photo_name VARCHAR(255),
             photo_file BYTEA
+            PRIMARY KEY (user_id, card_id)
         );
+        
         CREATE TABLE IF NOT EXISTS skills (
             id SERIAL PRIMARY KEY,
             user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+            card_id INT NOT NULL,
             skill TEXT NOT NULL
+            FOREIGN KEY (user_id, card_id) REFERENCES user_cards(user_id, card_id) ON DELETE CASCADE
         );
         
         """
+
         with self._get_connection() as conn:#ВНИМАНИЕ ДЛЯ СОХРАНЕНИЕ АДЕКВАТНОСТИ ВАШЕГО КОГДА МЫ ТЕПЕРЬ ИСПОЛЬЗУЕМ ДАННУЮ КОНСТРКЦИЮ
             with conn.cursor() as cur:#ИНАЧЕ ЭТА ХЕРНЯ БУДЕТ УЯЗВИМОЙ Т К ЕЕ НАДО ЗАКРЫВАТЬ (ТО ЧТО ВСЕ МЫ УДАЧНО ПРОДОЛБИЛИ)
                 cur.execute(create_query)
@@ -228,7 +238,7 @@ class UserManager:#Этот черт будет использоваться д�
                     return False
 
 
-    def get_user_info(self, email):
+    def get_user_card(self, email, card_number):
         query = "SELECT id, name, level_of_education, course, description FROM users WHERE email = %s;"
         query2 = "SELECT skill FROM skills WHERE user_id = %s;"
         try:
@@ -254,7 +264,7 @@ class UserManager:#Этот черт будет использоваться д�
             conn.rollback()
             raise
 
-    def set_user_info(self, email, educationLevel, course, description, skills):
+    def add_user_card(self, email, card_number, educationLevel, course, description, skills):
         query = "UPDATE users SET level_of_education = %s, course = %s, description = %s WHERE email = %s RETURNING id;"  # умные запросы в базу данных
         delete_query = "DELETE FROM skills WHERE user_id = %s;"  # сносим нафиг все старые скилы которые были у юзера
         query2 = "INSERT INTO skills (user_id, skill) VALUES (%s, %s);"
@@ -275,3 +285,44 @@ class UserManager:#Этот черт будет использоваться д�
             conn.rollback() # давай по новой миша все фигня
             raise
 
+    def delete_user_card(self, email, card_number, educationLevel, course, description, skills):
+        query = "UPDATE users SET level_of_education = %s, course = %s, description = %s WHERE email = %s RETURNING id;"  # умные запросы в базу данных
+        delete_query = "DELETE FROM skills WHERE user_id = %s;"  # сносим нафиг все старые скилы которые были у юзера
+        query2 = "INSERT INTO skills (user_id, skill) VALUES (%s, %s);"
+        try:
+            with self._get_connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute(query, (educationLevel, course, description, email))
+                    result = cur.fetchone()
+                    if not result:
+                        raise ValueError(f"Пользователь с email '{email}' не найден.")
+                    id = result[0]
+                    cur.execute(delete_query, (id,)) # сносим нафиг все старые скилы которые были у юзера
+                    for skill in skills:
+                        if skill: cur.execute(query2, (id,skill))  # вставляем новые
+                    conn.commit()
+        except psycopg2.Error as e:
+            print(f"Ошибка БД при добавлении информации о пользователе: {e}")
+            conn.rollback() # давай по новой миша все фигня
+            raise
+
+    def replace_user_card(self, email, card_number, educationLevel, course, description, skills):
+        query = "UPDATE users SET level_of_education = %s, course = %s, description = %s WHERE email = %s RETURNING id;"  # умные запросы в базу данных
+        delete_query = "DELETE FROM skills WHERE user_id = %s;"  # сносим нафиг все старые скилы которые были у юзера
+        query2 = "INSERT INTO skills (user_id, skill) VALUES (%s, %s);"
+        try:
+            with self._get_connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute(query, (educationLevel, course, description, email))
+                    result = cur.fetchone()
+                    if not result:
+                        raise ValueError(f"Пользователь с email '{email}' не найден.")
+                    id = result[0]
+                    cur.execute(delete_query, (id,)) # сносим нафиг все старые скилы которые были у юзера
+                    for skill in skills:
+                        if skill: cur.execute(query2, (id,skill))  # вставляем новые
+                    conn.commit()
+        except psycopg2.Error as e:
+            print(f"Ошибка БД при добавлении информации о пользователе: {e}")
+            conn.rollback() # давай по новой миша все фигня
+            raise

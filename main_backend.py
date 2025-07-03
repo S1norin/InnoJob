@@ -417,25 +417,43 @@ async def download_photo(
         )
 
 
-@app.post("/write_user_info")
-async def write_user_info(user_email: str, data:UserInfo, db: UserManager = Depends(get_user_manager)):
+@app.post("/users/{user_email}/cards")
+async def add_user_card(user_email: str, card_number: int, data:UserCard, db: UserManager = Depends(get_user_manager)):
     result = await run_in_threadpool(db.user_in_base, user_email) # проверяем что долбанафт есть в базе данных
     if result:
-        await run_in_threadpool(db.set_user_info, user_email, data.educationLevel, data.course, data.description, data.skills) # запихуиваем всю инфу в таблицу
+        await run_in_threadpool(db.add_user_card, user_email, card_number, data.educationLevel, data.course, data.description, data.skills) # запихуиваем всю инфу в таблицу
         return {"access":True, "message":"User in base"}
     else:
         return {"access": False, "message": "User not in base"}
 
 
 
-@app.get("/user_info")
-async def get_user_info(user_email: str, db: UserManager = Depends(get_user_manager)):
+@app.get("/users/{user_email}/cards/{card_id}")
+async def get_user_card(user_email: str, card_number: int, db: UserManager = Depends(get_user_manager)):
     try:
-        user_info = await run_in_threadpool(db.get_user_info, user_email)# получаем говно в виде словаря
-        return UserInfo(**user_info) # Распихать полученное говно по параметрам модели UserInfo
+        user_info = await run_in_threadpool(db.get_user_card, user_email, card_number)# получаем говно в виде словаря
+        return UserCard(**user_info) # Распихать полученное говно по параметрам модели UserInfo
     except Exception as e:
         print(f"Server error getting user info: {e}")
         raise HTTPException(status_code=500, detail="Could not fetch user info.")
+
+@app.delete("/users/{user_email}/cards/{card_id}")
+async def delete_user_card(user_email: str, card_number: int, db: UserManager = Depends(get_user_manager)):
+    result = await run_in_threadpool(db.user_in_base, user_email) # проверяем что долбанафт есть в базе данных
+    if result:
+        await run_in_threadpool(db.delete_user_card, user_email, card_number) # сносим нафиг
+        return {"access":True, "message":"User in base"}
+    else:
+        return {"access": False, "message": "User not in base"}
+
+@app.put("/users/{user_email}/cards/{card_id}")
+async def edit_user_card(user_email: str, card_number: int, data:UserCard, db: UserManager = Depends(get_user_manager)):
+    result = await run_in_threadpool(db.user_in_base, user_email, card_number) # проверяем что долбанафт есть в базе данных
+    if result:
+        await run_in_threadpool(db.replace_user_card, user_email, data.educationLevel, data.course, data.description, data.skills) # запихуиваем всю инфу в таблицу
+        return {"access":True, "message":"User in base"}
+    else:
+        return {"access": False, "message": "User not in base"}
 
 
 
