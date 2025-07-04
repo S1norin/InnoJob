@@ -426,7 +426,7 @@ async def download_photo(
 
 
 @app.post("/users/{user_email}/cards")
-async def add_user_card(user_email: str, data:UserCard, db: UserManager = Depends(get_user_manager)):
+async def add_user_card(user_email: str, data:CreateCard, db: UserManager = Depends(get_user_manager)):
     result = await run_in_threadpool(db.user_in_base, user_email) # проверяем что долбанафт есть в базе данных
     if result:
         await run_in_threadpool(db.add_user_card, user_email, data.education_level, data.education_full, data.age, data.description, data.skills) # запихуиваем всю инфу в таблицу
@@ -455,7 +455,7 @@ async def delete_user_card(user_email: str, card_number: int, db: UserManager = 
         return {"access": False, "message": "User not in base"}
 
 @app.patch("/users/{user_email}/cards/{card_id}")
-async def edit_user_card(user_email: str, card_number: int, data:UserCard, db: UserManager = Depends(get_user_manager)):
+async def edit_user_card(user_email: str, card_number: int, data:CreateCard, db: UserManager = Depends(get_user_manager)):
     result = await run_in_threadpool(db.user_in_base, user_email) # проверяем что долбанафт есть в базе данных
     if result:
         await run_in_threadpool(db.edit_user_card, user_email, card_number, data.education_level, data.education_full, data.age, data.description, data.skills) # запихуиваем всю инфу в таблицу

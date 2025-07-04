@@ -29,7 +29,7 @@ class UserManager:#Этот черт будет использоваться д�
             confirmation_code_created_at INTEGER,  
             is_confirmed BOOLEAN DEFAULT FALSE
         );
-        CREATE TABLE IF NOT EXISTS user_cards (
+        CREATE TABLE IF NOT EXISTS cards (
             user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
             card_id INT NOT NULL,
             level_of_education TEXT,
@@ -39,7 +39,7 @@ class UserManager:#Этот черт будет использоваться д�
             cv_name VARCHAR(255),
             cv_pdf BYTEA,
             photo_name VARCHAR(255),
-            photo_file BYTEA
+            photo_file BYTEA,
             PRIMARY KEY (user_id, card_id)
         );
         
@@ -47,7 +47,7 @@ class UserManager:#Этот черт будет использоваться д�
             id SERIAL PRIMARY KEY,
             user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
             card_id INT NOT NULL,
-            skill TEXT NOT NULL
+            skill TEXT NOT NULL,
             FOREIGN KEY (user_id, card_id) REFERENCES user_cards(user_id, card_id) ON DELETE CASCADE
         );
         
@@ -94,7 +94,7 @@ class UserManager:#Этот черт будет использоваться д�
 
     #сохраняем файл как бинарное очко
     def add_cv_from_bytes(self, user_email, card_number, pdf_content, pdf_name):
-        query = "UPDATE cards SET cv_name = %s, cv_pdf = %s WHERE user_id = %s AND card_id = %s;"#умные запросы в базу данных
+        query = "UPDATE cards SET cv_name = %s, cv_pdf = %s WHERE user_id = %s AND card_id = %s RETURNING user_id, card_id;"#умные запросы в базу данных
         id = self.get_user_id(user_email)
         try:
             with self._get_connection() as conn:
@@ -126,7 +126,7 @@ class UserManager:#Этот черт будет использоваться д�
 
 
     def add_photo_from_bytes(self, user_email, card_number, photo_content, photo_name):
-        query = "UPDATE cards SET photo_name = %s, photo_file = %s WHERE user_id = %s AND card_id = %s;"#умные запросы в базу данных
+        query = "UPDATE cards SET photo_name = %s, photo_file = %s WHERE user_id = %s AND card_id = %s RETURNING user_id, card_id;"#умные запросы в базу данных
         id = self.get_user_id(user_email)
         try:
             with self._get_connection() as conn:
