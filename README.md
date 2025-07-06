@@ -83,6 +83,8 @@
 
 ### Static view
 
+![alt text](docs/architecture/static-view/diagram.png)
+
 The system follow layered microservice architecture with external services integration
 
 1. Components
@@ -110,6 +112,8 @@ The system follow layered microservice architecture with external services integ
 
 ### Dynamic view
 
+![alt text](docs/architecture/dynamic-view/diagram.png)
+
 Non-trivial request: CV upload
 
 1. Sequence Description
@@ -131,6 +135,8 @@ Non-trivial request: CV upload
 2. Docker exposes only `8080` port for `fastAPI` backend.
 
 3. `nginx` on server forwards `8080` port to `80` and `innojob.ru` to `89.169.35.122`
+
+It can be deployed on client server via `docker compose up` in the root of project, although it would be available on different port (`8080`)
 
 # Quality Assurance
 
