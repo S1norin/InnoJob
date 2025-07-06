@@ -1,0 +1,52 @@
+# Quality Attribute Scenarios
+
+## Compatibility
+### Co-existence
+**Importance to customer** -  users want access to all job sites in one place
+
+#### Multi-site Vacancy Integration
+**Given:** Multiple job hunting sites are operational
+**When:** A user searches for vacancies
+**Then:** The system should display results from all integrated sites eligible for university workoff
+**Execution:** Integration testing with mock APIs from different job sites
+
+#### Third-party Service Compatibility
+**Given:** External job site APIs change their interface
+**When:** Our system attempts to fetch data
+**Then:** System should notify developers about API change
+**Execution:** Contract testing and API versioning validation
+
+## Security
+### Confidentiality
+**Importance to customer** - CVs are sensetive data
+
+#### CV Data Protection
+**Given:** User uploads sensitive CV information
+**When:** Unauthorized access attempt is made
+**Then:** System should deny access and log the attempt
+**Execution:** Penetration testing and access control validation
+
+#### Data Encryption
+**Given:** CV data is stored in the database
+**When:** Database is accessed directly
+**Then:** All sensitive data should be encrypted
+**Execution:** Database security audit and encryption verification
+
+## Maintainability
+### Modifiability
+**Importance to customer** - there are a lot of job hunting sites that we haven't yet implemented, by we might consider implementin in future
+
+#### Scenario: New Job Site Integration
+**Given:** A new job hunting site needs to be integrated
+**When:** Developer implements the integration
+**Then:** Integration should be completed within 2 days using existing framework
+**Execution:** Developer productivity metrics and integration complexity assessment
+
+### Adaptability
+**Importance to customer** - site should be adaptable for different devices
+
+#### Responsive Design Adaptation
+**Given:** Users access the site from various devices
+**When:** Screen resolution changes
+**Then:** Interface should adapt without functionality loss
+**Execution:** Cross-device testing and responsive design validation
