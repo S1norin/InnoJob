@@ -134,7 +134,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 return getMinYears(a) - getMinYears(b);
             };
 
-            const createCheckboxes = (container, itemsSet, isExperience = false) => {
+            // const createCheckboxes = (container, itemsSet, isExperience = false) 
+            const createCheckboxes = (container, itemsSet, isExperience = false, showCount = false, countMap = null) => {
                 container.innerHTML = '';
                 let itemsArr = Array.from(itemsSet);
 
@@ -146,6 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 itemsArr.forEach(item => {
                     const label = document.createElement('label');
+                    label.className = 'checkbox-label';
                     const checkbox = document.createElement('input');
                     checkbox.type = 'checkbox';
                     checkbox.value = item;
@@ -154,6 +156,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     label.appendChild(checkbox);
                     label.appendChild(span);
+
+                    // if (showCount && countMap) {
+                    //     const countBadge = document.createElement('span');
+                    //     countBadge.className = 'vacancy-count';
+                    //     countBadge.textContent = countMap.get(item) || 0;
+                    //     label.appendChild(countBadge);
+                    // }
+
                     container.appendChild(label);
                 });
 
@@ -189,8 +199,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     citiesContainer.innerHTML = '';
 
                     filteredCities.forEach(([city, count]) => {
+                        // const label = document.createElement('label');
+                        // label.className = 'city-label';
+
                         const label = document.createElement('label');
-                        label.className = 'city-label';
+                        label.className = 'checkbox-label';
 
                         const checkbox = document.createElement('input');
                         checkbox.type = 'checkbox';
@@ -669,7 +682,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const tags = [];
             if (vacancy.format && vacancy.format !== "empty") {
                 tags.push(vacancy.format);
-            }
+            } 
 
             return `
                 <div class="vacancy-card">
