@@ -1,9 +1,27 @@
 variables:
   DOCKER_TLS_CERTDIR: "/certs"
   APP: "scareerz"
+  PYTHON_VERSION: "3.13"
 
 stages:
+  - lint
   - build
+  - unit-test
+  - integration-test
+
+lint:
+  stage: lint
+  image: python:${PYTHON_VERSION}
+  before_script:
+    - pip install flake8 flake8-gl-codeclimate
+  script:
+    - flake8 . --format gl-codeclimate --exit-zero --output-file gl-code-quality-report.json
+  artifacts:
+    reports:
+      codequality: gl-code-quality-report.json
+    paths:
+      - gl-code-quality-report.json
+    expire_in: 2 week
 
 build:
   stage: build
@@ -19,3 +37,43 @@ build:
     - docker tag scareerz-server $HARBOR_HOST/$HARBOR_PROJECT/$APP:latest
     - docker push $HARBOR_HOST/$HARBOR_PROJECT/$APP:$CI_JOB_ID
     - docker push $HARBOR_HOST/$HARBOR_PROJECT/$APP:latest
+
+unit-test:
+  stage: unit-test
+  image: python:${PYTHON_VERSION}
+  services:
+    - postgres:latest
+  before_script:
+    - cp config_template.py config.py
+    - pip install -r requirements.txt
+    - python -m spacy download en_core_web_sm
+    - python -m spacy download ru_core_news_sm
+  script:
+    - pytest tests/unit/ -v --junitxml=unit-test-results.xml
+  artifacts:
+    reports:
+      junit: unit-test-results.xml
+    expire_in: 2 week
+
+integration-test:
+  stage: integration-test
+  image: python:${PYTHON_VERSION}
+  services:
+    - postgres:latest
+  variables:
+    POSTGRES_DB: test_db
+    POSTGRES_USER: test_user
+    POSTGRES_PASSWORD: test_password
+    DATABASE_URL: "postgresql://test_user:test_password@postgres:5432/test_db"
+  before_script:
+    - cp config_template.py config.py
+    - pip install -r requirements.txt
+    - python -m spacy download en_core_web_sm
+    - python -m spacy download ru_core_news_sm
+  script:
+    - pytest tests/integration/ -v --junitxml=integration-test-results.xml
+  artifacts:
+    reports:
+      junit: integration-test-results.xml
+    expire_in: 2 week
+

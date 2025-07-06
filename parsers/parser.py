@@ -30,8 +30,10 @@ def get_data_hh():
         print(f"Запрос данных работодателей {par.get('employer_id')}")
         response = requests.get("https://api.hh.ru/vacancies", params=par)
 
+        delay = 0.2
         while response.status_code == 403:
-            sleep(2)
+            sleep(delay)
+            delay += 0.2
             response = requests.get("https://api.hh.ru/vacancies", params=par)
 
         api_data = response.json()
@@ -73,7 +75,7 @@ def get_data_hh():
                 try:
                     response_details = get_data_from_url(url_api_details)
 
-                    delay = 0
+                    delay = 0.2
 
                     while response_details.status_code == 403:
                         response_details = get_data_from_url(url_api_details)
