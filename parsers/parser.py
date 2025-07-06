@@ -60,6 +60,7 @@ def get_data_hh():
             form = [i['name'] for i in vacancy_hh.get('work_format')]
             if not form:
                 form = ['Нет данных']
+            form = list(map(lambda x: 'В офисе' if x == 'На\xa0месте работодателя' else x, form))
 
             url_alternate = vacancy_hh.get("alternate_url")  # Ссылка на вакансию на сайте
             url_api_details = vacancy_hh.get("url")  # URL для API деталей вакансии
