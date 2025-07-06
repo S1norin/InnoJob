@@ -2,7 +2,7 @@ import psycopg2
 
 from parsers.parser import get_main_data, get_employer_data_hh, get_city_data
 from parsers.parser_configs import *
-# from config import *
+from config import *
 
 
 # Интерфейс для работы с вакансиями
@@ -264,8 +264,8 @@ class VacancyManager:
                 res = list(set([i[0] for i in cur.fetchall()]))
                 return res
 
-# db = VacancyManager(db_host, db_name, db_user, db_password, db_port)
+db = VacancyManager(db_host, db_name, db_user, db_password, db_port)
 # print(db.get_formats())
-# print(len(d))
+# # print(len(d))
 # print(len(db.get_employers()))
 # print(len(db.get_cities()))
