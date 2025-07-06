@@ -83,7 +83,7 @@
 
 ### Static view
 
-![alt text](docs/architecture/static-view/diagram.png)
+![Static view diagram](docs/architecture/static-view/diagram.png)
 
 The system follow layered microservice architecture with external services integration
 
@@ -112,7 +112,7 @@ The system follow layered microservice architecture with external services integ
 
 ### Dynamic view
 
-![alt text](docs/architecture/dynamic-view/diagram.png)
+![Dynamic view diagram](docs/architecture/dynamic-view/diagram.png)
 
 Non-trivial request: CV upload
 
@@ -129,6 +129,7 @@ Non-trivial request: CV upload
     1. Average time of request: 280 ms
 
 ### Deployment view
+![Deployment view diagram](docs/architecture/deployment-view/diagram.jpeg)
 
 1. App is deployed in `Docker Compose` via `python` and `postgres` images
 
