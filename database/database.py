@@ -12,7 +12,7 @@ class VacancyManager:
 
         # Создание таблиц
         self.update_tables()
-        self._create_tables_if_not_exists()
+        self.create_tables_if_not_exists()
         self.update_sources()                # Обновляем источники ДО добавления данных
         self.update_employers()              # Добавляем работодателей
         self.update_vacancies_from_source()  # Добавляем вакансии
@@ -22,7 +22,7 @@ class VacancyManager:
         return psycopg2.connect(**self.db_params)
 
     # Удобная функция для создания таблиц (в случае отсутствия оных)
-    def _create_tables_if_not_exists(self):
+    def create_tables_if_not_exists(self):
         # Сначала создаём таблицу с источниками (если оных нет)
         query = """ 
             CREATE TABLE IF NOT EXISTS sources (
@@ -136,8 +136,7 @@ class VacancyManager:
     def update_tables(self):
         with self._get_connection() as conn:
             with conn.cursor() as cur:
-                cur.execute(
-                    "DROP TABLE IF EXISTS requirements, vacancies, employers, formats CASCADE;")
+                cur.execute("DROP TABLE IF EXISTS requirements, vacancies, employers, formats CASCADE;")
                 conn.commit()
 
     def update_vacancies_from_source(self):
@@ -254,7 +253,7 @@ class VacancyManager:
                 return data
 
     def get_sources(self):
-        return ['hh.ru']
+        return ['hh.ru', 'telegram']
 
     def get_formats(self):
         request = 'SELECT format FROM formats'
