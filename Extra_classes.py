@@ -22,17 +22,9 @@ class NewPassword(BaseModel):
     mail: str
     new_password: str
 
-class UserCard(BaseModel):
+class UserInfo(BaseModel):
     name: str
-    education_level: str
-    age: int
-    education_full: str
-    description: str
-    skills: List[str]
-
-class CreateCard(BaseModel):
-    education_level: str
-    age: int
-    education_full: str
+    educationLevel: str
+    course: str
     description: str
     skills: List[str]

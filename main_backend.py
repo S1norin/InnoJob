@@ -149,9 +149,8 @@ async def register_user(user_data: UserCreate, db: UserManager = Depends(get_use
         raise HTTPException(status_code=500, detail="Internal server error.")
 
 #загрузка гребанного пдф файла
-@app.post("/users/cv/{user_email}/{card_number}")
+@app.post("/upload-cv")
 async def upload_cv(
-    card_number: int,
     db: UserManager = Depends(get_user_manager),
     email: str = Form(...),
     pdf_file: UploadFile = File(...)#получаем файл (эта важна)
@@ -169,7 +168,6 @@ async def upload_cv(
         await run_in_threadpool(
             db.add_cv_from_bytes,
             user_email=email,
-            card_number=card_number,
             pdf_content=pdf_content_bytes,
             pdf_name=pdf_file.filename
         )
@@ -193,18 +191,16 @@ async def upload_cv(
 
 
 #тыбзим файл
-@app.get("/users/cv/{user_email}/{card_number}")
+@app.get("/users/cv/{user_email}")
 async def download_cv(
     user_email: str,
-    card_number: int,
     db: UserManager = Depends(get_user_manager)
 ):
 
     try:
         file_name, pdf_content = await run_in_threadpool(
             db.get_cv,#вызываем функцию для получения фийла в виде байнари говна
-            user_email=user_email,
-            card_number=card_number
+            user_email=user_email
         )
 
         if not pdf_content:# ноу контент((
@@ -334,9 +330,8 @@ async def change_password(data: NewPassword, db: UserManager = Depends(get_user_
     return {"status":True, "message":"Password change"}
 
 
-@app.post("/users/photo/{user_email}/{card_number}")
+@app.post("/upload-photo")
 async def upload_photo(
-    card_number: int,
     db: UserManager = Depends(get_user_manager),
     email: str = Form(...),
     photo: UploadFile = File(...) #получаем фотографию рожи пользователя
@@ -363,7 +358,6 @@ async def upload_photo(
         await run_in_threadpool(
             db.add_photo_from_bytes,
             user_email=email,
-            card_number=card_number,
             photo_content=photo_content_bytes,
             photo_name=photo.filename
         )
@@ -385,18 +379,16 @@ async def upload_photo(
             detail="An internal server error occurred while processing the file."
         )
 
-@app.get("/users/photo/{user_email}/{card_number}")
+@app.get("/users/photo/{user_email}")
 async def download_photo(
     user_email: str,
-    card_number: int,
     db: UserManager = Depends(get_user_manager)
 ):
 
     try:
         file_name, photo_content = await run_in_threadpool(
             db.get_photo,#вызываем функцию для получения фийла в виде байнари говна
-            user_email=user_email,
-            card_number=card_number
+            user_email=user_email
         )
 
         if not photo_content:# ноу контент((
@@ -425,43 +417,25 @@ async def download_photo(
         )
 
 
-@app.post("/users/{user_email}/cards")
-async def add_user_card(user_email: str, data:CreateCard, db: UserManager = Depends(get_user_manager)):
+@app.post("/write_user_info")
+async def write_user_info(user_email: str, data:UserInfo, db: UserManager = Depends(get_user_manager)):
     result = await run_in_threadpool(db.user_in_base, user_email) # проверяем что долбанафт есть в базе данных
     if result:
-        await run_in_threadpool(db.add_user_card, user_email, data.education_level, data.education_full, data.age, data.description, data.skills) # запихуиваем всю инфу в таблицу
+        await run_in_threadpool(db.set_user_info, user_email, data.educationLevel, data.course, data.description, data.skills) # запихуиваем всю инфу в таблицу
         return {"access":True, "message":"User in base"}
     else:
         return {"access": False, "message": "User not in base"}
 
 
 
-@app.get("/users/{user_email}/cards/{card_id}")
-async def get_user_card(user_email: str, card_number: int, db: UserManager = Depends(get_user_manager)):
+@app.get("/user_info")
+async def get_user_info(user_email: str, db: UserManager = Depends(get_user_manager)):
     try:
-        user_info = await run_in_threadpool(db.get_user_card, user_email, card_number)# получаем говно в виде словаря
-        return UserCard(**user_info) # Распихать полученное говно по параметрам модели UserInfo
+        user_info = await run_in_threadpool(db.get_user_info, user_email)# получаем говно в виде словаря
+        return UserInfo(**user_info) # Распихать полученное говно по параметрам модели UserInfo
     except Exception as e:
         print(f"Server error getting user info: {e}")
         raise HTTPException(status_code=500, detail="Could not fetch user info.")
-
-@app.delete("/users/{user_email}/cards/{card_id}")
-async def delete_user_card(user_email: str, card_number: int, db: UserManager = Depends(get_user_manager)):
-    result = await run_in_threadpool(db.user_in_base, user_email) # проверяем что долбанафт есть в базе данных
-    if result:
-        await run_in_threadpool(db.delete_user_card, user_email, card_number) # сносим нафиг
-        return {"access":True, "message":"User in base"}
-    else:
-        return {"access": False, "message": "User not in base"}
-
-@app.patch("/users/{user_email}/cards/{card_id}")
-async def edit_user_card(user_email: str, card_number: int, data:CreateCard, db: UserManager = Depends(get_user_manager)):
-    result = await run_in_threadpool(db.user_in_base, user_email) # проверяем что долбанафт есть в базе данных
-    if result:
-        await run_in_threadpool(db.edit_user_card, user_email, card_number, data.education_level, data.education_full, data.age, data.description, data.skills) # запихуиваем всю инфу в таблицу
-        return {"access":True, "message":"User in base"}
-    else:
-        return {"access": False, "message": "User not in base"}
 
 
 
