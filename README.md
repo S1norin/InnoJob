@@ -1,3 +1,13 @@
+# InnoJob - your last stop before you find your job in Innopolis SEZ!
+
+## Link to site
+
+[innojob.ru](http://innojob.ru)
+
+## Deployment
+
+Run `docker compose up --build` to run the project. By default, the site can be accessed via your IP addres and port `80`, however, you can change port by editing `nginx/nginx.conf`
+
 # Usage
 
 1. Access site via [innojob.ru](http://innojob.ru)
