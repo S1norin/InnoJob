@@ -103,34 +103,208 @@ body {
 }
 
 
-/* дальше */
+/* Карточки CV */
 
-.header-info {
+.cv-cards{
+    display: flex;
+    align-items: flex-start;
+    background-color: #f2f2f2;
+    flex-direction: row;
+    font-family: sans-serif;
+    margin: 0 auto;
+    padding: 0;
+    gap: 25px;
+}
+
+
+.cv-card {
+    background-color: white;
+    border-radius: 15px;
+    padding: clamp(12px, 3vw, 20px);
+    width: min(60vw, 396px);
+    height: 520px;
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    gap: 3px;
+}
+
+.card-header {
+    display: flex;
     align-items: center;
-    margin-bottom: 0px;
-    margin-top: 0;
+    gap: clamp(10px, 2vw, 15px);
+}
+
+
+.logo-place {
+    width: 80px;
+    height: 80px;
+    background-color: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #999;
+    font-size: 14px;
+    object-fit: cover;
+}
+
+.job-title-info {
+    flex: 1;
+}
+
+.job-title-info h2 {
+    margin: 0 0 0.75rem 0;
+    font-size: clamp(1.1rem, 2.2vw, 1.5rem);
+    line-height: 1.35;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    word-break: break-word;
+    text-align: left;
+}
+
+
+.card-details {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    color: #555;
+    font-size: clamp(0.8rem, 1.2vw, 0.95rem);
+    padding: 0.5rem 0;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    white-space: nowrap;
+}
+
+
+ .card-details img{
+    width: clamp(16px, 1.9vw, 20px);
+    height: auto;
+    aspect-ratio: 1 / 1;
+ }
+
+
+.card-description {
+    background-color: #f2f2f2;
     width: 100%;
+    height: 60%;
+    border-radius: 1rem;
+    padding: clamp(10px, 2vw, 15px);
+    overflow-y: auto;
+    box-sizing: border-box;
+}
+
+.card-description p {
+    margin: 0 0 1rem 0;
+    line-height: 1.5;
+    font-size: clamp(0.85rem, 2vw, 1rem);
+    color: #000000;
+}
+
+.cv-skills-section{
+    margin-bottom: 9px;
+    margin-top: 6px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.cv-skills {
+    margin-bottom: 6px;
+    display: flex; 
+    flex-wrap: wrap;
+}
+
+.cv-skill-tag {
+    background-color: #00bb002c;
+    color: #008c00;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    display: inline-block;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid #008c0057;
+    margin-right: 8px;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    width: auto;
+    min-width: 40px;
+    max-width: 100%;
     text-align: center;
 }
 
-.header-info h2 {
-    font-size: 26px;
-    margin-top: 0;
-    font-weight: 600;
-    margin-bottom: 0px;
+.buttoms {
+    display: flex;
+    gap: 20px;
+    margin-top: 15px;
+    margin-bottom: 0;
+    justify-content: space-between;
 }
 
-.header-info p {
-    color: #333;
-    font-size: 16px;
-    margin-bottom: 0px;
+.apply-button {
+    background-color: #00bb00;
+    color: white;
+    border: none;
+    border-radius: 30px;
+    font-size: clamp(0.9rem, 2.5vw, 1rem);
+    cursor: pointer;
+    transition: background-color 0.3s;
+    min-width: 0;
+    width: 48%;
+    padding: 0.5rem 1.5rem;
+    margin: 0;
+    text-align: center;
+    display: inline-block;
+}
+
+.apply-button:hover {
+    background-color: #008c00;
 }
 
 
+.add-cv-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 30px 0;
+    width: 100%;
+}
+
+.add-cv-btn {
+    background-color: #00bb00;
+    color: white;
+    border: none;
+    border-radius: 30px;
+    font-size: clamp(0.9rem, 2.5vw, 1rem);
+    cursor: pointer;
+    transition: background-color 0.3s;
+    min-width: 0;
+    padding: 0.5rem 1.5rem;
+    margin: 0;
+    text-align: center;
+    display: inline-block;
+}
+
+.add-cv-btn:hover {
+    background-color: #008c00;
+}
 
 
+/* Карточка заполнения CV */
 .profile-form {
     background-color: #fff;
     border-radius: 15px;
