@@ -109,12 +109,9 @@ background-color: #f2f2f2;
     width: 100%;
     height: 55px;
     max-width: 1400px;
-    /* border: 1px solid hsla(0, 0%, 33%, 0.18); */
-    /* margin: 20px auto; */
     background-color: white;
     padding: 13px 13px;
     border-radius: 15px;
-    /* box-shadow: 4px 4px 2px 0px hsla(120, 45%, 16%, 0.5); */
     gap: 5px;
 }
 
@@ -134,8 +131,6 @@ background-color: #f2f2f2;
     background-color: #f2f2f2;
     color: #555;
     margin-right: 10px;
-    /* box-shadow: inset 2px 2px 4px #b5b5b5,
-                inset -2px -2px 4px #ffffff; */
      outline: none;
 }
 
@@ -150,8 +145,6 @@ background-color: #f2f2f2;
     white-space: nowrap;
     transition: background-color 0.2s;
     background-color: #00bb00;
-    /* box-shadow: inset 2px 2px 4px #009a00,
-                inset -2px -2px 4px #11ff11; */
     letter-spacing: 0.4px;
 }
 
@@ -182,10 +175,8 @@ background-color: #f2f2f2;
 
 .filters-conteiner{
     background-color: white;
-    /* border: 1px solid hsla(0, 0%, 33%, 0.18); */
-    /* box-shadow: 4px 4px 2px 0px hsla(120, 45%, 16%, 0.5); */
     border-radius: 15px;
-    padding: clamp(12px, 3vw, 20px);
+    padding: clamp(0px, 1.5vw, 20px);
     gap: 0px;
     width: min(40vw, 396px);
     /* height: 600px;  */
@@ -195,10 +186,6 @@ background-color: #f2f2f2;
     margin-left: 0px;
     align-self: flex-start;
     gap: 15px;
-    /* overflow-y: scroll;
-    padding-right: 17px;
-    box-sizing: content-box;
-    overflow: hidden;  */
 }
 
 .filters_header{
@@ -210,9 +197,6 @@ background-color: #f2f2f2;
     border-radius: 50px;
     padding: 5px 10px;
     gap: 2px;
-    /* box-shadow: inset 2px 2px 4px #b5b5b5,
-                inset -2px -2px 4px #ffffff; */
-
 }
 
 .filters_header h2 {
@@ -248,6 +232,7 @@ background-color: #f2f2f2;
     gap: 2px;
     color: #555;
     padding: 0.5rem 0;
+    
 }
 
 .checkbox-label {
@@ -256,18 +241,18 @@ background-color: #f2f2f2;
     cursor: pointer;
     font-size: clamp(0.8rem, 1.2vw, 0.95rem);
     color: #333;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
     user-select: none;
+    border-radius: 10px;
+    transition: background-color 0.2s, color 0.2s;
+    padding: 2px 0;
 
 }
 
+.checkbox-label:hover {
+    background-color: #f2f2f2;
+}
+
 .checkbox-label input[type="checkbox"] {
-    /* width: 18px;
-    height: 18px;
-    margin-right: 12px;
-    cursor: pointer; */
     appearance: none;
     -webkit-appearance: none;
     margin: 0;
@@ -275,7 +260,14 @@ background-color: #f2f2f2;
     width: 0;
 }
 
-.checkbox-label span::before {
+.checkbox-label span {
+    font-size: inherit;
+    color: #333;
+    transition: color 0.2s, font-weight 0.2s;
+}
+
+
+.checkbox-label span:not(.vacancy-count)::before {
     content: '';
     display: inline-block;
     width: 14px;
@@ -289,19 +281,13 @@ background-color: #f2f2f2;
     top: 3px;
 }
 
-.checkbox-label input[type="checkbox"]:checked + span::before {
+.checkbox-label input[type="checkbox"]:checked + span:not(.vacancy-count)::before {
     background-color: #00bb00;
-    /* box-shadow: inset 2px 2px 4px #009a00,
-                inset -2px -2px 4px #11ff11; */
-
-
     background-image: url("/pics/tick.png");
     background-repeat: no-repeat;
     background-position: center;
     background-size: 65%;
 }
-
-
 
 hr {
     border: none;
@@ -350,6 +336,98 @@ hr {
     background-color: #008c00;
 }
 
+/*!* Стили для городского фильтра в общей стилистике *!*/
+
+
+.city-search-wrapper {
+    display: flex;
+    width: 100%;
+    background-color: white;
+    border-radius: 15px;
+}
+
+.city-search-input {
+    flex-grow: 1;
+    width: 100%;
+    background-color: #f2f2f2;
+    color: #555;
+    border: none;
+    border-radius: 15px;
+    font-size: 17px;
+    padding: 10px 15px;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.cities-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    color: #555;
+    padding: 0.5rem 0;
+    margin-top: 10px;
+}
+
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: clamp(0.8rem, 1.2vw, 0.95rem);
+    color: #333;
+    user-select: none;
+    border-radius: 10px;
+    transition: background-color 0.2s, color 0.2s;
+    padding: 2px 0;
+}
+
+.checkbox-label:hover {
+    background-color: #f2f2f2;
+}
+
+.checkbox-label input[type="checkbox"]:checked + span {
+    color: #00bb00;
+    font-weight: bold;
+}
+
+.checkbox-label span {
+    font-size: inherit;
+    color: #333;
+    transition: color 0.2s, font-weight 0.2s;
+}
+
+.vacancy-count {
+    background-color: #f2f2f2;
+    color: #555;
+    border-radius: 10px;
+    font-size: 13px;
+    padding: 2px 8px;
+    margin-left: auto;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.checkbox-label:hover .vacancy-count,
+.checkbox-label input[type="checkbox"]:checked ~ .vacancy-count {
+    background-color: #00bb00;
+    color: #fff;
+}
+
+.filter_variants.collapsed label:nth-child(n+6),
+.cities-container.collapsed .checkbox-label:nth-child(n+6) {
+    display: none !important;
+}
+
+
+/* !* Стили для скрытия элементов *! */
+.cities-container.collapsed .city-label:nth-child(n+6) {
+   display: none !important;
+}
+
+.filter_section .show-more-btn:hover {
+   background-color: #008c00;
+}
+
+
 /* CARDS */
 
 
@@ -372,22 +450,14 @@ hr {
 /* ALL JOBS */
 .all_jobs{
     background-color: white;
-    /* border: 1px solid hsla(0, 0%, 33%, 0.18); */
     width: 100%;
     display: flex;
-    /* height: 60px; */
-    /* box-shadow: 4px 4px 2px 0px hsla(120, 45%, 16%, 0.5); */
     border-radius: 15px;
-    /* padding: clamp(12px, 3vw, 20px); */
-    /* gap: clamp(10px, 2vw, 15px); */
-    /* width: min(40vw, 396px); */
     box-sizing: border-box;
     justify-content: space-between;
     flex-direction: row;
     align-items: center;
     padding: 7px 13px;
-    /* margin: 0;
-    gap: 0px; */
 }
 
 .all_jobs_text{
@@ -572,7 +642,7 @@ hr {
     margin: 0 0 1rem 0;
     line-height: 1.5;
     font-size: clamp(0.85rem, 2vw, 1rem);
-    color: #555;
+    color: #000000;
 }
 
 .skills-section {
@@ -675,4 +745,130 @@ hr {
 #scrollBtn:hover {
   background-color: #008c00;
 }
+
+
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 30px 0;
+    padding: 15px 25px;
+    background-color: white;
+    border-radius: 50px;
+    max-width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.page-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background-color: transparent;
+    color: #00BB00FF;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.page-btn:hover:not(.active) {
+    background-color: #f0f8f4;
+    color: #6B9B7F;
+    transform: scale(1.05);
+}
+
+.page-btn.active {
+    background-color: #00BB00FF;
+    color: white;
+    box-shadow: 0 2px 8px rgba(141, 180, 160, 0.4);
+    transform: scale(1.1);
+}
+
+.page-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.page-btn:disabled:hover {
+    background-color: transparent;
+    transform: none;
+}
+
+.arrow-btn {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    border: 2px solid #00BB00FF;
+    background-color: white;
+    color: #00BB00FF;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.arrow-btn:hover:not(:disabled) {
+    background-color: #00BB00FF;
+    color: white;
+    transform: scale(1.05);
+}
+
+.arrow-btn:disabled {
+    border-color: #d0d0d0;
+    color: #d0d0d0;
+    cursor: not-allowed;
+}
+
+.ellipsis {
+    color: #00BB00FF;
+    font-size: 16px;
+    font-weight: 500;
+    padding: 0 5px;
+}
+
+/* Анимация перехода активного состояния */
+.page-btn.active {
+    animation: activePulse 0.3s ease-out;
+}
+
+@keyframes activePulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.15);
+    }
+    100% {
+        transform: scale(1.1);
+    }
+}
+
+/* Responsive стили */
+/* @media (max-width: 768px) {
+    .pagination {
+        padding: 12px 20px;
+        gap: 6px;
+    }
+
+    .page-btn {
+        width: 35px;
+        height: 35px;
+        font-size: 14px;
+    }
+
+    .arrow-btn {
+        width: 30px;
+        height: 30px;
+        font-size: 12px;
+    }
+} */
 

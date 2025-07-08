@@ -258,7 +258,7 @@ document.addEventListener('DOMContentLoaded', function () {
     loadFromLocalStorage();
 
     function getUserEmail() {
-        return "kycenbka@gmail.com"; // временно
+        return "a.ilin@innopolis.university"; // временно
     }
 
     // **ФУНКЦИИ ДЛЯ РАБОТЫ С НАВЫКАМИ**

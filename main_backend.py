@@ -77,6 +77,7 @@ async def read_welcome():
 async def read_welcome():
     return FileResponse('web/UserProfile.html')
 
+
 @app.get("/vacancies")
 async def get_all_vacancies(db: VacancyManager = Depends(get_vacancy_manager)):
     try:
@@ -142,7 +143,7 @@ async def register_user(user_data: UserCreate, db: UserManager = Depends(get_use
             db.add_new_user,
             name=user_data.name, email=user_data.email, password=user_data.password
         )
-        await create_password(user_data.email, db)
+        #await create_password(user_data.email, db)
         # verification disabled due to email troubles
         # await send_verification(user_data.email, db)
         return {"message": "User registered", "user_id": user_id}
