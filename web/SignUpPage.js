@@ -50,8 +50,8 @@ document.querySelector('.login-form').addEventListener('submit', async (e) => {
             localStorage.setItem("userName", firstName);
             localStorage.setItem("userSurname", lastName);
             localStorage.setItem("userEmail", userData.email);
-            alert("Регистрация прошла успешно. Подтвердите почту.");
-            window.location.href = "ConfirmPage.html";
+            alert("Регистрация прошла успешно.");
+            window.location.href = "/log_in_page";
         } else {
             document.getElementById('email-error').textContent = result.detail || "Ошибка регистрации";
         }

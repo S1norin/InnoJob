@@ -59,14 +59,14 @@ class UserManager:#Этот черт будет использоваться д�
 
 #харашо а теперь передем к менее продолбаной части
     def add_new_user(self, name, email, password):
-        query = "INSERT INTO users (name, email, password) VALUES (%s, %s, %s) RETURNING id;"
+        query = "INSERT INTO users (name, email, password, is_confirmed) VALUES (%s, %s, %s, %s) RETURNING id;"
         password_bytes = password.encode('utf-8')
         hashed_password = bcrypt.hashpw(password_bytes, bcrypt.gensalt()).decode('utf-8')#данная залупа хеширует пароль причем сохраня соль хеширования непосредственно внутри
 
         try:
             with self._get_connection() as conn:#НЕ ЗАБЫВАЕМ ПРО ПРЕКРАСНЕЙШУЮ КОНСТРУКЦИЮ
                 with conn.cursor() as cur:
-                    cur.execute(query, (name, email, hashed_password))#захерачиваем пользователя
+                    cur.execute(query, (name, email, hashed_password, "True"))#захерачиваем пользователя
                     user_id = cur.fetchone()[0]
                     return user_id#если понадобиться можно будет получат ид
         except psycopg2.IntegrityError:
