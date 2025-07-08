@@ -73,10 +73,6 @@ async def read_job_listing():
 async def read_welcome():
     return FileResponse('web/WelcomePage.html')
 
-@app.get("/user_profile")
-async def read_welcome():
-    return FileResponse('web/UserProfile.html')
-
 @app.get("/vacancies")
 async def get_all_vacancies(db: VacancyManager = Depends(get_vacancy_manager)):
     try:
