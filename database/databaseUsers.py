@@ -48,7 +48,7 @@ class UserManager:#Этот черт будет использоваться д�
             user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
             card_id INT NOT NULL,
             skill TEXT NOT NULL,
-            FOREIGN KEY (user_id, card_id) REFERENCES user_cards(user_id, card_id) ON DELETE CASCADE
+            FOREIGN KEY (user_id, card_id) REFERENCES cards(user_id, card_id) ON DELETE CASCADE
         );
         
         """
