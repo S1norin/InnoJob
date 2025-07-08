@@ -2,7 +2,7 @@ import requests
 from time import sleep
 
 from parsers.parser_configs import *
-from telegram_parser import parse_channel
+from parsers.telegram_parser import parse_channel
 def get_params_hh():
     params = []
     for i in employer_ids_hh:
@@ -204,7 +204,7 @@ def get_data_hh():
 def get_main_data():
     data = []
     data.extend(get_data_hh())
-    data.extend(parse_channel('IU Career Finder'))
+    # data.extend(parse_channel('IUCareerFinder'))
     return data
 
 def get_employer_data_hh(e_id):
@@ -224,3 +224,5 @@ def get_city_data(a_id):
         'name': response.get('name')
     }
     return data
+
+# print(*parse_channel("IUCareerFinder", 30), sep='\n')

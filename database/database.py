@@ -2,7 +2,7 @@ import psycopg2
 
 from parsers.parser import get_main_data, get_employer_data_hh, get_city_data
 from parsers.parser_configs import *
-# from config import *
+from config import *
 
 
 # Интерфейс для работы с вакансиями
@@ -10,6 +10,13 @@ class VacancyManager:
     def __init__(self, host, dbname, user, password, port):
         self.db_params = {'host': host, 'dbname': dbname, 'user': user, 'password': password, 'port': port}
 
+        self._total_update()
+
+    # Создаёт подключение для дальнейшей работы
+    def _get_connection(self):
+        return psycopg2.connect(**self.db_params)
+
+    def _total_update(self):
         # Создание таблиц
         self.update_tables()
         self.create_tables_if_not_exists()
@@ -17,9 +24,6 @@ class VacancyManager:
         self.update_employers()              # Добавляем работодателей
         self.update_vacancies_from_source()  # Добавляем вакансии
 
-    # Создаёт подключение для дальнейшей работы
-    def _get_connection(self):
-        return psycopg2.connect(**self.db_params)
 
     # Удобная функция для создания таблиц (в случае отсутствия оных)
     def create_tables_if_not_exists(self):
@@ -253,7 +257,10 @@ class VacancyManager:
                 return data
 
     def get_sources(self):
-        return ['hh.ru', 'telegram']
+        return [
+            'hh.ru',
+            # 'telegram'
+        ]
 
     def get_formats(self):
         request = 'SELECT format FROM formats'
@@ -263,7 +270,13 @@ class VacancyManager:
                 res = list(set([i[0] for i in cur.fetchall()]))
                 return res
 
-# db = VacancyManager(db_host, db_name, db_user, db_password, db_port)
+db = VacancyManager(db_host, db_name, db_user, db_password, db_port)
+print(len(db.get_vac_list()))
+db._total_update()
+print(len(db.get_vac_list()))
+
+db._total_update()
+print(len(db.get_vac_list()))
 # # print(db.get_formats())
 # # # print(len(d))
 # # print(len(db.get_employers()))

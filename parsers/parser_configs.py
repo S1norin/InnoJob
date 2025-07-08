@@ -11,7 +11,7 @@ employer_ids_hh = [
 
 sources = {
     '1': 'hh.ru',
-    '2': 'telegram'
+    # '2': 'telegram'
 }
 
 def get_params_superjob():
