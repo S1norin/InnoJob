@@ -270,9 +270,9 @@ class VacancyManager:
                 cur.execute(request)
                 res = list(set([i[0] for i in cur.fetchall()]))
                 return res
-
-db = VacancyManager(db_host, db_name, db_user, db_password, db_port)
-print(*db.get_vac_list(), sep='\n')
+#
+# db = VacancyManager(db_host, db_name, db_user, db_password, db_port)
+# print(*db.get_vac_list(), sep='\n')
 # db._total_update()
 # print(len(db.get_vac_list()))
 #
