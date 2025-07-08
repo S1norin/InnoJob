@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
-
 <head>
     <meta charset="UTF-8" />
-    <title>Scareerz</title>
-    <link rel="stylesheet" href="/web/UserProfile.css">
+    <title>InnoJob</title>
+    <link rel="stylesheet" href="/web/UserProfile.css?v=1.1">
+
 </head>
 
 <body>
@@ -14,13 +14,13 @@
                 <a href="/logo">
                     <img src="/pics/IU.png" alt="IU Logo">
                 </a>
-                <h2>ScarEerZ</h2>
+                <h2>InnoJob</h2>
             </div>
             <div class="header-right">
-                <a href="MainPage.html">
+                <a href="/job_listing">
                     <h2>Jobs</h2>
                 </a>
-                <a href="WelcomePage.html">
+                <a href="/welcome">
                     <img src="../pics/logout.png" alt="logout">
                 </a>
             </div>
@@ -28,109 +28,100 @@
     </header>
 
     <div class="other_body">
-        <div class="header-info">
-            <h2>Профиль пользователя</h2>
-            <p>Заполните информацию о себе</p>
+        <!-- Левая колонка с формой -->
+        <div class="fill_cards">
+            <div class="profile-form">
+                <div class="profile-header">
+                    <div class="profile-image">
+                        <div class="image-placeholder">Фото</div>
+                        <img id="profilePhoto" class="profile-photo" style="display:none;">
+                        <input type="file" id="photoInput" accept="image/png, image/jpeg" style="display:none;">
+                        <button id="uploadPhotoBtn" class="upload-photo-btn">Upload Photo</button>
+                    </div>
+                    <div class="profile-info">
+                        <input type="email" placeholder="Email" class="email-input" readonly>
+                        <input type="text" placeholder="Имя" class="name-input">
+                        <input type="text" placeholder="Фамилия" class="name-input">
+                        <input type="file" id="cvInput" accept="application/pdf" style="display:none;">
+                        <button class="upload-cv-btn" id="uploadCvBtn">Upload CV</button>
+                        <div id="cvPreview" class="cv-preview"></div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="skills-section">
+                        <label>Навыки</label>
+                        <div class="skills-container">
+                            <div class="selected-skills" id="selectedSkills">
+                                <!-- Выбранные навыки будут отображаться здесь -->
+                            </div>
+                            <div class="skills-input-wrapper">
+                                <input type="text" class="skills-search" id="skillsSearch" placeholder="Поиск навыков...">
+                            </div>
+                            <div class="skills-dropdown" id="skillsDropdown">
+                                <div class="skills-option" data-value="javascript">JavaScript</div>
+                                <div class="skills-option" data-value="python">Python</div>
+                                <div class="skills-option" data-value="react">React</div>
+                                <div class="skills-option" data-value="nodejs">Node.js</div>
+                                <div class="skills-option" data-value="html">HTML/CSS</div>
+                                <div class="skills-option" data-value="vue">Vue.js</div>
+                                <div class="skills-option" data-value="angular">Angular</div>
+                                <div class="skills-option" data-value="php">PHP</div>
+                                <div class="skills-option" data-value="java">Java</div>
+                                <div class="skills-option" data-value="csharp">C#</div>
+                                <div class="skills-option" data-value="sql">SQL</div>
+                                <div class="skills-option" data-value="mongodb">MongoDB</div>
+                                <div class="skills-option" data-value="docker">Docker</div>
+                                <div class="skills-option" data-value="git">Git</div>
+                                <div class="skills-option" data-value="aws">AWS</div>
+                                <div class="skills-option" data-value="photoshop">Photoshop</div>
+                                <div class="skills-option" data-value="figma">Figma</div>
+                                <div class="skills-option" data-value="sketch">Sketch</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Уровень образования</label>
+                            <select class="form-select" id="educationLevel" required>
+                                <option value="" disabled selected>Выберите уровень</option>
+                                <option value="school">Среднее образование</option>
+                                <option value="college">Среднее профессиональное</option>
+                                <option value="bachelor">Бакалавриат</option>
+                                <option value="master">Магистратура</option>
+                                <option value="phd">Аспирантура</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Статус образования</label>
+                            <select class="form-select" id="educationStatus" required>
+                                <option value="" disabled selected>Статус образования</option>
+                                <option value="Оконченное">Оконченное</option>
+                                <option value="Неоконченное">Неоконченное</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>О себе</label>
+                        <textarea class="form-textarea" id="description" placeholder="Расскажите о себе, своем опыте и достижениях..." rows="6"></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="save-btn" id="saveBtn">Сохранить</button>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="profile-form">
-            <div class="profile-header">
-                <div class="profile-image">
-                    <div class="image-placeholder"></div>
-                    <img id="profilePhoto" class="profile-photo"
-                        style="width:120px;height:120px;border-radius:12px;object-fit:cover;display:none;">
-                    <input type="file" id="photoInput" accept="image/png, image/jpeg" style="display:none;">
-                    <button id="uploadPhotoBtn" class="upload-photo-btn">Upload Photo</button>
-                </div>
-                <div class="profile-info">
-                    <input type="email" placeholder="Email" class="email-input" readonly>
-                    <input type="text" placeholder="Имя" class="name-input" readonly>
-                    <input type="text" placeholder="Фамилия" class="name-input" readonly>
-                    <input type="file" id="cvInput" accept="application/pdf" style="display:none;">
-                    <button class="upload-cv-btn" id="uploadCvBtn">Upload CV</button>
-                    <div id="cvPreview" class="cv-preview"></div>
-                </div>
-            </div>
-
-            <div class="form-section">
-                <div class="skills-section">
-                    <label>Навыки</label>
-                    <div class="skills-container">
-                        <div class="selected-skills" id="selectedSkills">
-                            <!-- Выбранные навыки будут отображаться здесь -->
-                        </div>
-                        <div class="skills-input-wrapper">
-                            <input type="text" class="skills-search" id="skillsSearch" placeholder="Поиск навыков...">
-                            <!-- <div class="dropdown-arrow">▼</div> -->
-                        </div>
-                        <div class="skills-dropdown" id="skillsDropdown">
-                            <div class="skills-option" data-value="javascript">JavaScript</div>
-                            <div class="skills-option" data-value="python">Python</div>
-                            <div class="skills-option" data-value="react">React</div>
-                            <div class="skills-option" data-value="nodejs">Node.js</div>
-                            <div class="skills-option" data-value="html">HTML/CSS</div>
-                            <div class="skills-option" data-value="vue">Vue.js</div>
-                            <div class="skills-option" data-value="angular">Angular</div>
-                            <div class="skills-option" data-value="php">PHP</div>
-                            <div class="skills-option" data-value="java">Java</div>
-                            <div class="skills-option" data-value="csharp">C#</div>
-                            <div class="skills-option" data-value="sql">SQL</div>
-                            <div class="skills-option" data-value="mongodb">MongoDB</div>
-                            <div class="skills-option" data-value="docker">Docker</div>
-                            <div class="skills-option" data-value="git">Git</div>
-                            <div class="skills-option" data-value="aws">AWS</div>
-                            <div class="skills-option" data-value="photoshop">Photoshop</div>
-                            <div class="skills-option" data-value="figma">Figma</div>
-                            <div class="skills-option" data-value="sketch">Sketch</div>
-                        </div>
-
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Уровень образования</label>
-                        <select class="form-select" required>
-                            <option value="" disabled selected>Выберите уровень</option>
-
-                            <option value="school">Среднее образование</option>
-                            <option value="college">Среднее профессиональное</option>
-                            <option value="bachelor">Бакалавриат</option>
-                            <option value="master">Магистратура</option>
-                            <option value="phd">Аспирантура</option>
-                        </select>
-                        <!-- <div class="dropdown-arrow">▼</div> -->
-                    </div>
-
-                    <div class="form-group">
-                        <label>Курс обучения</label>
-                        <select class="form-select" required>
-                            <option value="" disabled selected>Выберите курс</option>
-
-                            <option value="1">1 курс</option>
-                            <option value="2">2 курс</option>
-                            <option value="3">3 курс</option>
-                            <option value="4">4 курс</option>
-                            <option value="5">5 курс</option>
-                            <option value="6">6 курс</option>
-                        </select>
-                        <!-- <div class="dropdown-arrow">▼</div> -->
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>О себе</label>
-                    <textarea class="form-textarea" placeholder="Расскажите о себе, своем опыте и достижениях..."
-                        rows="6"></textarea>
-                </div>
-
-                <div class="form-actions">
-                    <button type="submit" class="save-btn">Save</button>
-                </div>
-            </div>
+        <!-- Правая колонка с карточками -->
+        <div class="cv-cards" id="cardsContainer">
+            <!-- Здесь будут отображаться созданные карточки -->
         </div>
     </div>
-    <script src="UserProfilePage.js"></script>
-</body>
 
+    <script src="/web/UserProfilePage.js"></script>
+</body>
 </html>
