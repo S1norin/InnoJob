@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8" />
-    <title>Scareerz</title>
+    <title>InnoJob</title>
     <link rel="stylesheet" href="/web/UserProfile.css">
 </head>
 
@@ -14,13 +14,13 @@
                 <a href="/logo">
                     <img src="/pics/IU.png" alt="IU Logo">
                 </a>
-                <h2>ScarEerZ</h2>
+                <h2>InnoJob</h2>
             </div>
             <div class="header-right">
-                <a href="MainPage.html">
+                <a href="/job_listing">
                     <h2>Jobs</h2>
                 </a>
-                <a href="WelcomePage.html">
+                <a href="/welcome">
                     <img src="../pics/logout.png" alt="logout">
                 </a>
             </div>
@@ -28,17 +28,45 @@
     </header>
 
     <div class="other_body">
-        <div class="header-info">
-            <h2>Профиль пользователя</h2>
-            <p>Заполните информацию о себе</p>
-        </div>
+        <div class="cv-cards">
+            <div class="cv-card">
+
+                    <div class="card-header">
+                        <div class="logo-place"></div>
+                        <div class="job-title-info">
+                            <h2>Name</h2>
+                            <h2>Surname</h2>
+                        </div>
+                    </div>
+
+                    <div class="card-details">
+                        <div class="detail-item">
+                            <img src="/pics/education.png" alt="education">
+                            <span>Уровень образования</span>
+                        </div>
+                        <div class="detail-item">
+                            <span>Статус образования</span>
+                        </div>
+                    </div>
+
+                    <div class="cv-skills">
+                        <div class="cv-skill-tag">скилл1</div>
+                        <div class="cv-skill-tag">скилл222222</div>
+                        <div class="cv-skill-tag">скилл33333</div>
+                        <div class="cv-skill-tag">скил444</div>
+                        </div>
+
+                    <div class="card-description">
+                        <p>Описание</p>
+                    </div>
+
+        <div class="fill_cards">
 
         <div class="profile-form">
             <div class="profile-header">
                 <div class="profile-image">
                     <div class="image-placeholder"></div>
-                    <img id="profilePhoto" class="profile-photo"
-                        style="width:120px;height:120px;border-radius:12px;object-fit:cover;display:none;">
+                    <img id="profilePhoto" class="profile-photo">
                     <input type="file" id="photoInput" accept="image/png, image/jpeg" style="display:none;">
                     <button id="uploadPhotoBtn" class="upload-photo-btn">Upload Photo</button>
                 </div>
@@ -103,16 +131,12 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Курс обучения</label>
+                        <label> Статус образования </label>
                         <select class="form-select" required>
-                            <option value="" disabled selected>Выберите курс</option>
+                            <option value="" disabled selected>Статус образования</option>
 
-                            <option value="1">1 курс</option>
-                            <option value="2">2 курс</option>
-                            <option value="3">3 курс</option>
-                            <option value="4">4 курс</option>
-                            <option value="5">5 курс</option>
-                            <option value="6">6 курс</option>
+                            <option value="Оконченное">Оконченное</option>
+                            <option value="Неоконченное">Неоконченное</option>
                         </select>
                         <!-- <div class="dropdown-arrow">▼</div> -->
                     </div>
@@ -128,9 +152,62 @@
                     <button type="submit" class="save-btn">Save</button>
                 </div>
             </div>
+
+
         </div>
+
+            <div class="add-cv-wrapper">
+                <button class="add-cv-btn">+ Добавить резюме</button>
+            </div>
     </div>
-    <script src="UserProfilePage.js"></script>
+
+
+
+        <div class="cv-cards">
+            <div class="cv-card">
+
+                    <div class="card-header">
+                        <div class="logo-place"></div>
+                        <div class="job-title-info">
+                            <h2>Name</h2>
+                            <h2>Surname</h2>
+                        </div>
+                    </div>
+
+                    <div class="card-details">
+                        <div class="detail-item">
+                            <img src="/pics/education.png" alt="education">
+                            <span>Уровень образования</span>
+                        </div>
+                        <div class="detail-item">
+                            <span>Статус образования</span>
+                        </div>
+                    </div>
+
+                    <div class="cv-skills">
+                        <div class="cv-skill-tag">скилл1</div>
+                        <div class="cv-skill-tag">скилл222222</div>
+                        <div class="cv-skill-tag">скилл33333</div>
+                        <div class="cv-skill-tag">скил444</div>
+                        </div>
+
+                    <div class="card-description">
+                        <p>Описание</p>
+                    </div>
+
+                    <div class="buttoms">
+                        <button class="apply-button">Скачать CV</button>
+                        <button class="apply-button">Cвязаться</button>
+                    </div>
+            </div>
+        </div>
+
+
+
+
+
+    </div>
+    <script src="/web/UserProfilePage.js"></script>
 </body>
 
 </html>

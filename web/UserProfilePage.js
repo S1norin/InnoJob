@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function updateDropdownOptions() {
-        const options = skillsDropdown.querySelectorAll('.skills-option');
+        const options = skillsDropdown.querySelectorAll('.skills-dropdown');
         options.forEach(option => {
             const value = option.getAttribute('data-value');
             if (selectedSkills.some(skill => skill.value === value)) {
@@ -128,8 +128,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Helper to get email from localStorage (adjust key if needed)
     function getUserEmail() {
-        return localStorage.getItem('emailToConfirm') || localStorage.getItem('userEmail');
+        return "kycenbka@gmail.com"; //временно, для чека работы загрузки фото
     }
+
+    localStorage.setItem('userName', 'Ксения');
+    localStorage.setItem('userSurname', 'Минаева');
+
 
     // Get references to all fields
     const emailInput = document.querySelector('.email-input');
@@ -322,6 +326,7 @@ document.addEventListener('DOMContentLoaded', function () {
             alert("Email пользователя не найден.");
             return;
         }
+
         const formData = new FormData();
         formData.append('email', email);
         formData.append('photo', file);
@@ -332,7 +337,7 @@ document.addEventListener('DOMContentLoaded', function () {
             });
             const result = await response.json();
             if (result.status === "success") {
-                alert("Фото успешно загружено!");
+                ("Фото успешно загружено!");
                 afterProfileUpdate();
             } else {
                 alert("Ошибка загрузки фото: " + (result.message || "Неизвестная ошибка"));
@@ -359,6 +364,7 @@ document.addEventListener('DOMContentLoaded', function () {
             alert("Email пользователя не найден.");
             return;
         }
+
         const formData = new FormData();
         formData.append('email', email);
         formData.append('pdf_file', file);
