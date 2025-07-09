@@ -1,10 +1,8 @@
-from math import trunc
-
 import requests
 from time import sleep
 
 from parsers.parser_configs import *
-
+from parsers.telegram_parser import parse_channel
 def get_params_hh():
     params = []
     for i in employer_ids_hh:
@@ -18,8 +16,100 @@ def get_params_hh():
     return params
 
 
-def get_data_from_url(url):
-    return requests.get(url)
+# SUPERJOB_API_KEY = "ваш_ключ_здесь"
+#
+# def get_data_superjob():
+#     print("Запрос вакансий с SuperJob.ru...")
+#     params = get_params_sj()  # Новая функция для параметров SuperJob
+#     vacancies = []
+#     headers = {"X-Api-App-Id": SUPERJOB_API_KEY}  # Заголовок авторизации
+#
+#     for par in params:
+#         print(f"Запрос с параметрами: {par}")
+#         response = requests.get("https://api.superjob.ru/2.0/vacancies/",
+#                                 headers=headers,
+#                                 params=par)
+#
+#         # Обработка ограничений API
+#         delay = 0.2
+#         while response.status_code == 403 or response.status_code == 429:
+#             sleep(delay)
+#             delay += 0.2
+#             response = requests.get("https://api.superjob.ru/2.0/vacancies/",
+#                                     headers=headers,
+#                                     params=par)
+#
+#         if response.status_code != 200:
+#             print(f"Ошибка {response.status_code}: {response.text}")
+#             continue
+#
+#         api_data = response.json()
+#         for vacancy_sj in api_data.get('objects', []):
+#             # Основные поля
+#             name = vacancy_sj.get("profession", "Без названия")
+#             city_id = vacancy_sj.get('town', {}).get('id') if vacancy_sj.get('town') else None
+#             employer_id = vacancy_sj.get('firm_id')
+#
+#             # Обработка зарплаты
+#             salary_info = {
+#                 "from": vacancy_sj.get("payment_from"),
+#                 "to": vacancy_sj.get("payment_to"),
+#                 "currency": vacancy_sj.get("currency", "rub").upper(),
+#                 "gross": vacancy_sj.get("gross", False)
+#             }
+#
+#             # Форматирование опыта
+#             experience_map = {
+#                 "noExperience": "Нет опыта",
+#                 "between1And3": "1-3 года",
+#                 "between3And6": "3-6 лет",
+#                 "moreThan6": "Более 6 лет"
+#             }
+#             experience = experience_map.get(vacancy_sj.get("experience", {}).get("id", ""), "Нет данных")
+#
+#             # Формат работы
+#             work_place = vacancy_sj.get("place_of_work", {})
+#             work_format = []
+#             if work_place:
+#                 format_map = {
+#                     1: "В офисе",
+#                     2: "Гибрид",
+#                     3: "Удалённая работа"
+#                 }
+#                 work_format = [format_map.get(work_place.get("id"), "Другой формат")]
+#
+#             # Описание и требования
+#             description = vacancy_sj.get("vacancyRichText", "") or vacancy_sj.get("candidat", "")
+#             skills = [skill["title"] for skill in vacancy_sj.get("skills", [])]
+#
+#             vacancies.append({
+#                 "name": name,
+#                 "city": city_id,
+#                 "employer_id": employer_id,
+#                 "salary_from": salary_info["from"],
+#                 "salary_to": salary_info["to"],
+#                 "salary_currency": salary_info["currency"],
+#                 "salary_mode": "gross" if salary_info["gross"] else "net",
+#                 "experience": experience,
+#                 "format": work_format,
+#                 "source": "superjob",
+#                 "description": description,
+#                 "link": vacancy_sj.get("link", "#"),
+#                 "picture": vacancy_sj.get("client", {}).get("logo", "#"),
+#                 "requirements": skills
+#             })
+#
+#         # Пауза между запросами
+#         sleep(0.25)
+#
+#     return vacancies
+#
+# def get_params_sj():
+#     """Генератор параметров для SuperJob API"""
+#     return [
+#         {'keyword': 'Python', 'town': 4, 'count': 100},  # Москва
+#         {'keyword': 'Data Science', 'town': 14, 'count': 50}  # Санкт-Петербург
+#     ]
 
 def get_data_hh():
     print("Запрос вакансий с HH.ru...")
@@ -73,12 +163,12 @@ def get_data_hh():
 
             if url_api_details:
                 try:
-                    response_details = get_data_from_url(url_api_details)
+                    response_details = requests.get(url_api_details)
 
                     delay = 0.2
 
                     while response_details.status_code == 403:
-                        response_details = get_data_from_url(url_api_details)
+                        response_details = requests.get(url_api_details)
                         sleep(delay + 0.5)
                         delay += 0.5
                     data_details = response_details.json()
@@ -114,6 +204,7 @@ def get_data_hh():
 def get_main_data():
     data = []
     data.extend(get_data_hh())
+    # data.extend(parse_channel('IUCareerFinder'))
     return data
 
 def get_employer_data_hh(e_id):
@@ -133,3 +224,5 @@ def get_city_data(a_id):
         'name': response.get('name')
     }
     return data
+
+# print(*parse_channel("IUCareerFinder", 30), sep='\n')

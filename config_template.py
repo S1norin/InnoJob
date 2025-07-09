@@ -12,6 +12,3 @@ SMTP_PORT = 465  # для SSL
 SMTP_USER = "andreyilin03@mail.ru"
 SMTP_PASSWORD = "UT397BpgFo82s1YRC8kt"
 
-telegram_api_id=""
-telegram_api_hash=""
-telegram_session=""

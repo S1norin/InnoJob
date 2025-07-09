@@ -2,7 +2,7 @@ from telethon.sync import TelegramClient
 from telethon.sessions import StringSession
 from nlp_parser import parse_vacancy
 try:
-    from config import telegram_session, telegram_api_id, telegram_api_hash
+    from parsers.parser_configs import telegram_session, telegram_api_id, telegram_api_hash
     if not telegram_session:
         raise ImportError("Dalbaeb exception")
 except:

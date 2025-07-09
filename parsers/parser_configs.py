@@ -1,5 +1,5 @@
 employer_ids_hh = [
-    '5970367', '9981358', '11856196', '9756959', '7311'#, '156424', '10647164', '10491049', '562662', '773061',
+    '5970367', '9981358', '11856196', '9756959', '7311', '156424', '10647164', '10491049', '562662', '773061',
     # '4042737', '4468207', '10433406', '59436', '5184662', '4170578', '147672', '3154691', '10831945', '10572529',
     # '3335092', '4376554', '913233', '5079653', '10603974', '2488672', '567799', '9936093', '3565512', '2752199',
     # '1272806', '4499572', '4949743', '1441807', '3091070', '2300703', '5855834', '10202226', '1009889', '618292',
@@ -10,5 +10,13 @@ employer_ids_hh = [
 
 
 sources = {
-    '1': 'hh.ru'
+    '1': 'hh.ru',
+    # '2': 'telegram'
 }
+
+def get_params_superjob():
+    pass
+
+telegram_api_id = 23793794
+telegram_api_hash = "fd99415c924b7c46a03d3f8cde2fb4f4"
+telegram_session = "1ApWapzMBu27SgVlb-9r2DIhirmE4MJkFEmy1OF5qwyJi8sA7ChLYKs-X_bU1uQ8M6AYWDYu88-TBrJL_x4CrY3QKyBEd-uq7NfA2agEKvohu5bkmqzGCTF_04pjNToahPmH_LBd0mhqQtrrMmGvSMrgApcFKvHOh_1OFHePc1fzUKaqi1nYijRHo3_GpjFvWKqVBZAdD5oRjPBVYL19YHvBFuoDTlaRcaf0gGjTxgalmP4h0HXPZ0B9TV2PuRU7eOLRHLnsEtF9aZtyZiDg-UDUjg5qYLTGPUUXpK32sn-yBKaIElX5NyTYFvoHw3s06PdT4KkoA09M_A1sBQb2TEPYe9MWbccM="

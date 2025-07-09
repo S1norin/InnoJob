@@ -2,7 +2,7 @@ import psycopg2
 
 from parsers.parser import get_main_data, get_employer_data_hh, get_city_data
 from parsers.parser_configs import *
-# from config import *
+from config import *
 
 
 # Интерфейс для работы с вакансиями
@@ -10,19 +10,23 @@ class VacancyManager:
     def __init__(self, host, dbname, user, password, port):
         self.db_params = {'host': host, 'dbname': dbname, 'user': user, 'password': password, 'port': port}
 
-        # Создание таблиц
-        self.update_tables()
-        self._create_tables_if_not_exists()
-        self.update_sources()                # Обновляем источники ДО добавления данных
-        self.update_employers()              # Добавляем работодателей
-        self.update_vacancies_from_source()  # Добавляем вакансии
+        self._total_update()
 
     # Создаёт подключение для дальнейшей работы
     def _get_connection(self):
         return psycopg2.connect(**self.db_params)
 
+    def _total_update(self):
+        # Создание таблиц
+        self.update_tables()
+        self.create_tables_if_not_exists()
+        self.update_sources()                # Обновляем источники ДО добавления данных
+        self.update_employers()              # Добавляем работодателей
+        self.update_vacancies_from_source()  # Добавляем вакансии
+
+
     # Удобная функция для создания таблиц (в случае отсутствия оных)
-    def _create_tables_if_not_exists(self):
+    def create_tables_if_not_exists(self):
         # Сначала создаём таблицу с источниками (если оных нет)
         query = """ 
             CREATE TABLE IF NOT EXISTS sources (
@@ -104,40 +108,40 @@ class VacancyManager:
             LEFT JOIN formats f ON v.id = f.vacancy_id
             ORDER BY v.id;
         """
-        vacancies = []
+        vacancies = {}
         with self._get_connection() as conn:
             with conn.cursor() as cur:
                 cur.execute(query)
                 for row in cur.fetchall():
-                    vac_id, name, employer, city, s_from, s_to, s_cur, s_mod, exp, fmt, desc, link, pic, source, req = row
-                    vac = {
-                        "id": vac_id,
-                        "name": name,
-                        "employer": employer,
-                        "city": city,
-                        "salary_from": s_from,
-                        "salary_to": s_to,
-                        "salary_currency": s_cur,
-                        "salary_mode": s_mod,
-                        "experience": exp,
-                        "format": fmt if fmt else [],
-                        "description": desc,
-                        "link": link,
-                        "picture": pic,
-                        "source": source,
-                        "requirements": req if req else []
-                    }
-                    try:
-                        vacancies.index(vac)
-                    except ValueError:
-                        vacancies.append(vac)
-        return vacancies
+                    (vac_id, name, employer, city, s_from, s_to, s_cur, s_mod, exp, fmt, desc, link, pic, source,
+                     req) = row
+                    if vac_id not in vacancies:
+                        vacancies[vac_id] = {
+                            "id": vac_id,
+                            "name": name,
+                            "employer": employer,
+                            "city": city,
+                            "salary_from": s_from,
+                            "salary_to": s_to,
+                            "salary_currency": s_cur,
+                            "salary_mode": s_mod,
+                            "experience": exp,
+                            "format": fmt if fmt else [],
+                            "description": desc,
+                            "link": link,
+                            "picture": pic,
+                            "source": source,
+                            "requirements": []
+                        }
+                    # Добавляем требование, если оно есть и не дублируется
+                    if req and req not in vacancies[vac_id]["requirements"]:
+                        vacancies[vac_id]["requirements"].append(req)
+        return list(vacancies.values())
 
     def update_tables(self):
         with self._get_connection() as conn:
             with conn.cursor() as cur:
-                cur.execute(
-                    "DROP TABLE IF EXISTS requirements, vacancies, employers, formats CASCADE;")
+                cur.execute("DROP TABLE IF EXISTS requirements, vacancies, employers, formats CASCADE;")
                 conn.commit()
 
     def update_vacancies_from_source(self):
@@ -254,7 +258,10 @@ class VacancyManager:
                 return data
 
     def get_sources(self):
-        return ['hh.ru']
+        return [
+            'hh.ru',
+            # 'telegram'
+        ]
 
     def get_formats(self):
         request = 'SELECT format FROM formats'
@@ -263,8 +270,14 @@ class VacancyManager:
                 cur.execute(request)
                 res = list(set([i[0] for i in cur.fetchall()]))
                 return res
-
+#
 # db = VacancyManager(db_host, db_name, db_user, db_password, db_port)
+# print(*db.get_vac_list(), sep='\n')
+# db._total_update()
+# print(len(db.get_vac_list()))
+#
+# db._total_update()
+# print(len(db.get_vac_list()))
 # # print(db.get_formats())
 # # # print(len(d))
 # # print(len(db.get_employers()))
