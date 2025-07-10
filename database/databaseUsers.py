@@ -312,6 +312,7 @@ class UserManager:#Этот черт будет использоваться д�
                     for skill in skills:
                         if skill: cur.execute(query3, (user_id, card_number, skill))  # вставляем новые
                     conn.commit()
+                    return card_number
         except psycopg2.Error as e:
             print(f"Ошибка БД при добавлении информации о пользователе: {e}")
             conn.rollback() # давай по новой миша все фигня

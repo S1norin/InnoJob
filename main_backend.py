@@ -434,8 +434,8 @@ async def download_photo(
 async def add_user_card(user_email: str, data:CreateCard, db: UserManager = Depends(get_user_manager)):
     result = await run_in_threadpool(db.user_in_base, user_email) # проверяем что долбанафт есть в базе данных
     if result:
-        await run_in_threadpool(db.add_user_card, user_email, data.education_level, data.education_full, data.age, data.description, data.skills) # запихуиваем всю инфу в таблицу
-        return {"access":True, "message":"User in base"}
+        card_id = await run_in_threadpool(db.add_user_card, user_email, data.education_level, data.education_full, data.age, data.description, data.skills) # запихуиваем всю инфу в таблицу
+        return {"access":True, "message":"User in base", "card_id":card_id}
     else:
         return {"access": False, "message": "User not in base"}
 
