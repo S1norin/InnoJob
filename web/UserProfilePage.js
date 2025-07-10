@@ -42,102 +42,97 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    function fileToBase64(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
-        });
-    }
-
-    function base64ToFile(base64, filename, mimeType) {
-        try {
-            const arr = base64.split(',');
-            const mime = mimeType || arr[0].match(/:(.*?);/)[1];
-            const bstr = atob(arr[1]);
-            let n = bstr.length;
-            const u8arr = new Uint8Array(n);
-            while (n--) u8arr[n] = bstr.charCodeAt(n);
-            return new File([u8arr], filename || 'file', { type: mime });
-        } catch (error) {
-            return null;
-        }
-    }
-
-    async function saveToLocalStorage() {
+    // Only store user name/surname in localStorage
+    function saveUserInfoToLocalStorage() {
         if (!checkLocalStorageSupport()) return;
-        try {
-            const cardsToSave = [];
-            for (const card of userCards) {
-                const cardToSave = { ...card };
-                if (card.photoFile) {
-                    cardToSave.photoBase64 = await fileToBase64(card.photoFile);
-                    cardToSave.photoMimeType = card.photoFile.type;
-                }
-                if (card.cvFile) {
-                    cardToSave.cvBase64 = await fileToBase64(card.cvFile);
-                    cardToSave.cvMimeType = card.cvFile.type;
-                }
-                delete cardToSave.photoFile;
-                delete cardToSave.cvFile;
-                delete cardToSave.photoUrl;
-                delete cardToSave.cvUrl;
-                cardsToSave.push(cardToSave);
-            }
-            localStorage.setItem('userCards', JSON.stringify(cardsToSave));
-        } catch (error) {}
+        if (nameInputs[0]) localStorage.setItem('userName', nameInputs[0].value);
+        if (nameInputs[1]) localStorage.setItem('userSurname', nameInputs[1].value);
+        if (emailInput) localStorage.setItem('userEmail', emailInput.value);
     }
 
-    function loadFromLocalStorage() {
-        if (!checkLocalStorageSupport()) return;
-        try {
-            const savedCards = localStorage.getItem('userCards');
-            if (savedCards) {
-                const parsedCards = JSON.parse(savedCards);
-                userCards = parsedCards.map(card => {
-                    if (card.photoBase64 && card.photoFileName) {
-                        const photoFile = base64ToFile(card.photoBase64, card.photoFileName, card.photoMimeType || 'image/jpeg');
-                        if (photoFile) {
-                            card.photoFile = photoFile;
-                            card.photoUrl = URL.createObjectURL(photoFile);
-                        }
-                    }
-                    if (card.cvBase64 && card.cvFileName) {
-                        const cvFile = base64ToFile(card.cvBase64, card.cvFileName, card.cvMimeType || 'application/pdf');
-                        if (cvFile) {
-                            card.cvFile = cvFile;
-                            card.cvUrl = URL.createObjectURL(cvFile);
-                        }
-                    }
-                    delete card.photoBase64;
-                    delete card.cvBase64;
-                    delete card.photoMimeType;
-                    delete card.cvMimeType;
-                    return card;
-                });
-            }
+    function loadUserInfoFromLocalStorage() {
+        if (emailInput) emailInput.value = localStorage.getItem('userEmail') || '';
+        if (nameInputs[0]) nameInputs[0].value = localStorage.getItem('userName') || '';
+        if (nameInputs[1]) nameInputs[1].value = localStorage.getItem('userSurname') || '';
+        console.log('loadUserInfoFromLocalStorage, email:', emailInput ? emailInput.value : '(нет emailInput)');
+    }
+
+    // --- FETCH CARDS FROM BACKEND ---
+    async function fetchUserCards() {
+        console.log('fetchUserCards called, email:', emailInput ? emailInput.value : '(нет emailInput)');
+        if (!emailInput || !emailInput.value.trim()) {
+            userCards = [];
             renderCards();
+            return;
+        }
+        isLoadingCards = true;
+        renderCards();
+        try {
+            const res = await fetch(`/users/${emailInput.value.trim()}/cards`);
+            if (!res.ok) throw new Error('Ошибка загрузки карточек');
+            const cards = await res.json();
+            // Для каждой карточки подгружаем фото
+            userCards = await Promise.all(cards.map(async card => {
+                let photoUrl = null;
+                if (card.photo_name) {
+                    try {
+                        const photoRes = await fetch(`/users/photo/${emailInput.value.trim()}/${card.card_id}`);
+                        if (photoRes.ok) {
+                            const blob = await photoRes.blob();
+                            photoUrl = URL.createObjectURL(blob);
+                        }
+                    } catch (e) { }
+                }
+                return {
+                    id: card.card_id,
+                    educationLevel: card.education_level,
+                    educationStatus: card.education_full,
+                    description: card.description,
+                    skills: card.skills,
+                    photoFile: null,
+                    photoUrl, // вот тут!
+                    cvFile: null,
+                    photoFileName: card.photo_name,
+                    cvFileName: card.cv_name,
+                    createdAt: null
+                };
+            }));
         } catch (error) {
             userCards = [];
+            // alert('Ошибка загрузки карточек: ' + error.message); // Remove debug alert
+        } finally {
+            isLoadingCards = false;
             renderCards();
         }
     }
 
     function clearLocalStorage() {
         if (!checkLocalStorageSupport()) return;
-        userCards.forEach(card => {
-            if (card.photoUrl) URL.revokeObjectURL(card.photoUrl);
-            if (card.cvUrl) URL.revokeObjectURL(card.cvUrl);
-        });
-        localStorage.removeItem('userCards');
+        localStorage.removeItem('userName');
+        localStorage.removeItem('userSurname');
+        localStorage.removeItem('userEmail');
     }
 
     // --- ИНИЦИАЛИЗАЦИЯ ---
-    if (emailInput) emailInput.value = localStorage.getItem('userEmail') || 'kycenbka@gmail.com';
-    if (nameInputs[0]) nameInputs[0].value = localStorage.getItem('userName') || '';
-    if (nameInputs[1]) nameInputs[1].value = localStorage.getItem('userSurname') || '';
-    loadFromLocalStorage();
+    loadUserInfoFromLocalStorage();
+    setTimeout(() => {
+        if (emailInput && emailInput.value.trim()) {
+            fetchUserCards();
+        }
+    }, 100);
+    let isLoadingCards = false;
+
+    // Автоматическая загрузка карточек при изменении email
+    if (emailInput) {
+        emailInput.addEventListener('change', function () {
+            saveUserInfoToLocalStorage();
+            if (emailInput.value.trim()) fetchUserCards();
+        });
+        emailInput.addEventListener('blur', function () {
+            saveUserInfoToLocalStorage();
+            if (emailInput.value.trim()) fetchUserCards();
+        });
+    }
 
     // --- НАВЫКИ ---
     if (skillsSearch) {
@@ -222,7 +217,7 @@ document.addEventListener('DOMContentLoaded', function () {
             selectedSkillsContainer.appendChild(skillTag);
         });
         selectedSkillsContainer.querySelectorAll('.skill-remove').forEach(btn => {
-            btn.addEventListener('click', function() {
+            btn.addEventListener('click', function () {
                 removeSkill(this.getAttribute('data-skill'));
             });
         });
@@ -231,27 +226,26 @@ document.addEventListener('DOMContentLoaded', function () {
     // --- СОЗДАНИЕ/ОБНОВЛЕНИЕ КАРТОЧКИ С ОТПРАВКОЙ В БД ---
     async function createCard() {
         try {
-            const name = nameInputs[0]?.value.trim() || 'Имя';
-            const surname = nameInputs[1]?.value.trim() || 'Фамилия';
-            const eduLevel = educationLevel?.value || 'Не указано';
-            const eduStatus = educationStatus?.value || 'Не указано';
-            const desc = description?.value.trim() || 'Описание не указано';
+            // Validate required fields
+            const eduLevel = educationLevel?.value || '';
+            const eduStatus = educationStatus?.value || '';
+            const desc = description?.value.trim() || '';
             const skills = selectedSkills.map(skill => skill.text);
-            const email = emailInput.value;
-
+            const email = emailInput.value.trim();
             if (!email) {
                 alert('Пожалуйста, укажите email');
                 return;
             }
-
-            let cardId;
-            let isNewCard = !editingCardId;
-
-            if (editingCardId) {
-                // РЕЖИМ РЕДАКТИРОВАНИЯ
-                cardId = editingCardId;
-
-                // 1. Обновляем данные карточки на сервере
+            // if (!eduLevel || !eduStatus || !desc || skills.length === 0) {
+            //     alert('Пожалуйста, заполните все поля и выберите хотя бы один навык');
+            //     return;
+            // }
+            if (saveBtn) saveBtn.disabled = true;
+            let isNewCard = (editingCardId == null);
+            let cardId = null; // <-- объявляем cardId здесь
+            if (!isNewCard) {
+                // PATCH-запрос
+                cardId = editingCardId; // <-- присваиваем cardId
                 try {
                     const updateResponse = await fetch(`/users/${email}/cards/${cardId}`, {
                         method: 'PATCH',
@@ -264,39 +258,28 @@ document.addEventListener('DOMContentLoaded', function () {
                             skills
                         })
                     });
-
-                    if (updateResponse.ok) {
-                        console.log('Карточка успешно обновлена на сервере');
+                    let updateData = {};
+                    let isJson = false;
+                    const contentType = updateResponse.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                        updateData = await updateResponse.json();
+                        isJson = true;
                     } else {
-                        console.warn('Ошибка при обновлении карточки на сервере');
+                        updateData.message = await updateResponse.text();
                     }
+                    if (!updateResponse.ok || (isJson && updateData.access === false)) {
+                        alert(updateData.message || 'Ошибка при обновлении карточки на сервере');
+                        return;
+                    }
+                    // После успешного обновления сбрасываем editingCardId
+                    editingCardId = null;
+                    if (saveBtn) saveBtn.textContent = 'Сохранить';
                 } catch (error) {
-                    console.warn('Ошибка при обновлении карточки:', error);
-                }
-
-                // Обновляем локальную карточку
-                const cardIndex = userCards.findIndex(card => card.id === editingCardId);
-                if (cardIndex !== -1) {
-                    const existingCard = userCards[cardIndex];
-                    userCards[cardIndex] = {
-                        ...existingCard,
-                        name,
-                        surname,
-                        educationLevel: eduLevel,
-                        educationStatus: eduStatus,
-                        description: desc,
-                        skills,
-                        photoFile: currentPhotoFile || existingCard.photoFile,
-                        cvFile: currentCvFile || existingCard.cvFile,
-                        photoFileName: currentPhotoFile ? currentPhotoFile.name : existingCard.photoFileName,
-                        cvFileName: currentCvFile ? currentCvFile.name : existingCard.cvFileName,
-                        updatedAt: new Date().toISOString()
-                    };
+                    alert('Ошибка при обновлении карточки: ' + error.message);
+                    return;
                 }
             } else {
-                // РЕЖИМ СОЗДАНИЯ
-
-                // 1. Создаем карточку на сервере
+                // POST-запрос
                 try {
                     const createResponse = await fetch(`/users/${email}/cards`, {
                         method: 'POST',
@@ -309,105 +292,85 @@ document.addEventListener('DOMContentLoaded', function () {
                             skills
                         })
                     });
-
-                    if (createResponse.ok) {
-                        const createData = await createResponse.json();
-                        // КЛЮЧЕВОЙ МОМЕНТ: получаем card_id из ответа сервера
-                        cardId = createData.card_id;
-                        console.log('Карточка создана на сервере с ID:', cardId);
-
-                        if (!cardId) {
-                            throw new Error('Сервер не вернул card_id');
-                        }
+                    let createData = {};
+                    let isJson = false;
+                    const contentType = createResponse.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                        createData = await createResponse.json();
+                        isJson = true;
                     } else {
-                        throw new Error('Ошибка при создании карточки на сервере');
+                        createData.message = await createResponse.text();
+                    }
+                    if (!createResponse.ok || (isJson && createData.access === false)) {
+                        alert(createData.message || 'Ошибка при создании карточки на сервере');
+                        return;
+                    }
+                    cardId = createData.card_id; // <-- присваиваем cardId здесь
+                    if (cardId === undefined || cardId === null) {
+                        alert('Сервер не вернул card_id');
+                        await fetchUserCards();
+                        return;
                     }
                 } catch (error) {
-                    console.error('Ошибка создания карточки:', error);
-                    // Используем временный ID для локального хранения
-                    cardId = Date.now();
-                    console.warn('Используем временный ID для локального хранения:', cardId);
+                    alert('Ошибка при создании карточки: ' + error.message);
+                    return;
                 }
-
-                // Добавляем новую карточку в локальный массив
-                userCards.push({
-                    id: cardId,
-                    name,
-                    surname,
-                    educationLevel: eduLevel,
-                    educationStatus: eduStatus,
-                    description: desc,
-                    skills,
-                    photoFile: currentPhotoFile,
-                    cvFile: currentCvFile,
-                    photoFileName: currentPhotoFile ? currentPhotoFile.name : null,
-                    cvFileName: currentCvFile ? currentCvFile.name : null,
-                    createdAt: new Date().toISOString()
-                });
             }
-
             // 2. Загружаем файлы на сервер (только если есть новые файлы)
-            if (currentCvFile && cardId) {
+            if (currentCvFile && cardId !== undefined && cardId !== null) {
                 try {
                     const formData = new FormData();
                     formData.append('email', email);
                     formData.append('pdf_file', currentCvFile);
-
                     const cvResponse = await fetch(`/users/cv/${email}/${cardId}`, {
                         method: 'POST',
                         body: formData
                     });
-
-                    if (cvResponse.ok) {
-                        console.log('CV успешно загружено на сервер');
-                    } else {
-                        console.warn('Ошибка при загрузке CV на сервер');
+                    if (!cvResponse.ok) {
+                        const errText = await cvResponse.text();
+                        alert('Ошибка при загрузке CV: ' + errText);
+                        return;
                     }
                 } catch (error) {
-                    console.warn('Ошибка при загрузке CV:', error);
+                    alert(error.message);
+                    return;
                 }
             }
-
-            if (currentPhotoFile && cardId) {
+            if (currentPhotoFile && cardId !== undefined && cardId !== null) {
                 try {
                     const formData = new FormData();
                     formData.append('email', email);
                     formData.append('photo', currentPhotoFile);
-
                     const photoResponse = await fetch(`/users/photo/${email}/${cardId}`, {
                         method: 'POST',
                         body: formData
                     });
-
-                    if (photoResponse.ok) {
-                        console.log('Фото успешно загружено на сервер');
-                    } else {
-                        console.warn('Ошибка при загрузке фото на сервер');
+                    if (!photoResponse.ok) {
+                        const errText = await photoResponse.text();
+                        alert('Ошибка при загрузке фото: ' + errText);
+                        return;
                     }
                 } catch (error) {
-                    console.warn('Ошибка при загрузке фото:', error);
+                    alert(error.message);
+                    return;
                 }
             }
-
             // 3. Обновляем интерфейс
-            renderCards();
+            await fetchUserCards();
             clearForm();
-            await saveToLocalStorage();
-
-            const message = isNewCard ? 'Карточка успешно создана и сохранена в БД!' : 'Карточка успешно обновлена в БД!';
-            alert(message);
-
+            saveUserInfoToLocalStorage();
         } catch (error) {
-            console.error('Ошибка при создании/обновлении карточки:', error);
-            alert('Ошибка при сохранении карточки: ' + error.message);
+            alert('Ошибка: ' + error.message);
+        } finally {
+            if (saveBtn) saveBtn.disabled = false;
         }
     }
 
     function renderCards() {
         if (!cardsContainer) return;
-        cardsContainer.innerHTML = '';
-        if (userCards.length === 0) {
-            cardsContainer.innerHTML = '<p style="text-align: center; color: #666; padding: 40px;">Карточки не найдены. Создайте первую карточку!</p>';
+        cardsContainer.innerHTML = ''
+        if (!emailInput.value.trim()) {
+            cardsContainer.innerHTML = '<p style="text-align: center; color: #666; padding: 40px;">Введите email для отображения карточек.</p>';
             return;
         }
         userCards.forEach(card => {
@@ -424,22 +387,24 @@ document.addEventListener('DOMContentLoaded', function () {
             `<div class="cv-skill-tag">${skill}</div>`
         ).join('');
         let photoContent = 'Фото';
-        if (cardData.photoFile) {
-            const url = URL.createObjectURL(cardData.photoFile);
-            photoContent = `<img src="${url}" alt="Photo" 
+        if (cardData.photoUrl) {
+            photoContent = `<img src="${cardData.photoUrl}" alt="Photo"
                             style="width:100%;height:100%;object-fit:cover;border-radius:12px;"
                             onerror="this.style.display='none'; this.parentElement.innerHTML='Ошибка загрузки фото';">`;
         }
-        const cvButtonText = cardData.cvFile ? 'Скачать CV' : 'CV отсутствует';
-        const cvButtonDisabled = cardData.cvFile ? '' : 'disabled';
+        const cvButtonText = cardData.cvFileName ? 'Скачать CV' : 'CV отсутствует';
+        const cvButtonDisabled = cardData.cvFileName ? '' : 'disabled';
+        // Get global user name and surname
+        const userName = (nameInputs[0] && nameInputs[0].value) || localStorage.getItem('userName') || '';
+        const userSurname = (nameInputs[1] && nameInputs[1].value) || localStorage.getItem('userSurname') || '';
         cardDiv.innerHTML = `
             <div class="card-header">
                 <div class="logo-place">
                     ${photoContent}
                 </div>
                 <div class="job-title-info">
-                    <h2>${cardData.name}</h2>
-                    <h2>${cardData.surname}</h2>
+                    <h2>${userName}</h2>
+                    <h2>${userSurname}</h2>
                 </div>
             </div>
             <div class="card-details">
@@ -514,21 +479,18 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // --- ГЛОБАЛЬНЫЕ ФУНКЦИИ ---
-    window.editCard = function(cardId) {
+    window.editCard = function (cardId) {
         const card = userCards.find(c => c.id === cardId);
         if (!card) return;
-
         // Заполняем форму данными карточки
         if (educationLevel) educationLevel.value = card.educationLevel;
         if (educationStatus) educationStatus.value = card.educationStatus;
         if (description) description.value = card.description;
         selectedSkills = card.skills.map(skill => ({ value: skill.toLowerCase(), text: skill }));
         renderSelectedSkills();
-
         // Восстанавливаем файлы
         currentPhotoFile = card.photoFile;
         currentCvFile = card.cvFile;
-
         if (card.photoFile && profilePhoto) {
             const url = URL.createObjectURL(card.photoFile);
             currentPhotoUrl = url;
@@ -542,75 +504,78 @@ document.addEventListener('DOMContentLoaded', function () {
             currentCvUrl = url;
             cvPreview.innerHTML = `<a href="${url}" target="_blank">📄 ${card.cvFileName || 'Загруженное CV'}</a>`;
         }
-
-        editingCardId = cardId;
+        editingCardId = cardId; // ВАЖНО: устанавливаем перед сохранением
         if (saveBtn) saveBtn.textContent = 'Обновить';
-
         const profileForm = document.querySelector('.profile-form');
         if (profileForm) profileForm.scrollIntoView({ behavior: 'smooth' });
     };
 
     // УДАЛЕНИЕ КАРТОЧКИ С ОТПРАВКОЙ В БД
-    window.deleteCard = async function(cardId) {
+    window.deleteCard = async function (cardId) {
         if (!confirm('Вы уверены, что хотите удалить эту карточку?')) return;
-
         try {
             // 1. Удаляем карточку с сервера
             try {
-                const deleteResponse = await fetch(`/users/${emailInput.value}/cards/${cardId}`, {
+                const deleteResponse = await fetch(`/users/${emailInput.value.trim()}/cards/${cardId}`, {
                     method: 'DELETE'
                 });
-
-                if (deleteResponse.ok) {
-                    console.log('Карточка успешно удалена с сервера');
-                } else {
-                    console.warn('Ошибка при удалении карточки с сервера');
+                if (!deleteResponse.ok) {
+                    const errText = await deleteResponse.text();
+                    alert('Ошибка при удалении карточки: ' + errText);
+                    return;
                 }
             } catch (error) {
-                console.warn('Ошибка при удалении карточки с сервера:', error);
+                alert('Ошибка при удалении карточки: ' + error.message);
+                return;
             }
-
-            // 2. Удаляем карточку из локального хранения
-            const cardToDelete = userCards.find(card => card.id === cardId);
-            if (cardToDelete) {
-                if (cardToDelete.photoUrl) URL.revokeObjectURL(cardToDelete.photoUrl);
-                if (cardToDelete.cvUrl) URL.revokeObjectURL(cardToDelete.cvUrl);
-            }
-
-            userCards = userCards.filter(card => card.id !== cardId);
-
-            // 3. Обновляем интерфейс
-            renderCards();
-            await saveToLocalStorage();
-
-            alert('Карточка удалена из БД!');
+            // 2. Обновляем интерфейс
+            await fetchUserCards();
         } catch (error) {
-            console.error('Ошибка при удалении карточки:', error);
             alert('Ошибка при удалении карточки');
         }
     };
 
-    window.downloadCV = function(cardId) {
+    window.downloadCV = async function (cardId) {
         const card = userCards.find(c => c.id === cardId);
         if (!card) {
             alert('Карточка не найдена');
             return;
         }
-        if (!card.cvFile) {
-            alert('CV не найдено для этой карточки. Загрузите CV через форму редактирования.');
+        if (card.cvFile) {
+            // Старый способ (если файл уже в памяти)
+            const url = URL.createObjectURL(card.cvFile);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = card.cvFileName || 'CV.pdf';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
             return;
         }
-        const url = URL.createObjectURL(card.cvFile);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = card.cvFileName || 'CV.pdf';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
+        if (card.cvFileName) {
+            // Новый способ — скачиваем с сервера
+            try {
+                const res = await fetch(`/users/cv/${emailInput.value.trim()}/${cardId}`);
+                if (!res.ok) throw new Error('CV не найдено на сервере');
+                const blob = await res.blob();
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = card.cvFileName || 'CV.pdf';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            } catch (e) {
+                alert('Ошибка при скачивании CV: ' + e.message);
+            }
+            return;
+        }
+        alert('CV не найдено для этой карточки. Загрузите CV через форму редактирования.');
     };
 
-    window.clearAllData = function() {
+    window.clearAllData = function () {
         if (confirm('Вы уверены, что хотите удалить ВСЕ карточки? Это действие нельзя отменить!')) {
             userCards.forEach(card => {
                 if (card.photoUrl) URL.revokeObjectURL(card.photoUrl);
@@ -625,13 +590,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // --- СОБЫТИЯ ---
     if (saveBtn) {
-        saveBtn.addEventListener('click', function(e) {
+        saveBtn.addEventListener('click', function (e) {
             e.preventDefault();
             createCard();
         });
     }
     if (addCvBtn) {
-        addCvBtn.addEventListener('click', function(e) {
+        addCvBtn.addEventListener('click', function (e) {
             e.preventDefault();
             clearForm();
             editingCardId = null;
@@ -647,7 +612,7 @@ document.addEventListener('DOMContentLoaded', function () {
         uploadCvBtn.addEventListener('click', () => cvInput.click());
     }
     if (photoInput) {
-        photoInput.addEventListener('change', function() {
+        photoInput.addEventListener('change', function () {
             const file = this.files[0];
             if (file && ["image/png", "image/jpeg", "image/jpg"].includes(file.type)) {
                 if (file.size > 5 * 1024 * 1024) {
@@ -672,7 +637,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
     if (cvInput) {
-        cvInput.addEventListener('change', function() {
+        cvInput.addEventListener('change', function () {
             const file = this.files[0];
             if (file && file.type === "application/pdf") {
                 if (file.size > 10 * 1024 * 1024) {
@@ -694,19 +659,16 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
     if (nameInputs[0]) {
-        nameInputs[0].addEventListener('input', function() {
+        nameInputs[0].addEventListener('input', function () {
             localStorage.setItem('userName', this.value);
         });
     }
     if (nameInputs[1]) {
-        nameInputs[1].addEventListener('input', function() {
+        nameInputs[1].addEventListener('input', function () {
             localStorage.setItem('userSurname', this.value);
         });
     }
-    window.addEventListener('beforeunload', function() {
-        saveToLocalStorage();
+    window.addEventListener('beforeunload', function () {
+        saveUserInfoToLocalStorage();
     });
-    setInterval(function() {
-        if (userCards.length > 0) saveToLocalStorage();
-    }, 30000);
 });

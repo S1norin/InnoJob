@@ -318,31 +318,19 @@ class UserManager:#Этот черт будет использоваться д�
             conn.rollback() # давай по новой миша все фигня
             raise
 
-    def delete_user_card(self, email, card_number):
-        query1 = "DELETE FROM cards WHERE user_id = %s AND card_id = %s"  # умные запросы в базу данных
-        query2 = "DELETE FROM skills WHERE user_id = %s AND card_id = %s;"  # сносим нафиг все старые скилы которые были у юзера
-        update_higher_cards_query = """
-                UPDATE cards 
-                SET card_id = card_id - 1 
-                WHERE user_id = %s AND card_id > %s
-            """
-        update_higher_skills_query = """
-                UPDATE skills 
-                SET card_id = card_id - 1 
-                WHERE user_id = %s AND card_id > %s
-            """
+    def delete_user_card(self, email, card_id):
+        query1 = "DELETE FROM skills WHERE user_id = %s AND card_id = %s;"
+        query2 = "DELETE FROM cards WHERE user_id = %s AND card_id = %s;"
         user_id = self.get_user_id(email)
         try:
             with self._get_connection() as conn:
                 with conn.cursor() as cur:
-                    cur.execute(query2, (user_id, card_number))
-                    cur.execute(query1, (user_id, card_number)) # сносим нафиг все старые скилы которые были у юзера
-                    cur.execute(update_higher_cards_query, (user_id, card_number))
-                    cur.execute(update_higher_skills_query, (user_id, card_number))
+                    cur.execute(query1, (user_id, card_id))
+                    cur.execute(query2, (user_id, card_id))
                     conn.commit()
         except psycopg2.Error as e:
             print(f"Ошибка БД при удалении информации о пользователе: {e}")
-            conn.rollback() # давай по новой миша все фигня
+            conn.rollback()
             raise
 
     def edit_user_card(self, email, card_number, education_level, education_full, age, description, skills):
@@ -372,4 +360,44 @@ class UserManager:#Этот черт будет использоваться д�
         except psycopg2.Error as e:
             print(f"Ошибка БД при изменении информации о пользователе: {e}")
             conn.rollback() # давай по новой миша все фигня
+            raise
+
+    def get_all_user_cards(self, email):
+        query1 = "SELECT id FROM users WHERE email = %s;"
+        query2 = "SELECT card_id, level_of_education, education_full, age, description, cv_name, photo_name FROM cards WHERE user_id = %s ORDER BY card_id;"
+        query3 = "SELECT card_id, skill FROM skills WHERE user_id = %s;"
+        try:
+            with self._get_connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute(query1, (email,))
+                    result = cur.fetchone()
+                    if not result:
+                        raise ValueError(f"Пользователь с email '{email}' не найден.")
+                    user_id = result[0]
+                    cur.execute(query2, (user_id,))
+                    cards = cur.fetchall()
+                    cur.execute(query3, (user_id,))
+                    skills_rows = cur.fetchall()
+                    # Map card_id to list of skills
+                    skills_map = {}
+                    for card_id, skill in skills_rows:
+                        skills_map.setdefault(card_id, []).append(skill)
+                    # Build card dicts
+                    card_dicts = []
+                    for card in cards:
+                        card_id, level_of_education, education_full, age, description, cv_name, photo_name = card
+                        card_dicts.append({
+                            "card_id": card_id,
+                            "education_level": level_of_education,
+                            "education_full": education_full,
+                            "age": age,
+                            "description": description,
+                            "cv_name": cv_name,
+                            "photo_name": photo_name,
+                            "skills": skills_map.get(card_id, [])
+                        })
+                    return card_dicts
+        except psycopg2.Error as e:
+            print(f"Ошибка БД при получении всех карточек пользователя: {e}")
+            conn.rollback()
             raise
