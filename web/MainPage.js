@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
         async fetchAndRenderVacancies() {
             this.setUIState('loading');
             try {
-                const response = await fetch('http://innojob.ru/vacancies');
+                const response = await fetch('https://innojob.ru/vacancies');
                 if (!response.ok) {
                     throw new Error(`Ошибка HTTP: ${response.status}`);
                 }

@@ -165,7 +165,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     // If not filled, fetch from backend
     if ((!localStorage.getItem('userName') || !localStorage.getItem('userSurname')) && email) {
-        fetch(`http://innojob.ru/user_info?user_email=${encodeURIComponent(email)}`)
+        fetch(`https://innojob.ru/user_info?user_email=${encodeURIComponent(email)}`)
             .then(res => res.json())
             .then(userInfo => {
                 if (userInfo.name) {
@@ -187,7 +187,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Helper to fetch and fill all profile data from backend
     function fetchAndFillProfile(email) {
         if (!email) return;
-        fetch(`http://innojob.ru/user_info?user_email=${encodeURIComponent(email)}`)
+        fetch(`https://innojob.ru/user_info?user_email=${encodeURIComponent(email)}`)
             .then(res => res.json())
             .then(userInfo => {
                 if (userInfo.name) fillNameFieldsFromFullName(userInfo.name);
@@ -245,7 +245,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         try {
-            const response = await fetch(`http://innojob.ru/write_user_info?user_email=${encodeURIComponent(email)}`, {
+            const response = await fetch(`https://innojob.ru/write_user_info?user_email=${encodeURIComponent(email)}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
@@ -273,7 +273,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Helper to show profile photo
     function showProfilePhoto(email) {
-        fetch(`http://innojob.ru/users/photo/${encodeURIComponent(email)}`)
+        fetch(`https://innojob.ru/users/photo/${encodeURIComponent(email)}`)
             .then(res => {
                 if (!res.ok) throw new Error('No photo');
                 return res.blob();
@@ -292,7 +292,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Helper to show CV preview
     function showCvPreview(email) {
-        fetch(`http://innojob.ru/users/cv/${encodeURIComponent(email)}`)
+        fetch(`https://innojob.ru/users/cv/${encodeURIComponent(email)}`)
             .then(res => {
                 if (!res.ok) throw new Error('No CV');
                 return res.blob();
@@ -326,7 +326,7 @@ document.addEventListener('DOMContentLoaded', function () {
         formData.append('email', email);
         formData.append('photo', file);
         try {
-            const response = await fetch('http://innojob.ru/upload-photo', {
+            const response = await fetch('https://innojob.ru/upload-photo', {
                 method: 'POST',
                 body: formData
             });
@@ -363,7 +363,7 @@ document.addEventListener('DOMContentLoaded', function () {
         formData.append('email', email);
         formData.append('pdf_file', file);
         try {
-            const response = await fetch('http://innojob.ru/upload-cv', {
+            const response = await fetch('https://innojob.ru/upload-cv', {
                 method: 'POST',
                 body: formData
             });

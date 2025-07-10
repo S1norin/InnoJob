@@ -37,7 +37,7 @@ document.querySelector('.login-form').addEventListener('submit', async (e) => {
     };
 
     try {
-        const response = await fetch('http://innojob.ru/users/register', {
+        const response = await fetch('https://innojob.ru/users/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(userData)

@@ -37,7 +37,7 @@ document.querySelector('.login-form').addEventListener('submit', async (e) => {
     console.log("Password:", loginData.password);
 
     try {
-        const response = await fetch('http://innojob.ru/login', {
+        const response = await fetch('https://innojob.ru/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(loginData)
@@ -47,7 +47,7 @@ document.querySelector('.login-form').addEventListener('submit', async (e) => {
 
         if (response.ok && result.status === "success") {
             // Fetch user info
-            fetch(`http://innojob.ru/user_info?user_email=${encodeURIComponent(email)}`)
+            fetch(`https://innojob.ru/user_info?user_email=${encodeURIComponent(email)}`)
                 .then(res => res.json())
                 .then(userInfo => {
                     if (userInfo.name) {
@@ -115,7 +115,7 @@ cvInput.addEventListener('change', async function () {
     formData.append('pdf_file', file);
 
     try {
-        const response = await fetch('http://innojob.ru/upload-cv', {
+        const response = await fetch('https://innojob.ru/upload-cv', {
             method: 'POST',
             body: formData
         });
@@ -149,7 +149,7 @@ photoInput.addEventListener('change', async function () {
     formData.append('photo', file);
 
     try {
-        const response = await fetch('http://innojob.ru/upload-photo', {
+        const response = await fetch('https://innojob.ru/upload-photo', {
             method: 'POST',
             body: formData
         });
