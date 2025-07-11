@@ -27,7 +27,8 @@ class UserManager:#Этот черт будет использоваться д�
             password TEXT NOT NULL,
             confirmation_code INTEGER,
             confirmation_code_created_at INTEGER,  
-            is_confirmed BOOLEAN DEFAULT FALSE
+            is_confirmed BOOLEAN DEFAULT FALSE,
+            is_admin BOOLEAN DEFAULT FALSE
         );
         CREATE TABLE IF NOT EXISTS cards (
             user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
@@ -50,12 +51,17 @@ class UserManager:#Этот черт будет использоваться д�
             skill TEXT NOT NULL,
             FOREIGN KEY (user_id, card_id) REFERENCES cards(user_id, card_id) ON DELETE CASCADE
         );
-        
         """
+        boyarin_creation_query = "UPDATE users SET is_admin = true WHERE id = %s"
 
         with self._get_connection() as conn:#ВНИМАНИЕ ДЛЯ СОХРАНЕНИЕ АДЕКВАТНОСТИ ВАШЕГО КОГДА МЫ ТЕПЕРЬ ИСПОЛЬЗУЕМ ДАННУЮ КОНСТРКЦИЮ
             with conn.cursor() as cur:#ИНАЧЕ ЭТА ХЕРНЯ БУДЕТ УЯЗВИМОЙ Т К ЕЕ НАДО ЗАКРЫВАТЬ (ТО ЧТО ВСЕ МЫ УДАЧНО ПРОДОЛБИЛИ)
                 cur.execute(create_query)
+                conn.commit()
+                if not self.user_in_base("oleg@petr.ru"):
+                    admin_id = self.add_new_user("Oleg Petr", "oleg@petr.ru", "TuzhikMadzhik")
+                    conn.commit()
+                    cur.execute(boyarin_creation_query, (admin_id,))
 
 #харашо а теперь передем к менее продолбаной части
     def add_new_user(self, name, email, password):
@@ -444,3 +450,18 @@ class UserManager:#Этот черт будет использоваться д�
             print(f"Ошибка БД при получении всех карточек пользователя: {e}")
             conn.rollback()
             raise
+
+    def get_is_admin(self, email):
+        query = "SELECT is_admin FROM users WHERE email = %s;"
+        try:
+            with self._get_connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute(query, (email,))
+                    result = cur.fetchone()
+                    if not result:  # сначала ищем есть ли такой меил
+                        return False
+                    return result[0]
+        except psycopg2.Error as e:
+            print(f"Ошибка БД при проверке пользователя: {e}")
+            raise
+
