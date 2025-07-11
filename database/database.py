@@ -234,21 +234,20 @@ class VacancyManager:
         request = f'SELECT id FROM cities WHERE city_id={c_id} AND source={source}'
         with self._get_connection() as conn:
             with conn.cursor() as cur:
-                # try:
-                cur.execute(request)
-                found_id = cur.fetchone()
-                if not found_id:
-                    request = 'INSERT INTO cities (city_id, name, source) VALUES (%s, %s, %s) RETURNING id'
-
-
-                    data = get_city_data(c_id, source)
-                    cur.execute(request, (data.get('area_id'), data.get('name'), source))
+                try:
+                    cur.execute(request)
                     found_id = cur.fetchone()
-                    conn.commit()
-                return found_id[0]
-
-                # except Exception as e:
-                #     print(f"Ошибка при поиске города: {str(e)}")
+                    if not found_id:
+                        # !!! Добавьте правильный source !!!
+                        data = get_city_data(c_id)
+                        # Например, если source всегда '1':
+                        request = 'INSERT INTO cities (city_id, name, source) VALUES (%s, %s, %s) RETURNING id'
+                        cur.execute(request, (data.get('area_id'), data.get('name'), '1'))
+                        found_id = cur.fetchone()
+                        conn.commit()
+                    return found_id[0]
+                except Exception as e:
+                    print(f"Ошибка при поиске города: {str(e)}")
 
     def get_employers(self):
         requests = f'SELECT name FROM employers'
