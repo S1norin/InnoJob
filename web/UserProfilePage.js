@@ -1,3 +1,5 @@
+import { SERVER_URL } from 'web/config.js';
+
 document.addEventListener('DOMContentLoaded', function () {
     console.log('DOM загружен, начинаем инициализацию...');
 
@@ -357,14 +359,14 @@ document.addEventListener('DOMContentLoaded', function () {
             skillTag.className = 'skill-tag';
             skillTag.innerHTML = `
                 ${skill.text}
-                <button type="button" class="skill-remove" data-skill="${skill.value}">×</button>
+                <button type="button" class="skill-remove" data-skill="${skill.value}"></button>
             `;
             selectedSkillsContainer.appendChild(skillTag);
         });
 
         // Добавляем обработчики для кнопок удаления
         selectedSkillsContainer.querySelectorAll('.skill-remove').forEach(btn => {
-            btn.addEventListener('click', function() {
+            btn.addEventListener('click', function () {
                 removeSkill(this.getAttribute('data-skill'));
             });
         });
@@ -503,8 +505,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
             <div class="card-files-info">
                 <small style="color: #666;">
-                    📷 ${cardData.photoFileName || 'Фото не загружено'} | 
-                    📄 ${cardData.cvFileName || 'CV не загружено'}
+                     ${cardData.photoFileName || 'Фото не загружено'} |
+                     ${cardData.cvFileName || 'CV не загружено'}
+                    
                 </small>
             </div>
 
@@ -517,6 +520,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         return cardDiv;
     }
+    /*добавить иконки*/
 
     function clearForm() {
         if (educationLevel) educationLevel.value = '';
@@ -553,7 +557,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Глобальные функции для кнопок карточек
-    window.editCard = function(cardId) {
+    window.editCard = function (cardId) {
         console.log('Редактирование карточки:', cardId);
         const card = userCards.find(c => c.id === cardId);
         if (!card) return;
@@ -594,7 +598,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     };
 
-    window.deleteCard = async function(cardId) {
+    window.deleteCard = async function (cardId) {
         console.log('Удаление карточки:', cardId);
         if (!confirm('Вы уверены, что хотите удалить эту карточку?')) return;
 
@@ -610,7 +614,7 @@ document.addEventListener('DOMContentLoaded', function () {
         await saveToLocalStorage();
     };
 
-    window.downloadCV = function(cardId) {
+    window.downloadCV = function (cardId) {
         console.log('Скачивание CV для карточки:', cardId);
         const card = userCards.find(c => c.id === cardId);
         if (!card) {
@@ -632,7 +636,7 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     // Функция для очистки всех данных
-    window.clearAllData = function() {
+    window.clearAllData = function () {
         if (confirm('Вы уверены, что хотите удалить ВСЕ карточки? Это действие нельзя отменить!')) {
             userCards.forEach(card => {
                 if (card.photoUrl) URL.revokeObjectURL(card.photoUrl);
@@ -649,7 +653,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // **ОБРАБОТЧИКИ СОБЫТИЙ**
 
     if (saveBtn) {
-        saveBtn.addEventListener('click', function(e) {
+        saveBtn.addEventListener('click', function (e) {
             console.log('Нажата кнопка сохранения');
             e.preventDefault();
             createCard();
@@ -657,7 +661,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     if (addCvBtn) {
-        addCvBtn.addEventListener('click', function(e) {
+        addCvBtn.addEventListener('click', function (e) {
             console.log('Нажата кнопка добавления CV');
             e.preventDefault();
             clearForm();
@@ -680,7 +684,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     if (photoInput) {
-        photoInput.addEventListener('change', function() {
+        photoInput.addEventListener('change', function () {
             const file = this.files[0];
             if (file && ["image/png", "image/jpeg", "image/jpg"].includes(file.type)) {
                 // Проверяем размер файла (максимум 5MB)
@@ -717,7 +721,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     if (cvInput) {
-        cvInput.addEventListener('change', function() {
+        cvInput.addEventListener('change', function () {
             const file = this.files[0];
             if (file && file.type === "application/pdf") {
                 // Проверяем размер файла (максимум 10MB)
@@ -749,24 +753,24 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Сохранение имени и фамилии в localStorage при изменении
     if (nameInputs[0]) {
-        nameInputs[0].addEventListener('input', function() {
+        nameInputs[0].addEventListener('input', function () {
             localStorage.setItem('userName', this.value);
         });
     }
 
     if (nameInputs[1]) {
-        nameInputs[1].addEventListener('input', function() {
+        nameInputs[1].addEventListener('input', function () {
             localStorage.setItem('userSurname', this.value);
         });
     }
 
     // Автосохранение при закрытии страницы
-    window.addEventListener('beforeunload', function() {
+    window.addEventListener('beforeunload', function () {
         saveToLocalStorage();
     });
 
     // Периодическое автосохранение каждые 30 секунд
-    setInterval(function() {
+    setInterval(function () {
         if (userCards.length > 0) {
             saveToLocalStorage();
         }
