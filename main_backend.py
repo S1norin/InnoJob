@@ -74,7 +74,7 @@ async def read_welcome():
     return FileResponse('web/WelcomePage.html')
 
 @app.get("/user_profile")
-async def read_welcome():
+async def read_user_profile():
     return FileResponse('web/UserProfile.html')
 
 

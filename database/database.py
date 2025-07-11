@@ -227,13 +227,14 @@ class VacancyManager:
                     cur.execute(request)
                     found_id = cur.fetchone()
                     if not found_id:
-                        request = 'INSERT INTO cities (city_id, name) VALUES (%s, %s) RETURNING id'
+                        # !!! Добавьте правильный source !!!
                         data = get_city_data(c_id)
-                        cur.execute(request, (data.get('area_id'), data.get('name')))
+                        # Например, если source всегда '1':
+                        request = 'INSERT INTO cities (city_id, name, source) VALUES (%s, %s, %s) RETURNING id'
+                        cur.execute(request, (data.get('area_id'), data.get('name'), '1'))
                         found_id = cur.fetchone()
                         conn.commit()
                     return found_id[0]
-
                 except Exception as e:
                     print(f"Ошибка при поиске города: {str(e)}")
 
