@@ -1,3 +1,5 @@
+import { SERVER_URL } from './config.js';
+
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
 document.querySelector('.login-form').addEventListener('submit', async (e) => {
@@ -37,7 +39,7 @@ document.querySelector('.login-form').addEventListener('submit', async (e) => {
     console.log("Password:", loginData.password);
 
     try {
-        const response = await fetch('http://localhost:8000/login', {
+        const response = await fetch(`${SERVER_URL}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(loginData)
@@ -47,7 +49,7 @@ document.querySelector('.login-form').addEventListener('submit', async (e) => {
 
         if (response.ok && result.status === "success") {
             // Fetch user info
-            fetch(`http://localhost:8000/user_info?user_email=${encodeURIComponent(email)}`)
+            fetch(`${SERVER_URL}/user_info?user_email=${encodeURIComponent(email)}`)
                 .then(res => res.json())
                 .then(userInfo => {
                     if (userInfo.name) {
@@ -115,7 +117,7 @@ cvInput.addEventListener('change', async function () {
     formData.append('pdf_file', file);
 
     try {
-        const response = await fetch('http://localhost:8000/upload-cv', {
+        const response = await fetch(`${SERVER_URL}/upload-cv`, {
             method: 'POST',
             body: formData
         });
@@ -149,7 +151,7 @@ photoInput.addEventListener('change', async function () {
     formData.append('photo', file);
 
     try {
-        const response = await fetch('http://localhost:8000/upload-photo', {
+        const response = await fetch(`${SERVER_URL}/upload-photo`, {
             method: 'POST',
             body: formData
         });
