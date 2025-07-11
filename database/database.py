@@ -1,6 +1,6 @@
 import psycopg2
 
-from parsers.parser import get_main_data, get_employer_data_hh, get_city_data
+from parsers.parser import get_main_data, get_employer_data_hh, get_city_data,get_employer_data_sj
 from parsers.parser_configs import *
 from config import *
 
@@ -18,14 +18,14 @@ class VacancyManager:
 
     def _total_update(self):
         # Создание таблиц
-        self.update_tables()
+        self.drop_tables()
         self.create_tables_if_not_exists()
         self.update_sources()                # Обновляем источники ДО добавления данных
         self.update_employers()              # Добавляем работодателей
         self.update_vacancies_from_source()  # Добавляем вакансии
 
 
-    # Удобная функция для создания таблиц (в случае отсутствия оных)
+    # функция для создания таблиц (в случае отсутствия оных)
     def create_tables_if_not_exists(self):
         # Сначала создаём таблицу с источниками (если оных нет)
         query = """ 
@@ -35,15 +35,16 @@ class VacancyManager:
         );
         CREATE TABLE IF NOT EXISTS employers (
             id SERIAL PRIMARY KEY,
-            employer_id INTEGER UNIQUE NOT NULL, 
+            employer_id TEXT UNIQUE NOT NULL, 
             name TEXT NOT NULL,
             logo TEXT,
             source INTEGER REFERENCES sources(id) ON DELETE CASCADE
         );
         CREATE TABLE IF NOT EXISTS cities (
             id SERIAL PRIMARY KEY,
-            city_id INTEGER UNIQUE NOT NULL,
-            name TEXT NOT NULL
+            city_id INTEGER NOT NULL,
+            name TEXT NOT NULL,
+            source INTEGER NOT NULL
         );
         CREATE TABLE IF NOT EXISTS vacancies (
             id SERIAL PRIMARY KEY,
@@ -53,7 +54,6 @@ class VacancyManager:
             salary_from INTEGER,
             salary_to INTEGER,
             salary_currency TEXT,
-            salary_mode TEXT,
             experience TEXT,
             format TEXT,
             description TEXT,
@@ -93,12 +93,11 @@ class VacancyManager:
                     cur.executemany('INSERT INTO sources (id, name) VALUES (%s, %s)', to_insert)
                     conn.commit()
 
-
     # Функция для получения данных о всех вакансиях
     def get_vac_list(self):
         query = """
             SELECT v.id, v.name, e.name, c.name, v.salary_from, v.salary_to, 
-                   v.salary_currency, v.salary_mode, v.experience, f.format, 
+                   v.salary_currency, v.experience, f.format, 
                    v.description, v.link, e.logo, s.name, r.requirement
             FROM vacancies v
             JOIN employers e ON v.employer = e.id
@@ -113,7 +112,7 @@ class VacancyManager:
             with conn.cursor() as cur:
                 cur.execute(query)
                 for row in cur.fetchall():
-                    (vac_id, name, employer, city, s_from, s_to, s_cur, s_mod, exp, fmt, desc, link, pic, source,
+                    (vac_id, name, employer, city, s_from, s_to, s_cur, exp, fmt, desc, link, pic, source,
                      req) = row
                     if vac_id not in vacancies:
                         vacancies[vac_id] = {
@@ -124,7 +123,6 @@ class VacancyManager:
                             "salary_from": s_from,
                             "salary_to": s_to,
                             "salary_currency": s_cur,
-                            "salary_mode": s_mod,
                             "experience": exp,
                             "format": fmt if fmt else [],
                             "description": desc,
@@ -138,10 +136,10 @@ class VacancyManager:
                         vacancies[vac_id]["requirements"].append(req)
         return list(vacancies.values())
 
-    def update_tables(self):
+    def drop_tables(self):
         with self._get_connection() as conn:
             with conn.cursor() as cur:
-                cur.execute("DROP TABLE IF EXISTS requirements, vacancies, employers, formats CASCADE;")
+                cur.execute("DROP TABLE IF EXISTS requirements, vacancies, employers, formats, cities CASCADE;")
                 conn.commit()
 
     def update_vacancies_from_source(self):
@@ -150,14 +148,14 @@ class VacancyManager:
                 vacancies_from_parser = get_main_data()  # Получаем данные при помощи парсера
                 for vacancy in vacancies_from_parser:
                     name = vacancy.get("name")
-                    city = self.find_city(vacancy.get('city'))
-                    a=vacancy.get('employer_id')
+                    city = self.find_city(vacancy.get('city'), vacancy.get('source'))
+                    a = vacancy.get('employer_id')
                     b = vacancy.get('source')
+                    print(a, b)
                     emp = self.find_employer(a, b)
                     s_from = vacancy.get('salary_from')
                     s_to = vacancy.get('salary_to')
                     currency = vacancy.get('salary_currency')
-                    mode = vacancy.get('salary_mode')
                     exp = vacancy.get('experience')
                     desc = vacancy.get('description')
                     link = vacancy.get('link')
@@ -170,12 +168,11 @@ class VacancyManager:
                             "salary_from, "
                             "salary_to, "
                             "salary_currency, "
-                            "salary_mode, "
                             "experience, "
                             "description, "
                             "link"
-                            ") VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id;",
-                            (name, city, emp, s_from, s_to, currency, mode, exp, desc, link)
+                            ") VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id;",
+                            (name, city, emp, s_from, s_to, currency, exp, desc, link)
                         )
                         vacancy_id = cur.fetchone()[0]  # Получаем айди
                         for skill in vacancy.get('requirements', []):  # Добавляем требования, если имеются
@@ -195,12 +192,16 @@ class VacancyManager:
     def add_employer(self, data: dict):
         request = """
             INSERT INTO employers (employer_id, name, logo, source) 
-            VALUES (%s, %s, %s, %s)
-            ON CONFLICT (employer_id) DO NOTHING
+            VALUES (%s, %s, %s, %s) RETURNING id ;
         """
         with self._get_connection() as conn:
             with conn.cursor() as cur:
                 cur.execute(request, (data.get('emp_id'), data.get('name'), data.get('logo'), data.get('source')))
+
+
+                # print(request, (data.get('emp_id'), data.get('name'), data.get('logo'), data.get('source')))
+
+
                 conn.commit()
 
     def update_employers(self):
@@ -210,36 +211,44 @@ class VacancyManager:
                 self.add_employer(data)
             except Exception:
                 pass
+        for emp in employer_isd_sj:
+            try:
+                data = get_employer_data_sj(emp)
+                self.add_employer(data)
+            except Exception:
+                print('some error')
 
     def find_employer(self, e_id, source):
-        request = f"""SELECT id FROM employers WHERE employer_id={e_id} AND source={source}"""
+        request = f"""SELECT id FROM employers WHERE employer_id='{e_id}' AND source={source}"""
         with self._get_connection() as conn:
             with conn.cursor() as cur:
                 try:
                     cur.execute(request)
-                    found_id = cur.fetchone()
+                    found_id = cur.fetchall()
                     return found_id[0]
                 except Exception as e:
                     print(e, f"employer {e_id} not found")
                     return None
 
-    def find_city(self, c_id):
-        request = f'SELECT id FROM cities WHERE city_id={c_id}'
+    def find_city(self, c_id, source):
+        request = f'SELECT id FROM cities WHERE city_id={c_id} AND source={source}'
         with self._get_connection() as conn:
             with conn.cursor() as cur:
-                try:
-                    cur.execute(request)
-                    found_id = cur.fetchone()
-                    if not found_id:
-                        request = 'INSERT INTO cities (city_id, name) VALUES (%s, %s) RETURNING id'
-                        data = get_city_data(c_id)
-                        cur.execute(request, (data.get('area_id'), data.get('name')))
-                        found_id = cur.fetchone()
-                        conn.commit()
-                    return found_id[0]
+                # try:
+                cur.execute(request)
+                found_id = cur.fetchone()
+                if not found_id:
+                    request = 'INSERT INTO cities (city_id, name, source) VALUES (%s, %s, %s) RETURNING id'
 
-                except Exception as e:
-                    print(f"Ошибка при поиске города: {str(e)}")
+
+                    data = get_city_data(c_id, source)
+                    cur.execute(request, (data.get('area_id'), data.get('name'), source))
+                    found_id = cur.fetchone()
+                    conn.commit()
+                return found_id[0]
+
+                # except Exception as e:
+                #     print(f"Ошибка при поиске города: {str(e)}")
 
     def get_employers(self):
         requests = f'SELECT name FROM employers'
@@ -260,7 +269,7 @@ class VacancyManager:
     def get_sources(self):
         return [
             'hh.ru',
-            # 'telegram'
+            'superjob'
         ]
 
     def get_formats(self):
@@ -271,14 +280,7 @@ class VacancyManager:
                 res = list(set([i[0] for i in cur.fetchall()]))
                 return res
 #
-# db = VacancyManager(db_host, db_name, db_user, db_password, db_port)
-# print(*db.get_vac_list(), sep='\n')
-# db._total_update()
-# print(len(db.get_vac_list()))
+db = VacancyManager(db_host, db_name, db_user, db_password, db_port)
+print(*db.get_vac_list(), sep='\n')
 #
-# db._total_update()
-# print(len(db.get_vac_list()))
-# # print(db.get_formats())
-# # # print(len(d))
-# # print(len(db.get_employers()))
-# # print(len(db.get_cities()))
+
