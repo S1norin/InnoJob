@@ -49,7 +49,7 @@
 
 ### GitGraph
 
-![GitGraph Team 18 Workflow](assets/GitGraph%20Team%2018%20Workflow-20250705183424-pzz81go.png)
+![GitGraph Team 18 Workflow](docs/GitGraph Team 18 Workflow.png)
 
 ## Secrets managment
 
