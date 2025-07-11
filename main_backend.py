@@ -1,4 +1,5 @@
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.staticfiles import StaticFiles
 from database.database import VacancyManager
 from config import *
@@ -12,11 +13,12 @@ from Extra_classes import *
 from email.message import EmailMessage
 import aiosmtplib
 import secrets
+from fastapi.openapi.docs import get_swagger_ui_html
 import time
 from urllib.parse import quote
 import psycopg2
 
-app = FastAPI()
+app = FastAPI(docs_url=None, redoc_url=None)
 
 
 app.add_middleware(
@@ -31,7 +33,7 @@ app.add_middleware(
 app.mount("/web", StaticFiles(directory="web"), name="web")
 app.mount("/pics", StaticFiles(directory="pics"), name="pics")
 
-
+security = HTTPBasic()
 
 @app.on_event("startup")
 async def startup_event():
@@ -45,6 +47,69 @@ def get_user_manager(request: Request) -> UserManager:
 
 def get_vacancy_manager(request: Request) -> VacancyManager:
     return request.app.state.vacancy_manager
+
+
+async def verify_admin(
+    credentials: HTTPBasicCredentials = Depends(security),
+    db: UserManager = Depends(get_user_manager)
+):
+    try:
+        # First, check if user even exists
+        user_exists = await run_in_threadpool(db.user_in_base, credentials.username)
+        if not user_exists:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="User not found",
+                headers={"WWW-Authenticate": "Basic"},
+            )
+
+        # Then verify credentials
+        is_correct = await run_in_threadpool(
+            db.check_user,
+            email=credentials.username,
+            password=credentials.password
+        )
+
+        if not is_correct:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Incorrect password",
+                headers={"WWW-Authenticate": "Basic"},
+            )
+
+        # Finally check admin status
+        is_admin = await run_in_threadpool(db.get_is_admin, credentials.username)
+        if not is_admin:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Admin privileges required",
+                headers={"WWW-Authenticate": "Basic"},
+            )
+
+        return credentials.username
+
+    except HTTPException:
+        # Re-raise known exceptions
+        raise
+    except Exception as e:
+        # Log unexpected errors but don't reveal details
+        print(f"Admin verification error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error during authentication"
+        )
+
+@app.get("/docs", include_in_schema=False)
+async def get_swagger_documentation(current_admin: str = Depends(verify_admin)):
+    return get_swagger_ui_html(
+        openapi_url="/openapi.json",
+        title="API Documentation (Admin Only)",
+        swagger_ui_parameters={"syntaxHighlight.theme": "obsidian"}
+    )
+
+@app.get("/openapi.json", include_in_schema=False)
+async def get_open_api_endpoint(current_admin: str = Depends(verify_admin)):
+    return app.openapi()
 
 @app.get("/")
 async def read_index():
