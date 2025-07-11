@@ -480,12 +480,27 @@ async def edit_user_card(user_email: str, card_id: int, data:CreateCard, db: Use
 
 @app.get("/cards")
 async def get_user_card(user_email: str, card_number: int, db: UserManager = Depends(get_user_manager)):
-    try:gi
+    try:
         cards = await run_in_threadpool(db.get_all_cards)# получаем говно в виде списка словаря
         return [UserCard(**user_info) for user_info in cards]
     except Exception as e:
         print(f"Server error getting user info: {e}")
         raise HTTPException(status_code=500, detail="Could not fetch user info.")
+
+
+@app.get("/all-cards")
+async def get_user_card(db: UserManager = Depends(get_user_manager)):
+    try:
+        cards = await run_in_threadpool(db.get_literally_all_cards)# получаем говно в виде списка словаря
+        try:
+            result = [UserCard(**user_info) for user_info in cards]
+        except:
+            return []
+        return result
+    except Exception as e:
+        print(f"Server error getting user info: {e}")
+        raise HTTPException(status_code=500, detail="Could not fetch user info.")
+
 
 
 

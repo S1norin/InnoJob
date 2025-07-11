@@ -401,3 +401,46 @@ class UserManager:#Этот черт будет использоваться д�
             print(f"Ошибка БД при получении всех карточек пользователя: {e}")
             conn.rollback()
             raise
+
+    def get_literally_all_cards(self):
+        query1 = "SELECT id, name FROM users"
+        query2 = "SELECT card_id, level_of_education, education_full, age, description, cv_name, photo_name FROM cards WHERE user_id = %s ORDER BY card_id;"
+        query3 = "SELECT card_id, skill FROM skills WHERE user_id = %s;"
+        try:
+            with self._get_connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute(query1)
+                    result = cur.fetchall()
+                    all_cards = []
+                    for user in result:
+                        user_id = user[0]
+                        user_name = user[1]
+                        cur.execute(query2, (user_id,))
+                        cards = cur.fetchall()
+                        cur.execute(query3, (user_id,))
+                        skills_rows = cur.fetchall()
+                        # Map card_id to list of skills
+                        skills_map = {}
+                        for card_id, skill in skills_rows:
+                            skills_map.setdefault(card_id, []).append(skill)
+                        # Build card dicts
+                        card_dicts = []
+                        for card in cards:
+                            card_id, level_of_education, education_full, age, description, cv_name, photo_name = card
+                            card_dicts.append({
+                                "name": user_name,
+                                "card_id": card_id,
+                                "education_level": level_of_education,
+                                "education_full": education_full,
+                                "age": age,
+                                "description": description,
+                                "cv_name": cv_name,
+                                "photo_name": photo_name,
+                                "skills": skills_map.get(card_id, [])
+                            })
+                        all_cards += card_dicts
+                    return all_cards
+        except psycopg2.Error as e:
+            print(f"Ошибка БД при получении всех карточек пользователя: {e}")
+            conn.rollback()
+            raise
