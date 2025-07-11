@@ -1,5 +1,3 @@
-import { SERVER_URL } from './config.js';
-
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.querySelector('.login-form');
     const codeInputs = document.querySelectorAll('.code-input');
@@ -37,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            const response = await fetch(`${SERVER_URL}/login/confirm`, {
+            const response = await fetch('http://localhost:8000/login/confirm', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, code })
