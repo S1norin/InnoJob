@@ -7,18 +7,16 @@
     <title>InnoJob</title>
 
     <!-- Styles -->
-    <link rel="stylesheet" href="web/MainPage.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="/web/MainCVs.css">
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"> -->
 
     <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <!-- <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Jockey+One&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Jockey+One&display=swap" rel="stylesheet"> -->
 </head>
 
-<style>
+<!-- <style>
     .vacancy-card,
     .search-container input,
     .filter_variants,
@@ -35,7 +33,7 @@
     .filter_section {
         font-family: "Jockey One", sans-serif;
     }
-</style>
+</style> -->
 
 <body>
     <header class="header">
@@ -48,7 +46,7 @@
                 <h2>InnoJob</h2>
             </div>
             <div class="header-right">
-                <a href="/user_profile">
+                <a href="/user_profil">
                     <img src="/pics/profile.png" alt="profile">
                 </a>
                 <!-- Needs redirection to actual page that actually logs you out (on backend)-->
@@ -61,9 +59,6 @@
     </header>
 
     <div class="other_body">
-        <div class="search-container">
-            <input type="text" id="search-input" placeholder="Название вакансии...">
-        </div>
 
         <div class="main_content">
             <div class="filters-conteiner">
@@ -72,80 +67,93 @@
                     <h2>Filters</h2>
                 </div>
 
-                <!-- Job Type -->
                 <div class="filter_section">
                     <div class="filter_section_header">
-                        <h2>Тип работы</h2>
+                        <h2>Уровень образования</h2>
                     </div>
                     <div class="filter_variants"></div>
                     <button class="show-more-btn">Показать больше</button>
                 </div>
                 <hr>
 
-                <!-- Required work experience -->
                 <div class="filter_section">
                     <div class="filter_section_header">
-                        <h2>Опыт работы</h2>
+                        <h2>Статус Образования</h2>
                     </div>
                     <div class="filter_variants"></div>
                     <button class="show-more-btn">Показать больше</button>
-                </div>
-                <hr>
-
-                <!-- Salary range -->
-                <div class="filter_section">
-                    <div class="filter_section_header">
-                        <h2>Зарплата</h2>
-                    </div>
-                    <div class="salary-inputs">
-                        <input type="text" placeholder="От...">
-                        <input type="text" placeholder="До...">
-                    </div>
                 </div>
                 <hr>
 
                 <!-- Location -->
                 <div class="filter_section">
                     <div class="filter_section_header">
-                        <h2>Город</h2>
+                        <h2>Навыки</h2>
                     </div>
                     <div class="filter_variants"></div>
+                    <!-- для удобства в css не меняла классы для поисковой строки, просто скопируй ту же поисковую строку с теми же названиями -->
                     <button class="show-more-btn">Показать больше</button>
                 </div>
                 <hr>
 
-                <!-- Company -->
-                <div class="filter_section">
-                    <div class="filter_section_header">
-                        <h2>Компания</h2>
-                    </div>
-                    <div class="filter_variants"></div>
-                    <button class="show-more-btn">Показать больше</button>
-                </div>
             </div>
 
             <div class="cards">
                 <div class="all_jobs">
                     <div class="all_jobs_text">
-                        <h2>Все вакансии</h2>
+                        <h2>Все резюме</h2>
                         <p>Показано x из y результатов</p>
                     </div>
                     <button id="clear-filters">Очистить все фильтры</button>
                 </div>
 
-                <div class="vacancies" id="vacancies-list"></div>
+                <div class="vacancies" id="vacancies-list">
+                    <div class="cv-card">
+                        <div class="card-header">
+                            <div class="logo-place"></div>
+                            <div class="job-title-info">
+                                <h2>Name</h2>
+                                <h2>Surname</h2>
+                            </div>
+                        </div>
+
+                        <div class="card-details">
+                            <div class="detail-item">
+                                <img src="/pics/education.png" alt="education">
+                                <span>Уровень образования</span>
+                            </div>
+                            <div class="detail-item">
+                                <span>Статус образования</span>
+                            </div>
+                        </div>
+
+                        <div class="cv-skills">
+                            <div class="cv-skill-tag">скилл1</div>
+                            <div class="cv-skill-tag">скилл222222</div>
+                            <div class="cv-skill-tag">скилл33333</div>
+                            <div class="cv-skill-tag">скил444</div>
+                        </div>
+
+                        <div class="card-description">
+                            <p>Описание</p>
+                        </div>
+
+                        <div class="buttoms">
+                            <button class="apply-button">Скачать CV</button>
+                            <button class="apply-button">Cвязаться</button>
+                        </div>
+                    </div>
+                </div>
                 <div id="pagination" class="pagination"></div>
             </div>
+
+
         </div>
     </div>
 
-    <button id="scrollBtn">
-        <img src="/pics/topbtn.png" alt="Наверх" style="width: 50%; height: 50%; opacity: 0;">
-    </button>
+    <button id="scrollBtn"></button>
 
-
-    <!-- JS -->
-    <script type="module" src="/web/MainPage.js"></script>
+    <script src="/web/MainCV.js"></script>
 </body>
 
 </html>

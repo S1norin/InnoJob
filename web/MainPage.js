@@ -1,6 +1,9 @@
+import { SERVER_URL } from './config.js';
+
 document.addEventListener('DOMContentLoaded', () => {
 
     const app = {
+
         elements: {},
         allVacancies: [],
         currentPage: 1,
@@ -33,32 +36,44 @@ document.addEventListener('DOMContentLoaded', () => {
             this.elements.salaryInputs = document.querySelectorAll('.salary-inputs input');
             this.elements.clearFiltersBtn = document.getElementById('clear-filters');
             this.elements.searchInput = document.getElementById('search-input');
-
         },
 
         bindEvents() {
             this.elements.pagination.addEventListener('click', (e) => {
-                if (e.target.matches('.page-btn')) {
+                if (e.target.matches('.page-btn') || e.target.matches('.arrow-btn')) {
                     const page = parseInt(e.target.dataset.page, 10);
-                    if (!isNaN(page)) {
+                    if (!isNaN(page) && page !== this.currentPage && !e.target.disabled) {
+                        // Добавляем анимацию перехода
+                        const oldActive = this.elements.pagination.querySelector('.page-btn.active');
+                        if (oldActive) {
+                            oldActive.style.transform = 'scale(1)';
+                        }
+
                         this.currentPage = page;
                         this.renderVacancies();
+
+                        setTimeout(() => {
+                            const newActive = this.elements.pagination.querySelector('.page-btn.active');
+                            if (newActive) {
+                                newActive.style.transform = 'scale(1.1)';
+                            }
+                        }, 50);
                     }
                 }
             });
         },
 
+
         async fetchAndRenderVacancies() {
             this.setUIState('loading');
             try {
-                const response = await fetch('https://innojob.ru/vacancies');
+                const response = await fetch(`${SERVER_URL}/vacancies`);
                 if (!response.ok) {
                     throw new Error(`Ошибка HTTP: ${response.status}`);
                 }
                 this.allVacancies = await response.json();
 
                 this.populateFilters();
-
                 this.renderVacancies();
             } catch (error) {
                 console.error('Ошибка при загрузке вакансий:', error);
@@ -69,15 +84,34 @@ document.addEventListener('DOMContentLoaded', () => {
         populateFilters() {
             const jobTypesSet = new Set();
             const experiencesSet = new Set();
-            const locationsSet = new Set();
+            const locationsMap = new Map(); // Changed to Map to count vacancies
             const companiesSet = new Set();
+
+            const salaries = [];
 
             this.allVacancies.forEach(vacancy => {
                 if (vacancy.format) jobTypesSet.add(vacancy.format);
                 if (vacancy.experience) experiencesSet.add(vacancy.experience);
-                if (vacancy.city) locationsSet.add(vacancy.city);
                 if (vacancy.employer) companiesSet.add(vacancy.employer);
+
+                // Count vacancies per city
+                if (vacancy.city) {
+                    const city = vacancy.city;
+                    locationsMap.set(city, (locationsMap.get(city) || 0) + 1);
+                }
+
+                if (vacancy.salary_from && vacancy.salary_from > 0) {
+                    salaries.push(vacancy.salary_from);
+                }
+                if (vacancy.salary_to && vacancy.salary_to > 0) {
+                    salaries.push(vacancy.salary_to);
+                }
             });
+
+            const minSalary = salaries.length > 0 ? Math.min(...salaries) : 0;
+            const maxSalary = salaries.length > 0 ? Math.max(...salaries) : 1000000;
+
+            this.updateSalaryInputs(minSalary, maxSalary);
 
             const sortExperience = (a, b) => {
                 const orderMap = {
@@ -102,7 +136,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 return getMinYears(a) - getMinYears(b);
             };
 
-            const createCheckboxes = (container, itemsSet, isExperience = false) => {
+            // const createCheckboxes = (container, itemsSet, isExperience = false) 
+            const createCheckboxes = (container, itemsSet, isExperience = false, showCount = false, countMap = null) => {
                 container.innerHTML = '';
                 let itemsArr = Array.from(itemsSet);
 
@@ -114,6 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 itemsArr.forEach(item => {
                     const label = document.createElement('label');
+                    label.className = 'checkbox-label';
                     const checkbox = document.createElement('input');
                     checkbox.type = 'checkbox';
                     checkbox.value = item;
@@ -122,6 +158,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     label.appendChild(checkbox);
                     label.appendChild(span);
+
+                    // if (showCount && countMap) {
+                    //     const countBadge = document.createElement('span');
+                    //     countBadge.className = 'vacancy-count';
+                    //     countBadge.textContent = countMap.get(item) || 0;
+                    //     label.appendChild(countBadge);
+                    // }
+
                     container.appendChild(label);
                 });
 
@@ -131,6 +175,67 @@ document.addEventListener('DOMContentLoaded', () => {
                     container.classList.remove('collapsed');
                 }
             };
+
+            const createCityFilter = (container, locationsMap) => {
+                container.innerHTML = '';
+
+                const searchWrapper = document.createElement('div');
+                searchWrapper.className = 'city-search-wrapper';
+
+                const searchInput = document.createElement('input');
+                searchInput.type = 'text';
+                searchInput.placeholder = 'Поиск городов...';
+                searchInput.className = 'city-search-input';
+
+                searchWrapper.appendChild(searchInput);
+                container.appendChild(searchWrapper);
+
+                const citiesContainer = document.createElement('div');
+                citiesContainer.className = 'cities-container';
+                container.appendChild(citiesContainer);
+
+                const sortedCities = Array.from(locationsMap.entries())
+                    .sort((a, b) => b[1] - a[1]);
+
+                const renderCities = (filteredCities = sortedCities) => {
+                    citiesContainer.innerHTML = '';
+
+                    filteredCities.forEach(([city, count]) => {
+                        // const label = document.createElement('label');
+                        // label.className = 'city-label';
+
+                        const label = document.createElement('label');
+                        label.className = 'checkbox-label';
+
+                        const checkbox = document.createElement('input');
+                        checkbox.type = 'checkbox';
+                        checkbox.value = city;
+
+                        const cityName = document.createElement('span');
+                        cityName.textContent = this.capitalizeWords(city);
+
+                        const countBadge = document.createElement('span');
+                        countBadge.textContent = count;
+                        countBadge.className = 'vacancy-count';
+
+                        label.appendChild(checkbox);
+                        label.appendChild(cityName);
+                        label.appendChild(countBadge);
+                        citiesContainer.appendChild(label);
+                    });
+                };
+
+                renderCities();
+
+                searchInput.addEventListener('input', (e) => {
+                    const searchTerm = e.target.value.toLowerCase();
+                    const filteredCities = sortedCities.filter(([city]) =>
+                        city.toLowerCase().includes(searchTerm)
+                    );
+                    renderCities(filteredCities);
+                });
+            };
+
 
             const sections = this.elements.filterContainer.querySelectorAll('.filter_section');
 
@@ -143,45 +248,107 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else if (header.includes('опыт работы')) {
                     createCheckboxes(variantsContainer, experiencesSet, true);
                 } else if (header.includes('город') || header.includes('location')) {
-                    createCheckboxes(variantsContainer, locationsSet);
+                    createCityFilter(variantsContainer, locationsMap);
                 } else if (header.includes('компания') || header.includes('company')) {
                     createCheckboxes(variantsContainer, companiesSet);
                 }
             });
 
-
             this.setupShowMoreButtons();
         },
 
+        updateSalaryInputs(minSalary, maxSalary) {
+            const formatSalaryForDisplay = (salary) => {
+                if (salary >= 1000000) {
+                    return `${Math.floor(salary)}`;
+                } else if (salary >= 1000) {
+                    return `${Math.floor(salary)}`;
+                }
+                return salary.toString();
+            };
+
+            if (this.elements.salaryInputs && this.elements.salaryInputs.length >= 2) {
+                this.elements.salaryInputs[0].placeholder = `От ${formatSalaryForDisplay(minSalary)}`;
+                this.elements.salaryInputs[1].placeholder = `До ${formatSalaryForDisplay(maxSalary)}`;
+
+                this.elements.salaryInputs[0].setAttribute('data-min', minSalary);
+                this.elements.salaryInputs[1].setAttribute('data-max', maxSalary);
+
+                const salarySection = this.elements.salaryInputs[0].closest('.filter_section');
+                if (salarySection) {
+                    let rangeInfo = salarySection.querySelector('.salary-range-info');
+                    if (!rangeInfo) {
+                        rangeInfo = document.createElement('div');
+                        rangeInfo.className = 'salary-range-info';
+                        rangeInfo.style.fontSize = '12px';
+                        rangeInfo.style.color = '#666';
+                        rangeInfo.style.marginTop = '5px';
+                        salarySection.appendChild(rangeInfo);
+                    }
+                }
+            }
+        },
 
         setupShowMoreButtons() {
             const filterSections = this.elements.filterContainer.querySelectorAll('.filter_section');
             filterSections.forEach(section => {
+                const header = section.querySelector('h2').textContent.toLowerCase();
                 const variantsContainer = section.querySelector('.filter_variants');
                 const showMoreBtn = section.querySelector('.show-more-btn');
 
                 if (!showMoreBtn) return;
 
-                if (variantsContainer.children.length > 5) {
-                    showMoreBtn.style.display = 'inline-block';
-                    showMoreBtn.textContent = 'Показать больше';
-                    variantsContainer.classList.add('collapsed');
+                // Специальная обработка для городов
+                if (header.includes('город') || header.includes('location')) {
+                    const citiesContainer = variantsContainer.querySelector('.cities-container');
+                    if (citiesContainer && citiesContainer.children.length > 5) {
+                        showMoreBtn.style.display = 'inline-block';
+                        showMoreBtn.textContent = 'Показать больше';
+                        citiesContainer.classList.add('collapsed');
 
-                    showMoreBtn.onclick = () => {
-                        if (variantsContainer.classList.contains('collapsed')) {
-                            variantsContainer.classList.remove('collapsed');
-                            showMoreBtn.textContent = 'Показать меньше';
-                        } else {
-                            variantsContainer.classList.add('collapsed');
-                            showMoreBtn.textContent = 'Показать больше';
+                        // Удаляем старые обработчики событий
+                        showMoreBtn.onclick = null;
+
+                        // Добавляем новый обработчик
+                        showMoreBtn.onclick = () => {
+                            if (citiesContainer.classList.contains('collapsed')) {
+                                citiesContainer.classList.remove('collapsed');
+                                showMoreBtn.textContent = 'Показать меньше';
+                            } else {
+                                citiesContainer.classList.add('collapsed');
+                                showMoreBtn.textContent = 'Показать больше';
+                            }
+                        };
+                    } else {
+                        showMoreBtn.style.display = 'none';
+                        if (citiesContainer) {
+                            citiesContainer.classList.remove('collapsed');
                         }
-                    };
+                    }
                 } else {
-                    showMoreBtn.style.display = 'none';
-                    variantsContainer.classList.remove('collapsed');
+                    // Обычная обработка для других фильтров
+                    if (variantsContainer.children.length > 5) {
+                        showMoreBtn.style.display = 'inline-block';
+                        showMoreBtn.textContent = 'Показать больше';
+                        variantsContainer.classList.add('collapsed');
+
+                        showMoreBtn.onclick = () => {
+                            if (variantsContainer.classList.contains('collapsed')) {
+                                variantsContainer.classList.remove('collapsed');
+                                showMoreBtn.textContent = 'Показать меньше';
+                            } else {
+                                variantsContainer.classList.add('collapsed');
+                                showMoreBtn.textContent = 'Показать больше';
+                            }
+                        };
+                    } else {
+                        showMoreBtn.style.display = 'none';
+                        variantsContainer.classList.remove('collapsed');
+                    }
                 }
             });
         },
+
 
         bindApplyButtons() {
             this.elements.vacanciesList.addEventListener('click', (e) => {
@@ -218,25 +385,101 @@ document.addEventListener('DOMContentLoaded', () => {
                         this.toggleFilter(this.filters.companies, labelText, checkbox.checked);
                     }
 
-
-
                     this.currentPage = 1;
                     this.renderVacancies();
                 }
             });
 
-            this.elements.salaryInputs[0].addEventListener('input', () => {
-                const val = parseInt(this.elements.salaryInputs[0].value);
-                this.filters.salaryFrom = !isNaN(val) ? val : null;
-                this.currentPage = 1;
-                this.renderVacancies();
-            });
+            this.elements.salaryInputs.forEach((input, index) => {
+                input.addEventListener('keydown', (e) => {
+                    const allowedKeys = [
+                        'Backspace', 'Delete', 'Tab', 'Enter',
+                        'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown',
+                        'Home', 'End'
+                    ];
 
-            this.elements.salaryInputs[1].addEventListener('input', () => {
-                const val = parseInt(this.elements.salaryInputs[1].value);
-                this.filters.salaryTo = !isNaN(val) ? val : null;
-                this.currentPage = 1;
-                this.renderVacancies();
+                    if (e.ctrlKey || e.metaKey) {
+                        return;
+                    }
+
+                    if (!allowedKeys.includes(e.key) && !/^[0-9]$/.test(e.key)) {
+                        e.preventDefault();
+                    }
+                });
+
+                input.addEventListener('input', (e) => {
+                    let value = e.target.value.replace(/\D/g, '');
+
+                    const maxValue = 10000000;
+                    if (parseInt(value) > maxValue) {
+                        value = maxValue.toString();
+                    }
+
+                    e.target.value = value;
+
+                    const minAllowed = parseInt(e.target.getAttribute('data-min')) || 0;
+                    const maxAllowed = parseInt(e.target.getAttribute('data-max')) || Infinity;
+                    const val = parseInt(value);
+
+                    if (!isNaN(val)) {
+                        if ((index === 0 && val < minAllowed) || (index === 1 && val > maxAllowed)) {
+                            e.target.style.borderColor = '#ff6b6b';
+                            e.target.title = index === 0
+                                ? `Минимальная зарплата: ${minAllowed}`
+                                : `Максимальная зарплата: ${maxAllowed}`;
+                        } else {
+                            e.target.style.borderColor = '';
+                            e.target.title = '';
+                        }
+                    } else {
+                        e.target.style.borderColor = '';
+                        e.target.title = '';
+                    }
+
+                    if (index === 0) {
+                        this.filters.salaryFrom = !isNaN(val) ? val : null;
+                    } else {
+                        this.filters.salaryTo = !isNaN(val) ? val : null;
+                    }
+
+                    this.currentPage = 1;
+                    this.renderVacancies();
+                });
+
+                input.addEventListener('paste', (e) => {
+                    e.preventDefault();
+                    const paste = (e.clipboardData || window.clipboardData).getData('text');
+                    const numericValue = paste.replace(/\D/g, '');
+                    if (numericValue) {
+                        const maxValue = 10000000;
+                        const finalValue = Math.min(parseInt(numericValue), maxValue).toString();
+                        e.target.value = finalValue;
+                        e.target.dispatchEvent(new Event('input'));
+                    }
+                });
+
+                input.addEventListener('keypress', (e) => {
+                    if (!/[0-9]/.test(e.key) &&
+                        !['Backspace', 'Delete', 'Tab', 'Enter'].includes(e.key)) {
+
+                        input.style.borderColor = '#ff6b6b';
+                        input.title = 'Можно вводить только цифры';
+
+                        setTimeout(() => {
+                            if (input.style.borderColor === 'rgb(255, 107, 107)') {
+                                input.style.borderColor = '';
+                                input.title = '';
+                            }
+                        }, 2000);
+                    }
+                });
+
+                input.addEventListener('focus', (e) => {
+                    if (e.target.title === 'Можно вводить только цифры') {
+                        e.target.style.borderColor = '';
+                        e.target.title = '';
+                    }
+                });
             });
 
             this.elements.clearFiltersBtn.addEventListener('click', () => {
@@ -259,10 +502,14 @@ document.addEventListener('DOMContentLoaded', () => {
             this.elements.salaryInputs[0].value = '';
             this.elements.salaryInputs[1].value = '';
             this.elements.searchInput.value = '';
-            this.searchTerm = '';
-            this.populateFilters();
-            this.renderVacancies();
 
+            // Clear city search input
+            const citySearchInput = this.elements.filterContainer.querySelector('.city-search-input');
+            if (citySearchInput) {
+                citySearchInput.value = '';
+            }
+
+            this.searchTerm = '';
 
             this.filters = {
                 jobTypes: new Set(),
@@ -277,6 +524,8 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('search-input').value = '';
 
             this.currentPage = 1;
+
+            this.populateFilters();
             this.renderVacancies();
         },
 
@@ -289,7 +538,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.currentPage = 1;
                 this.renderVacancies();
             });
-
         },
 
         renderVacancies() {
@@ -360,46 +608,59 @@ document.addEventListener('DOMContentLoaded', () => {
         renderPagination(totalItems) {
             const pageCount = Math.ceil(totalItems / this.itemsPerPage);
             const current = this.currentPage;
+
+            if (pageCount <= 1) {
+                this.elements.pagination.innerHTML = '';
+                return;
+            }
+
             let html = '';
 
-            const createPageBtn = (i, text = null, isHidden = false) => {
-                return `<button class="page-btn ${i === current ? 'active' : ''} ${isHidden ? 'hidden' : ''}" data-page="${i}">${text || i}</button>`;
-            };
+            // Кнопка "Назад"
+            html += `<button class="arrow-btn" data-page="${current - 1}" ${current <= 1 ? 'disabled' : ''}>‹</button>`;
 
-            const createEllipsis = (isVisible = true) => {
-                return `<span class="ellipsis ${!isVisible ? 'invisible' : ''}">...</span>`;
-            };
-
-            if (current > 1) {
-                html += createPageBtn(current - 1, '‹');
-            }
-
-            html += createPageBtn(1);
-            html += createPageBtn(2);
-
-            html += createEllipsis(current > 3);
-
-            if (current !== 1 && current !== 2 && current !== pageCount) {
-                html += createPageBtn(current);
+            // Логика отображения страниц
+            if (pageCount <= 7) {
+                // Показываем все страницы если их мало
+                for (let i = 1; i <= pageCount; i++) {
+                    html += `<button class="page-btn ${i === current ? 'active' : ''}" data-page="${i}">${i}</button>`;
+                }
             } else {
-                html += createPageBtn(current, current, true);
+                // Сложная логика для большого количества страниц
+                html += `<button class="page-btn ${1 === current ? 'active' : ''}" data-page="1">1</button>`;
+
+                if (current > 4) {
+                    html += `<span class="ellipsis">...</span>`;
+                }
+
+                let start = Math.max(2, current - 1);
+                let end = Math.min(pageCount - 1, current + 1);
+
+                if (current <= 3) {
+                    end = Math.min(5, pageCount - 1);
+                }
+                if (current >= pageCount - 2) {
+                    start = Math.max(pageCount - 4, 2);
+                }
+
+                for (let i = start; i <= end; i++) {
+                    html += `<button class="page-btn ${i === current ? 'active' : ''}" data-page="${i}">${i}</button>`;
+                }
+
+                if (current < pageCount - 3) {
+                    html += `<span class="ellipsis">...</span>`;
+                }
+
+                if (pageCount > 1) {
+                    html += `<button class="page-btn ${pageCount === current ? 'active' : ''}" data-page="${pageCount}">${pageCount}</button>`;
+                }
             }
 
-            html += createEllipsis(current < pageCount - 2);
-
-            if (pageCount > 3) {
-                html += createPageBtn(pageCount);
-            } else {
-                html += createPageBtn(pageCount, pageCount, true);
-            }
-
-            if (current < pageCount) {
-                html += createPageBtn(current + 1, '›');
-            }
+            // Кнопка "Вперед"
+            html += `<button class="arrow-btn" data-page="${current + 1}" ${current >= pageCount ? 'disabled' : ''}>›</button>`;
 
             this.elements.pagination.innerHTML = html;
         },
-
 
 
         formatSalaryNumber(number) {
@@ -420,15 +681,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 salaryText = `${from} ${to}`.trim();
             }
 
-
-
             const tags = [];
             if (vacancy.format && vacancy.format !== "empty") {
                 tags.push(vacancy.format);
-            }
+            } 
 
             return `
-                
                 <div class="vacancy-card">
                     <div class="card-header">
                         <div class="logo-place"></div>
@@ -507,5 +765,4 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     app.init();
-
 });

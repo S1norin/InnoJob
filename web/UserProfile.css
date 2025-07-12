@@ -91,50 +91,232 @@ body {
 .other_body {
     background-color: #f2f2f2;
     display: flex;
+    flex-direction: row; /* Горизонтальное расположение */
+    gap: 50px; /* Увеличенное расстояние между элементами c 25*/
+    margin-left: 30px; /* Добавлен левый отступ для карточек */
+    margin: 0 auto;
+    align-items: flex-start;
+    width: 100%;
+    max-width: 1400px;
+    font-family: sans-serif;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+
+.fill_cards {
+    background-color: #f2f2f2;
+    display: flex;
     flex-direction: column;
     align-items: center;
-    min-height: 100vh;
-    width: 93%;
-    max-width: 900px;
+    /*min-height: 100vh;*/
+    width: 100%;
+    max-width: 700px;
     font-family: sans-serif;
     margin: 0 auto;
     padding: 0;
     gap: 25px;
+    flex: 1;
+}
+
+/* КОНТЕЙНЕР ДЛЯ КАРТОЧЕК СПРАВА - СЕТКА 2×3 */
+/*сделала так, чтобы карточки добавлялись в сетке 2*2, потом можно будет добавить переключение по страницам*/
+#cardsContainer {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(3, auto);
+    gap: 20px;
+    background-color: #f2f2f2;
+    padding: 0;
+    margin: 0;
+    margin-left: 30px; /* Добавить левый отступ */
+    min-width: 800px;
+    max-width: 1000px;
 }
 
 
-/* дальше */
-
-.header-info {
+/* Карточки CV */
+.cv-card {
+    background-color: white;
+    border-radius: 15px;
+    padding: clamp(12px, 3vw, 20px);
+    width: min(60vw, 396px); /* Адаптивная ширина с максимумом */
+    height: 520px; /* Фиксированная высота */
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    gap: 3px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /*добавила тень*/
+}
+
+.card-header {
+    display: flex;
     align-items: center;
-    margin-bottom: 0px;
-    margin-top: 0;
+    gap: clamp(10px, 2vw, 15px);
+}
+
+.logo-place {
+    width: 80px;
+    height: 80px;
+    background-color: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #999;
+    font-size: 14px;
+    object-fit: cover;
+}
+
+.job-title-info {
+    flex: 1;
+}
+
+.job-title-info h2 {
+    margin: 0 0 0.75rem 0;
+    font-size: clamp(1.1rem, 2.2vw, 1.5rem);
+    line-height: 1.35;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    word-break: break-word;
+    text-align: left;
+}
+
+.card-details {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    color: #555;
+    font-size: clamp(0.8rem, 1.2vw, 0.95rem);
+    padding: 0.5rem 0;
+    justify-content: space-between;
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    white-space: nowrap;
+}
+
+.card-details img {
+    width: clamp(16px, 1.9vw, 20px);
+    height: auto;
+    aspect-ratio: 1 / 1;
+}
+
+.card-description {
+    background-color: #f2f2f2;
     width: 100%;
+    height: 60%;
+    border-radius: 1rem;
+    padding: clamp(10px, 2vw, 15px);
+    overflow-y: auto;
+    box-sizing: border-box;
+}
+
+.card-description p {
+    margin: 0 0 1rem 0;
+    line-height: 1.5;
+    font-size: clamp(0.85rem, 2vw, 1rem);
+    color: #000000;
+}
+
+.cv-skills {
+    margin-bottom: 6px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;  /* Маленькое расстояние между навыками */
+}
+
+.cv-skill-tag {
+    background-color: #00bb002c;
+    color: #008c00;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    display: inline-block;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid #008c0057;
+    margin-right: 4px; /* Маленький правый отступ */
+    margin-bottom: 4px;
+    white-space: nowrap;
+    width: auto;
+    min-width: 40px;
+    max-width: 100%;
     text-align: center;
 }
 
-.header-info h2 {
-    font-size: 26px;
-    margin-top: 0;
-    font-weight: 600;
-    margin-bottom: 0px;
+.buttoms {
+    display: flex;
+    gap: 10px; /* Маленькое расстояние между кнопками */
+    margin-top: 15px;
+    margin-bottom: 0;
+    justify-content: space-between;
+    flex-wrap: wrap; /* Перенос кнопок на новую строку */
 }
 
-.header-info p {
-    color: #333;
-    font-size: 16px;
-    margin-bottom: 0px;
+.apply-button {
+    background-color: #00bb00;
+    color: white;
+    border: none;
+    border-radius: 30px;
+    font-size: clamp(0.8rem, 2vw, 0.9rem); /* Меньший шрифт */
+    cursor: pointer;
+    transition: background-color 0.3s;
+    width: 30%;  /* Узкие кнопки */
+    min-width: 80px;
+    padding: 0.5rem 1rem;
+    margin: 2px; /* Небольшие отступы */
+    text-align: center;
+    display: inline-block;
 }
 
+.apply-button:hover {
+    background-color: #008c00;
+}
 
+.delete-card {
+    background-color: #dc3545; /* Красная кнопка удаления */
+}
 
+.delete-card:hover {
+    background-color: #c82333;
+}
 
+.add-cv-btn {
+    background-color: #00bb00;
+    color: white;
+    border: none;
+    border-radius: 30px;
+    font-size: clamp(0.9rem, 2.5vw, 1rem);
+    cursor: pointer;
+    transition: background-color 0.3s;
+    min-width: 0;
+    padding: 0.5rem 1.5rem;
+    margin: 0;
+    text-align: center;
+    display: inline-block;
+}
+
+.add-cv-btn:hover {
+    background-color: #008c00;
+}
+
+/* Карточка заполнения CV */
 .profile-form {
     background-color: #fff;
     border-radius: 15px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Стандартная тень */
     padding: clamp(12px, 3vw, 32px);
     width: 100%;
     max-width: 600px;
@@ -243,10 +425,16 @@ input[type="email"]:focus,
     display: block;
 }
 
+.form-group {
+    flex: 1;
+    min-width: 0; /* Минимальная ширина для flex элементов */
+}
+
 .form-actions {
     display: flex;
     justify-content: center;
     margin-top: 20px;
+    width: 100%; /* Полная ширина контейнера кнопок */
 }
 
 .save-btn {
@@ -273,8 +461,6 @@ textarea {
     display: flex;
     gap: 25px;
     margin-top: 0;
-    /* margin-bottom: 30px;
-    padding-bottom: 25px; */
     width: 100%;
 }
 
@@ -405,12 +591,12 @@ textarea {
     gap: 20px;
 }
 
-.form-group {
-    flex: 1;
-}
-
 .form-select option {
     color: #333;
+}
+
+.form-select {
+    width: 100%;
 }
 
 .form-textarea {
@@ -420,8 +606,7 @@ textarea {
     border-radius: 8px;
     font-size: 14px;
     font-family: inherit;
-    /* resize: vertical; */
-    min-height: 150px;
+    min-height: 150px; /* Минимальная высота без ограничений */
     box-sizing: border-box;
 }
 

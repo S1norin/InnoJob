@@ -1,3 +1,5 @@
+import { SERVER_URL } from './config.js';
+
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
 document.querySelector('.login-form').addEventListener('submit', async (e) => {
@@ -37,7 +39,7 @@ document.querySelector('.login-form').addEventListener('submit', async (e) => {
     };
 
     try {
-        const response = await fetch('https://innojob.ru/users/register', {
+        const response = await fetch(`${SERVER_URL}/users/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(userData)
@@ -46,12 +48,11 @@ document.querySelector('.login-form').addEventListener('submit', async (e) => {
         const result = await response.json();
 
         if (response.ok) {
-            localStorage.setItem("emailToConfirm", userData.email);
             localStorage.setItem("userName", firstName);
             localStorage.setItem("userSurname", lastName);
             localStorage.setItem("userEmail", userData.email);
-            alert("Регистрация прошла успешно. Подтвердите почту.");
-            window.location.href = "ConfirmPage.html";
+            alert("Регистрация прошла успешно.");
+            window.location.href = "/log_in_page";
         } else {
             document.getElementById('email-error').textContent = result.detail || "Ошибка регистрации";
         }
