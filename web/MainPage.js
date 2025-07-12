@@ -1,3 +1,4 @@
+import { SERVER_URL } from "./config.js";
 document.addEventListener('DOMContentLoaded', () => {
 
     const app = {
@@ -65,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
         async fetchAndRenderVacancies() {
             this.setUIState('loading');
             try {
-                const response = await fetch(`http://localhost:8000/vacancies`);
+                const response = await fetch(`${SERVER_URL}/vacancies`);
                 if (!response.ok) {
                     throw new Error(`Ошибка HTTP: ${response.status}`);
                 }
