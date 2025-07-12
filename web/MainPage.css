@@ -1,3 +1,23 @@
+@font-face {
+    font-family: 'headers';
+    src: url('/fonts/заголовки.woff2') format('woff2'),
+    url('/fonts/заголовки.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'mains';
+    src: url('fonts/основной.woff2') format('woff2'),
+    url('/fonts/основной.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+
+
 #vacancies-list {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -9,12 +29,11 @@
 }
 
 body{
-    background-color: #f2f2f2;
+    background-color: hsl(194, 39%, 94%);
     display: flex;
     flex-direction: column;
     align-items: center;
     min-height: 100vh;
-    font-family: sans-serif;
     margin: 0;
     padding: 0;
     gap: 25px;
@@ -48,11 +67,13 @@ width: 100%;
     gap: 0.5rem;
 }
 
+/* ?? название в шапке */
 .header-left h2 {
     margin: 0;
     color: #ffffff;
     display: flex;
     align-items: right;
+    font-family: 'headers', "Trebuchet MS", Helvetica, sans-serif;
     gap:1px;
     font-size: 17px;
     font-weight: normal;
@@ -86,14 +107,13 @@ width: 100%;
 
 
 .other_body{
-background-color: #f2f2f2;
+    background-color: hsl(194, 39%, 94%);
     display: flex;
     flex-direction: column;
     align-items: center;
     min-height: 100vh;
     width: 93%;
     max-width: 1400px;
-    font-family: sans-serif;
     margin: 0 auto;
     padding: 0;
     gap: 25px;
@@ -115,41 +135,20 @@ background-color: #f2f2f2;
     gap: 5px;
 }
 
-.search-container input[type="text"],
-.search-container button {
+/* ?? название вакансии.... в поисковой строке  */
+.search-container input[type="text"] {
     box-sizing: border-box;
     border: none;
     border-radius: 10px;
     font-size: 17px;
     font-weight: normal;
     padding: 0 15px;
-
-}
-
-.search-container input[type="text"] {
+    font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
     flex-grow: 1;
-    background-color: #f2f2f2;
+    background-color: #f6fbff;
     color: #555;
     margin-right: 10px;
      outline: none;
-}
-
-.search-container button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    /* gap: 8px; */
-    color: white;
-    padding: 0 25px;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: background-color 0.2s;
-    background-color: #00bb00;
-    letter-spacing: 0.4px;
-}
-
-.search-container button:hover {
-    background-color: #008c00;
 }
 
 
@@ -158,12 +157,11 @@ background-color: #f2f2f2;
 .main_content{
     display: flex;
     align-items: flex-start;
-    background-color: #f2f2f2;
+    background-color: hsl(194, 39%, 94%);
     flex-direction: row;
     min-height: 100vh;
     width: 100%;
     max-width: 1400px;
-    font-family: sans-serif;
     margin: 0 auto;
     padding: 0;
     gap: 25px;
@@ -179,7 +177,6 @@ background-color: #f2f2f2;
     padding: clamp(0px, 1.5vw, 20px);
     gap: 0px;
     width: min(40vw, 396px);
-    /* height: 600px;  */
     height: auto;
     display: flex;
     flex-direction: column;
@@ -191,14 +188,14 @@ background-color: #f2f2f2;
 .filters_header{
     display: flex;
     position: relative;
-    /* justify-content: center; */
     align-items: center;
-    background-color: #f2f2f2;
+    background-color: #f6fbff;
     border-radius: 50px;
     padding: 5px 10px;
     gap: 2px;
 }
 
+/* ?? Фильтры */
 .filters_header h2 {
     margin: 0;
     font-size: 17px;
@@ -210,6 +207,7 @@ background-color: #f2f2f2;
     left: 50%;
     transform: translateX(-50%);
     letter-spacing: 0.4px;
+    font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
 }
 
 .filters_header img{
@@ -219,37 +217,116 @@ background-color: #f2f2f2;
     text-align: left;
 }
 
+/* ?? тип работы */
 .filter_section h2 {
     margin: 0 0 3px 0;
     font-size: 20px;
     color: #000;
     letter-spacing: 0.4px;
+    font-family: 'headers', "Trebuchet MS", Helvetica, sans-serif;
 }
 
+
+/* ?? в офисе */
 .filter_variants {
     display: flex;
     flex-direction: column;
     gap: 2px;
     color: #555;
     padding: 0.5rem 0;
-    
+    font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
 }
 
-.checkbox-label {
+
+hr {
+    border: none;
+    height: 1px;
+    background-color: #f6fbff;
+    margin: 5px 0;
+}
+
+.salary-inputs {
     display: flex;
-    align-items: center;
-    cursor: pointer;
-    font-size: clamp(0.8rem, 1.2vw, 0.95rem);
-    color: #333;
-    user-select: none;
-    border-radius: 10px;
-    transition: background-color 0.2s, color 0.2s;
-    padding: 2px 0;
-
+    gap: 15px;
 }
 
-.checkbox-label:hover {
-    background-color: #f2f2f2;
+/* ?? ввод зп */
+.salary-inputs input {
+    margin-top: 10px;
+    width: 100%;
+    padding: 10px;
+    border-radius: 20px;
+    text-align: center;
+    font-size: 13px;
+    background-color: #f6fbff;
+    outline: none;
+    border: none;
+    color:#333;
+    font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
+}
+
+/* ?? от и до зп */
+.salary-inputs input::placeholder {
+    color: #555; /* Замените на желаемый цвет */
+    font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
+}
+
+
+/* ?? показать больше */
+.show-more-btn {
+    border-radius: 15px;
+    padding: 4px 12px;
+    font-size: 16px;
+    cursor: pointer;
+    color: white;
+    margin-top: 15px;
+    background-color: #00bb00;
+    letter-spacing: 0.4px;
+    outline: none;
+    border: none;
+    font-family: 'headers', "Trebuchet MS", Helvetica, sans-serif;
+}
+
+.filter_section .show-more-btn:hover {
+   background-color: #008c00;
+}
+
+
+.city-search-wrapper {
+    display: flex;
+    width: 100%;
+    background-color: white;
+    border-radius: 15px;
+}
+
+/* ?? ввод поиска городов */
+.city-search-input {
+    flex-grow: 1;
+    width: 100%;
+    background-color: #f6fbff;
+    color: #555;
+    border: none;
+    border-radius: 15px;
+    font-size: 17px;
+    padding: 10px 15px;
+    outline: none;
+    box-sizing: border-box;
+    font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
+}
+
+/* ?? Поиск городов... */
+.city-search-input::placeholder {
+    color: #555; /* Замените на нужный вам цвет */
+    font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
+}
+
+.cities-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    color: #555;
+    padding: 0.5rem 0;
+    margin-top: 10px;
 }
 
 .checkbox-label input[type="checkbox"] {
@@ -275,7 +352,7 @@ background-color: #f2f2f2;
     border: 1px solid #b0b0b0;
     border-radius: 4px;
     margin-right: 12px;
-    background-color: #f2f2f2;
+    background-color: #f6fbff;
     transition: background-color 0.2s, border-color 0.2s;
     position: relative;
     top: 3px;
@@ -288,86 +365,6 @@ background-color: #f2f2f2;
     background-position: center;
     background-size: 65%;
 }
-
-hr {
-    border: none;
-    height: 1px;
-    background-color: #f2f2f2;
-    margin: 5px 0;
-}
-
-.salary-inputs {
-    display: flex;
-    gap: 15px;
-}
-
-.salary-inputs input {
-    margin-top: 10px;
-    width: 100%;
-    padding: 10px;
-    border-radius: 20px;
-    text-align: center;
-    font-size: 13px;
-    background-color: #f2f2f2;
-    /* box-shadow: inset 2px 2px 4px #b5b5b5,
-                inset -2px -2px 4px #ffffff; */
-    outline: none;
-    border: none;
-    color:#333;
-}
-
-.show-more-btn {
-    background-color: #adc4ab;
-    border-radius: 15px;
-    padding: 4px 12px;
-    font-size: 16px;
-    cursor: pointer;
-    color: white;
-    margin-top: 15px;
-    background-color: #00bb00;
-    /* box-shadow: inset 2px 2px 4px #009a00,
-                inset -2px -2px 4px #11ff11; */
-    letter-spacing: 0.4px;
-    outline: none;
-    border: none;
-}
-
-.all_jobs button:hover {
-    background-color: #008c00;
-}
-
-/*!* Стили для городского фильтра в общей стилистике *!*/
-
-
-.city-search-wrapper {
-    display: flex;
-    width: 100%;
-    background-color: white;
-    border-radius: 15px;
-}
-
-.city-search-input {
-    flex-grow: 1;
-    width: 100%;
-    background-color: #f2f2f2;
-    color: #555;
-    border: none;
-    border-radius: 15px;
-    font-size: 17px;
-    padding: 10px 15px;
-    outline: none;
-    box-sizing: border-box;
-}
-
-.cities-container {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    color: #555;
-    padding: 0.5rem 0;
-    margin-top: 10px;
-}
-
 
 .checkbox-label {
     display: flex;
@@ -382,7 +379,7 @@ hr {
 }
 
 .checkbox-label:hover {
-    background-color: #f2f2f2;
+    background-color: #f6fbff;
 }
 
 .checkbox-label input[type="checkbox"]:checked + span {
@@ -396,16 +393,6 @@ hr {
     transition: color 0.2s, font-weight 0.2s;
 }
 
-.vacancy-count {
-    background-color: #f2f2f2;
-    color: #555;
-    border-radius: 10px;
-    font-size: 13px;
-    padding: 2px 8px;
-    margin-left: auto;
-    transition: background-color 0.2s, color 0.2s;
-}
-
 .checkbox-label:hover .vacancy-count,
 .checkbox-label input[type="checkbox"]:checked ~ .vacancy-count {
     background-color: #00bb00;
@@ -417,15 +404,23 @@ hr {
     display: none !important;
 }
 
+.vacancy-count {
+    background-color: #f6fbff;
+    color: #555;
+    border-radius: 10px;
+    font-size: 13px;
+    padding: 2px 8px;
+    margin-left: auto;
+    transition: background-color 0.2s, color 0.2s;
+}
+
 
 /* !* Стили для скрытия элементов *! */
 .cities-container.collapsed .city-label:nth-child(n+6) {
    display: none !important;
 }
 
-.filter_section .show-more-btn:hover {
-   background-color: #008c00;
-}
+
 
 
 /* CARDS */
@@ -433,13 +428,12 @@ hr {
 
 .cards{
     flex-grow: 1;
-    background-color: #f2f2f2;
+    background-color: hsl(194, 39%, 94%);
     width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
     min-height: 100vh;
-    font-family: sans-serif;
     margin: 0 auto;
     padding: 0;
     gap: 25px;
@@ -464,29 +458,33 @@ hr {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    /* gap: 0px;
-    margin: 0px; */
     gap: 4px;
     letter-spacing: 0.4px;
 }
 
+/* ?? все вакансии */
 .all_jobs h2{
     margin: 0px;
     font-size: 20px;
+    font-family: 'headers', "Trebuchet MS", Helvetica, sans-serif;
+    color: rgb(0, 0, 0);
 }
 
+/* ?? показано х из у вакансий */
 .all_jobs p{
     margin: 0px;
     color: #555;
     font-size: 15px;
     font-weight: normal;
+    font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
 }
 
+/* ?? отчистить все фильтры */
 .all_jobs button{
     height: 40px;
     box-sizing: border-box;
     border: none;
-    border-radius: 10px;
+    border-radius: 30px;
     font-size: 17px;
     font-weight: normal;
     padding: 0 15px;
@@ -494,31 +492,29 @@ hr {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    background-color: #f2f2f2;
+    background-color: #f6fbff;
     cursor: pointer;
     color: white;
     white-space: nowrap;
     transition: background-color 0.2s;
     background-color: #00bb00;
-    /* box-shadow: inset 2px 2px 4px #009a00,
-                inset -2px -2px 4px #11ff11; */
     letter-spacing: 0.4px;
+    font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
 }
 
 .all_jobs button:hover {
     background-color: #008c00;
 }
 
+
 /* VACANCIES */
 
 .vacancies{
-    background-color: #f2f2f2;
+    background-color: hsl(194, 39%, 94%);
     display: flex;
     flex-direction: column;
     align-items: center;
     width: 100%;
-    /* min-height: 100vh; */
-    font-family: sans-serif;
     margin: 0;
     padding: 0;
     gap: 25px;
@@ -528,8 +524,6 @@ hr {
 
 .vacancy-card {
     background-color: white;
-    /* border: 1px solid hsla(0, 0%, 33%, 0.18); */
-    /* box-shadow: 4px 4px 2px 0px hsla(120, 45%, 16%, 0.5); */
     border-radius: 15px;
     padding: clamp(12px, 3vw, 20px);
     width: min(60vw, 396px);
@@ -561,6 +555,7 @@ hr {
     flex: 1;
 }
 
+/* ?? название вакансии */
 .job-title-info h2 {
     margin: 0 0 0.75rem 0;
     font-size: clamp(1.1rem, 2vw, 1.1rem);
@@ -572,16 +567,19 @@ hr {
     -webkit-box-orient: vertical;
     word-break: break-word;
     text-align: left;
+    font-family: 'headers', "Trebuchet MS", Helvetica, sans-serif;
+    color: #000000;
 }
 
-
-.job-title-info p {
+/* ?? название компании */
+.job-title-info span {
     margin: 0;
     color: #555;
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    font-size: clamp(1rem, 2vw, 1.125rem);
+    font-size: clamp(0.8rem, 1.5vw, 1.1rem);
+    font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
 }
 
 .job-title-info img {
@@ -589,6 +587,7 @@ hr {
     aspect-ratio: 1 / 1;
 }
 
+/* ?? город и зп */
 .card-details {
     display: flex;
     align-items: center;
@@ -599,6 +598,7 @@ hr {
     padding: 0.5rem 0;
     justify-content: space-between;
     align-items: center;
+    font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
 }
 
 .detail-item {
@@ -608,14 +608,14 @@ hr {
     white-space: nowrap;
 }
 
+/* ?? тип работы и скилллы*/
 .job-type-tag, .skill-tag {
-    background-color: #e0e0e0;
-     /* box-shadow: inset 2px 2px 4px #b5b5b5,
-                inset -2px -2px 4px #ffffff; */
+    background-color: hsl(194, 39%, 94%);
     border-radius: 1rem;
     font-size: clamp(0.8rem, 1.2vw, 0.95rem);
     padding: 0.3rem 0.8rem;
     color: #555;
+    font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
 }
 
 
@@ -625,24 +625,26 @@ hr {
     aspect-ratio: 1 / 1;
  }
 
-
+/* ?? описание работы */
 .card-description {
-    background-color: #f2f2f2;
+    background-color: #f6fbff;
     width: 100%;
     height: 60%;
     border-radius: 1rem;
     padding: clamp(10px, 2vw, 15px);
     overflow-y: auto;
     box-sizing: border-box;
-    /* box-shadow: inset 2px 2px 4px #b5b5b5,
-                inset -2px -2px 4px #ffffff; */
+    color: #000000;
+    font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
 }
 
+/* ?? тоже описание работы */
 .card-description p {
     margin: 0 0 1rem 0;
     line-height: 1.5;
     font-size: clamp(0.85rem, 2vw, 1rem);
     color: #000000;
+    font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
 }
 
 .skills-section {
@@ -658,25 +660,25 @@ hr {
     gap: 0.5rem;
 }
 
+/* ?? откликнуться */
 .apply-button {
     background-color: #00bb00;
-    /* box-shadow: 0px 4px 4px 0px hsla(0, 0%, 0%, 0.25); */
     color: white;
     border: none;
     padding: 0.5rem 1.5rem;
     border-radius: 1rem;
     font-size: clamp(0.9rem, 2.5vw, 1rem);
     cursor: pointer;
-    /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); */
     transition: background-color 0.3s;
-    /* box-shadow: inset 2px 2px 4px #009a00,
-                inset -2px -2px 4px #11ff11; */
+    font-family: 'headers', "Trebuchet MS", Helvetica, sans-serif;
 }
 
 .apply-button:hover {
     background-color: #008c00;
 }
 
+
+/* Пегинация */
 #pagination {
   display: flex;
   justify-content: center;
@@ -686,7 +688,7 @@ hr {
   margin-bottom: 20px;
 }
 
-.page-btn {
+/* .page-btn {
   padding: 8px 14px;
   font-size: 16px;
   background-color: #f0f0f0;
@@ -695,10 +697,11 @@ hr {
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s ease;
-}
+  font-family: 'test';
+} */
 
 .page-btn:hover {
-  background-color: #dcdcdc;
+  background-color: hsl(194, 39%, 94%);
   border-color: #999;
 }
 
@@ -708,6 +711,7 @@ hr {
   color: white;
   border-color: #00bb00;
   font-weight: bold;
+  /* font-family: 'test'; */
 }
 
 #clear-filters.active {
@@ -718,32 +722,6 @@ hr {
 
 .filter_variants.collapsed label:nth-child(n+6) {
     display: none;
-}
-
-#scrollBtn {
-  position: fixed;
-  bottom: 30px;
-  right: 35px;
-  z-index: 1000;
-
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-
-  background-image: url("/pics/topbtn.png");
-  background-size: 50%;
-  background-position: center;
-  background-repeat: no-repeat;
-
-  background-color: #00bb00;
-  border: none;
-  cursor: pointer;
-
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-}
-
-#scrollBtn:hover {
-  background-color: #008c00;
 }
 
 
@@ -761,6 +739,7 @@ hr {
     margin-right: auto;
 }
 
+/* ?? цифры пегинации */
 .page-btn {
     width: 40px;
     height: 40px;
@@ -776,6 +755,7 @@ hr {
     justify-content: center;
     transition: all 0.3s ease;
     position: relative;
+    font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
 }
 
 .page-btn:hover:not(.active) {
@@ -838,6 +818,34 @@ hr {
 /* Анимация перехода активного состояния */
 .page-btn.active {
     animation: activePulse 0.3s ease-out;
+}
+
+/* кнопка вверх */
+
+#scrollBtn {
+  position: fixed;
+  bottom: 30px;
+  right: 35px;
+  z-index: 1000;
+
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+
+  background-image: url("/pics/topbtn.png");
+  background-size: 50%;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  background-color: #00bb00;
+  border: none;
+  cursor: pointer;
+
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+#scrollBtn:hover {
+  background-color: #008c00;
 }
 
 @keyframes activePulse {
