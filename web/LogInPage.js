@@ -1,5 +1,3 @@
-import { SERVER_URL } from './config.js';
-
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
 document.querySelector('.login-form').addEventListener('submit', async (e) => {
@@ -49,7 +47,7 @@ document.querySelector('.login-form').addEventListener('submit', async (e) => {
 
         if (response.ok && result.status === "success") {
             // Fetch user info
-            fetch(`${SERVER_URL}/user_info?user_email=${encodeURIComponent(email)}`)
+            fetch(`http://localhost:8000/user_info?user_email=${encodeURIComponent(email)}`)
                 .then(res => res.json())
                 .then(userInfo => {
                     if (userInfo.name) {
