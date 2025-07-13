@@ -1,5 +1,23 @@
+
+@font-face {
+    font-family: 'headers';
+    src: url('/fonts/заголовки.woff2') format('woff2'),
+    url('/fonts/заголовки.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'mains';
+    src: url('fonts/основной.woff2') format('woff2'),
+    url('/fonts/основной.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
 body{
-    background-color: #f2f2f2;
+    background-color: hsl(194, 39%, 94%);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -37,6 +55,7 @@ width: 100%;
     gap: 0.5rem;
 }
 
+/* ?? лого */
 .header-left h2 {
     margin: 0;
     color: #ffffff;
@@ -45,6 +64,7 @@ width: 100%;
     gap:1px;
     font-size: 17px;
     font-weight: normal;
+    font-family: 'headers', "Trebuchet MS", Helvetica, sans-serif;
 }
 
 .header-left img {
@@ -59,7 +79,7 @@ width: 100%;
 }
 
 .other_body{
-    background-color: #f2f2f2;
+    background-color: hsl(194, 39%, 94%);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -75,7 +95,6 @@ width: 100%;
 
 .card {
     background-color: white;
-    /* border: 1px solid hsla(0, 0%, 33%, 0.18); */
     border-radius: 15px;
     padding: clamp(12px, 3vw, 20px);
     width: min(55vw, 386px);
@@ -83,7 +102,6 @@ width: 100%;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    /* gap: 15px; */
     display: flex;
 }
 
@@ -92,25 +110,25 @@ width: 100%;
     display: flex;
     position: relative;
     align-items: center;
-    background-color: #f2f2f2;
+    background-color: #f6fbff;
     border-radius: 30px;
     padding: clamp(1px, 2.7vw, 30px);
-    /* gap: 2px; */
     margin-top: 10px;
 
 }
 
+/* ?? подтвердите почту */
 .card_header h2 {
-    /* margin: 0; */
     font-size: 17px;
     font-weight: bold;
-    color: #888;
+    color: #555;
     text-align: center;
     justify-content: center;
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
     letter-spacing: 0.4px;
+    font-family: 'headers', "Trebuchet MS", Helvetica, sans-serif;
 }
 
 .inputs{
@@ -121,22 +139,21 @@ width: 100%;
 
 .code-input-container {
     display: flex;
-    gap: 10px; /* Расстояние между окошками */
 }
 
+/* ?? ввод цифр */
 .code-input {
-    width: 50px; /* Ширина каждого окошка */
-    height: 60px; /* Высота каждого окошка */
-    font-size: 2em; /* Размер шрифта внутри окошка */
+    width: 50px;
+    height: 60px;
+    font-size: 2em;
     text-align: center;
-    border: 2px solid #ccc;
+    border: 2px solid #e8f4fd;
     border-radius: 8px;
-    outline: none; /* Убираем стандартную обводку при фокусе */
+    outline: none;
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
-    /* -moz-appearance: textfield; Для Firefox, чтобы убрать стрелки для number input */
+    font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
 }
 
-/* Убираем стрелки для number input в Chrome, Safari, Edge, Opera */
 .code-input::-webkit-outer-spin-button,
 .code-input::-webkit-inner-spin-button {
     -webkit-appearance: none;
@@ -144,7 +161,7 @@ width: 100%;
 }
 
 .code-input:focus {
-    border-color: #00bb00; /* Можно сделать рамку чуть темнее для контраста */
+    border-color: #00bb00;
     outline: none;
 }
 
@@ -152,13 +169,16 @@ width: 100%;
     width: 100%;
     padding: 12px 20px;
     margin-top: 15px;
-    border: 1px solid #dcdcdc;
+    border: 1px solid #e8f4fd;
     border-radius: 30px;
     box-sizing: border-box;
     text-align: center;
     font-size: 14px;
+    color: #000000;
+    font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
 }
 
+/* ?? Подтвердить */
 .login-form button {
     width: 70%;
     padding: 12px;
@@ -168,7 +188,7 @@ width: 100%;
     justify-content: center;
     align-items: center;
     border-radius: 30px;
-    background-color: #00bb00; /* Ярко-зеленый цвет */
+    background-color: #00bb00;
     color: white;
     font-size: 16px;
     font-weight: bold;
@@ -177,8 +197,9 @@ width: 100%;
     margin-top: 25px;
     margin-left: auto;
     margin-right: auto;
+    font-family: 'headers', "Trebuchet MS", Helvetica, sans-serif;
 }
 
 .login-form button:hover {
-    background-color: #008c00; /* Более темный зеленый при наведении */
+    background-color: #008c00;
 }
