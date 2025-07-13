@@ -20,10 +20,10 @@ InnoJob aggregates all vacancies from all headhunting sites that are available i
 
 - [x] Job listing
     - [x] Vacancies from HH.ru
-    - [ ] Vacancies from SuperJob
+    - [x] Vacancies from SuperJob
     - [ ] Vacancies/Internships from Telegram
 - [X] User
-    - [ ] User authentication
+    - [x] User authentication
     - [x] CV Upload
         - [x] "Skiils" field
         - [x] Bio
