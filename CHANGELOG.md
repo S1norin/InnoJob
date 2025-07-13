@@ -24,4 +24,8 @@
 ### Added
 
 - Added CV upload
-- 
+- Added Welcome Page
+
+## [MVP 1]
+
+- Added Job Listing page
