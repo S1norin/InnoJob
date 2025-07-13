@@ -2,7 +2,7 @@
 
 InnoJob aggregates all vacancies from all headhunting sites that are available in Innopolis Special Economic Zone
 
-![Logo](logo.png)
+![Logo](pics/IU2.png)
 
 [innojob.ru](http://innojob.ru)
 

@@ -111,7 +111,7 @@ cvInput.addEventListener('change', async function () {
     formData.append('pdf_file', file);
 
     try {
-        const response = await fetch('https://innojob.ru/upload-cv', {
+        const response = await fetch('${SERVER_URL}/upload-cv', {
             method: 'POST',
             body: formData
         });
@@ -145,7 +145,7 @@ photoInput.addEventListener('change', async function () {
     formData.append('photo', file);
 
     try {
-        const response = await fetch('https://innojob.ru/upload-photo', {
+        const response = await fetch('${SERVER_URL}/upload-photo', {
             method: 'POST',
             body: formData
         });
