@@ -1,4 +1,4 @@
-import { SERVER_URL } from "./config.js";
+import { SERVER_URL } from "/web/config.js";
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
 document.querySelector('.login-form').addEventListener('submit', async (e) => {
@@ -78,4 +78,86 @@ function showError(inputElement, message, id) {
     inputElement.insertAdjacentElement('afterend', span);
 }
 
+const cvInput = document.getElementById('cvInput');
+const uploadCvBtn = document.getElementById('uploadCvBtn');
+const photoInput = document.getElementById('photoInput');
+const uploadPhotoBtn = document.getElementById('uploadPhotoBtn');
+
+// Trigger file input when button is clicked
+uploadCvBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    cvInput.click();
+});
+uploadPhotoBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    photoInput.click();
+});
+
+// Upload CV
+cvInput.addEventListener('change', async function () {
+    const file = cvInput.files[0];
+    if (!file) return;
+    if (file.type !== "application/pdf") {
+        alert("Please select a PDF file.");
+        return;
+    }
+    const email = localStorage.getItem('userEmail');
+    if (!email) {
+        alert("Email пользователя не найден.");
+        return;
+    }
+    const formData = new FormData();
+    formData.append('email', email);
+    formData.append('pdf_file', file);
+
+    try {
+        const response = await fetch('https://innojob.ru/upload-cv', {
+            method: 'POST',
+            body: formData
+        });
+        const result = await response.json();
+        if (result.status === "success") {
+            alert("CV успешно загружено!");
+        } else {
+            alert("Ошибка загрузки CV: " + (result.message || "Неизвестная ошибка"));
+        }
+    } catch (err) {
+        alert("Ошибка соединения с сервером.");
+        console.error(err);
+    }
+});
+
+// Upload Photo
+photoInput.addEventListener('change', async function () {
+    const file = photoInput.files[0];
+    if (!file) return;
+    if (!["image/png", "image/jpeg"].includes(file.type)) {
+        alert("Пожалуйста, выберите JPG или PNG файл.");
+        return;
+    }
+    const email = localStorage.getItem('userEmail');
+    if (!email) {
+        alert("Email пользователя не найден.");
+        return;
+    }
+    const formData = new FormData();
+    formData.append('email', email);
+    formData.append('photo', file);
+
+    try {
+        const response = await fetch('https://innojob.ru/upload-photo', {
+            method: 'POST',
+            body: formData
+        });
+        const result = await response.json();
+        if (result.status === "success") {
+            alert("Фото успешно загружено!");
+        } else {
+            alert("Ошибка загрузки фото: " + (result.message || "Неизвестная ошибка"));
+        }
+    } catch (err) {
+        alert("Ошибка соединения с сервером.");
+        console.error(err);
+    }
+});
 

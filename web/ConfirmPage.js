@@ -1,4 +1,4 @@
-import { SERVER_URL } from "./config.js";
+import { SERVER_URL } from "/web/config.js";
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.querySelector('.login-form');
     const codeInputs = document.querySelectorAll('.code-input');

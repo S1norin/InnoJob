@@ -9,7 +9,7 @@
 
 @font-face {
     font-family: 'mains';
-    src: url('fonts/основной.woff2') format('woff2'),
+    src: url('/fonts/основной.woff2') format('woff2'),
     url('/fonts/основной.woff') format('woff');
     font-weight: normal;
     font-style: normal;
