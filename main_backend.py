@@ -32,6 +32,7 @@ app.add_middleware(
 # Mount the static directories
 app.mount("/web", StaticFiles(directory="web"), name="web")
 app.mount("/pics", StaticFiles(directory="pics"), name="pics")
+app.mount("/fonts", StaticFiles(directory="fonts"), name="fonts")
 
 security = HTTPBasic()
 
