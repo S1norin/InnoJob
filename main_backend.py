@@ -139,10 +139,13 @@ async def read_job_listing():
 async def read_welcome():
     return FileResponse('web/WelcomePage.html')
 
-@app.get("/user_profile")
-async def read_welcome():
-    return FileResponse('web/UserProfile.html')
+@app.get("/cv_listing_page")
+async def serve_cv_listing_page():
+    return FileResponse('web/MainCVs.html')
 
+@app.get("/user_profile")
+async def read_user_profile():
+    return FileResponse('web/UserProfile.html')
 
 @app.get("/vacancies")
 async def get_all_vacancies(db: VacancyManager = Depends(get_vacancy_manager)):
@@ -152,6 +155,16 @@ async def get_all_vacancies(db: VacancyManager = Depends(get_vacancy_manager)):
     except Exception as e:
         print(f"Server error getting vacancies: {e}")
         raise HTTPException(status_code=500, detail="Could not fetch vacancies.")
+
+@app.get("/cv_listing")
+async def get_all_cv_cards(db: UserManager = Depends(get_user_manager)):
+    try:
+        cards = await run_in_threadpool(db.get_literally_all_cards)
+        return cards
+    except Exception as e:
+        print(f"Server error getting all CV cards: {e}")
+        raise HTTPException(status_code=500, detail="Could not fetch CV cards.")
+
 
 @app.get("/cities")
 async def get_cities(db: VacancyManager = Depends(get_vacancy_manager)):
