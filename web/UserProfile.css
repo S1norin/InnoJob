@@ -1,17 +1,32 @@
+@font-face {
+    font-family: 'headers';
+    src: url('/fonts/заголовки.woff2') format('woff2'),
+    url('/fonts/заголовки.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'mains';
+    src: url('/fonts/основной.woff2') format('woff2'),
+    url('/fonts/основной.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+
 body {
-    background-color: #f2f2f2;
+    background-color: hsl(194, 39%, 94%);
     display: flex;
     flex-direction: column;
     align-items: center;
-    /* Центрирует по горизонтали */
-    /* justify-content: center; */
     min-height: 100vh;
     font-family: sans-serif;
     margin: 0;
-    /* box-sizing: border-box; */
     gap: 25px;
     width: 100%;
-
 }
 
 .header {
@@ -41,6 +56,7 @@ body {
     gap: 0.5rem;
 }
 
+/* ?? название*/
 .header-left h2 {
     margin: 0;
     color: #ffffff;
@@ -49,16 +65,26 @@ body {
     gap: 1px;
     font-size: 17px;
     font-weight: normal;
+    font-family: 'headers', "Trebuchet MS", Helvetica, sans-serif;
 }
 
+/* ?? название*/
 .header-right h2 {
     margin: 0;
     color: #ffffff;
+    text-decoration: none;
     display: flex;
     align-items: right;
     gap: 1px;
     font-size: 17px;
     font-weight: normal;
+    font-family: 'headers', "Trebuchet MS", Helvetica, sans-serif;
+}
+
+/* ?? название */
+.header-right a {
+    text-decoration: none;
+    font-family: 'headers', "Trebuchet MS", Helvetica, sans-serif;
 }
 
 .header-left img {
@@ -89,48 +115,45 @@ body {
 
 
 .other_body {
-    background-color: #f2f2f2;
+    background-color: hsl(194, 39%, 94%);
     display: flex;
-    flex-direction: row; /* Горизонтальное расположение */
-    gap: 50px; /* Увеличенное расстояние между элементами c 25*/
-    margin-left: 30px; /* Добавлен левый отступ для карточек */
+    flex-direction: row;
+    gap: 50px;
+    margin-left: 30px;
     margin: 0 auto;
     align-items: flex-start;
     width: 100%;
     max-width: 1400px;
-    font-family: sans-serif;
     padding: 20px;
     box-sizing: border-box;
 }
 
 
 .fill_cards {
-    background-color: #f2f2f2;
+    background-color: #f6fbff;
     display: flex;
     flex-direction: column;
     align-items: center;
-    /*min-height: 100vh;*/
     width: 100%;
     max-width: 700px;
-    font-family: sans-serif;
+    font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
     margin: 0 auto;
     padding: 0;
     gap: 25px;
     flex: 1;
 }
 
-/* КОНТЕЙНЕР ДЛЯ КАРТОЧЕК СПРАВА - СЕТКА 2×3 */
-/*сделала так, чтобы карточки добавлялись в сетке 2*2, потом можно будет добавить переключение по страницам*/
+
 #cardsContainer {
     flex: 1;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     grid-template-rows: repeat(3, auto);
     gap: 20px;
-    background-color: #f2f2f2;
+    background-color: hsl(194, 39%, 94%);
     padding: 0;
     margin: 0;
-    margin-left: 30px; /* Добавить левый отступ */
+    margin-left: 30px;
     min-width: 800px;
     max-width: 1000px;
 }
@@ -141,15 +164,14 @@ body {
     background-color: white;
     border-radius: 15px;
     padding: clamp(12px, 3vw, 20px);
-    width: min(60vw, 396px); /* Адаптивная ширина с максимумом */
-    height: 520px; /* Фиксированная высота */
+    width: min(60vw, 396px);
+    height: 520px;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     position: relative;
     gap: 3px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /*добавила тень*/
 }
 
 .card-header {
@@ -158,24 +180,27 @@ body {
     gap: clamp(10px, 2vw, 15px);
 }
 
+/* ?? фото */
 .logo-place {
     width: 80px;
     height: 80px;
-    background-color: #f8f9fa;
-    border: 1px solid #ddd;
+    background-color: #f6fbff;
+    border: 1px solid #e8f4fd;
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #999;
+    color: #555;
     font-size: 14px;
     object-fit: cover;
+    font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
 }
 
 .job-title-info {
     flex: 1;
 }
 
+/* ?? имя фамилия */
 .job-title-info h2 {
     margin: 0 0 0.75rem 0;
     font-size: clamp(1.1rem, 2.2vw, 1.5rem);
@@ -187,8 +212,11 @@ body {
     -webkit-box-orient: vertical;
     word-break: break-word;
     text-align: left;
+    color: rgb(0, 0, 0);
+    font-family: 'headers', "Trebuchet MS", Helvetica, sans-serif;
 }
 
+/* ?? образование */
 .card-details {
     display: flex;
     align-items: center;
@@ -198,6 +226,7 @@ body {
     font-size: clamp(0.8rem, 1.2vw, 0.95rem);
     padding: 0.5rem 0;
     justify-content: space-between;
+    font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
 }
 
 .detail-item {
@@ -214,7 +243,7 @@ body {
 }
 
 .card-description {
-    background-color: #f2f2f2;
+    background-color: #f6fbff;
     width: 100%;
     height: 60%;
     border-radius: 1rem;
@@ -223,20 +252,23 @@ body {
     box-sizing: border-box;
 }
 
+/* ?? описание */
 .card-description p {
     margin: 0 0 1rem 0;
     line-height: 1.5;
     font-size: clamp(0.85rem, 2vw, 1rem);
     color: #000000;
+    font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
 }
 
 .cv-skills {
     margin-bottom: 6px;
     display: flex;
     flex-wrap: wrap;
-    gap: 4px;  /* Маленькое расстояние между навыками */
+    gap: 4px;
 }
 
+/* ?? сикллы */
 .cv-skill-tag {
     background-color: #00bb002c;
     color: #008c00;
@@ -247,38 +279,42 @@ body {
     align-items: center;
     gap: 6px;
     border: 1px solid #008c0057;
-    margin-right: 4px; /* Маленький правый отступ */
+    margin-right: 4px;
     margin-bottom: 4px;
     white-space: nowrap;
     width: auto;
     min-width: 40px;
     max-width: 100%;
     text-align: center;
+    font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
 }
 
 .buttoms {
     display: flex;
-    gap: 10px; /* Маленькое расстояние между кнопками */
+    gap: 10px;
     margin-top: 15px;
     margin-bottom: 0;
     justify-content: space-between;
-    flex-wrap: wrap; /* Перенос кнопок на новую строку */
+    flex-wrap: wrap;
 }
 
+/* ?? кнопки */
 .apply-button {
     background-color: #00bb00;
-    color: white;
+    color: rgb(255, 255, 255);
     border: none;
     border-radius: 30px;
-    font-size: clamp(0.8rem, 2vw, 0.9rem); /* Меньший шрифт */
+    font-size: clamp(0.3rem, 0.9vw, 0.65rem);
     cursor: pointer;
     transition: background-color 0.3s;
-    width: 30%;  /* Узкие кнопки */
+    width: 30%;
     min-width: 80px;
     padding: 0.5rem 1rem;
-    margin: 2px; /* Небольшие отступы */
+    margin: 2px;
     text-align: center;
     display: inline-block;
+    font-weight: bold;
+    font-family: 'headers', "Trebuchet MS", Helvetica, sans-serif;
 }
 
 .apply-button:hover {
@@ -286,7 +322,7 @@ body {
 }
 
 .delete-card {
-    background-color: #dc3545; /* Красная кнопка удаления */
+    background-color: #dc3545;
 }
 
 .delete-card:hover {
@@ -295,7 +331,6 @@ body {
 
 .add-cv-btn {
     background-color: #00bb00;
-    color: white;
     border: none;
     border-radius: 30px;
     font-size: clamp(0.9rem, 2.5vw, 1rem);
@@ -314,9 +349,8 @@ body {
 
 /* Карточка заполнения CV */
 .profile-form {
-    background-color: #fff;
+    background-color: #ffffff;
     border-radius: 15px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Стандартная тень */
     padding: clamp(12px, 3vw, 32px);
     width: 100%;
     max-width: 600px;
@@ -329,7 +363,7 @@ body {
     margin-top: 0;
     margin-bottom: 30px;
     padding-bottom: 25px;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid #0c194b1a;
     width: 100%;
 }
 
@@ -341,19 +375,21 @@ body {
     gap: 10px;
 }
 
+/* ?? фото */
 .image-placeholder,
 .profile-photo {
     width: 120px;
     height: 120px;
-    background-color: #f8f9fa;
-    border: 1px solid #ddd;
+    background-color: #f6fbff;
+    border: 1px solid #0c194b1a;
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #999;
+    color: #555;
     font-size: 14px;
     object-fit: cover;
+    font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
 }
 
 .profile-photo {
@@ -368,17 +404,19 @@ body {
     width: 100%;
 }
 
+/* ?? почта, образование и статус */
 input[type="email"],
 .name-input,
 .form-select,
 .form-textarea {
     padding: 10px 15px;
-    border: 1px solid #ddd;
+    border: 1px solid #0c194b1a;
     border-radius: 8px;
     font-size: 16px;
-    font-family: inherit;
-    background: #f2f2f2;
+    font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
+    background: #f6fbff;
     transition: border-color 0.2s;
+    color: #555;
 }
 
 input[type="email"]:focus,
@@ -389,20 +427,21 @@ input[type="email"]:focus,
     border-color: #00bb00;
 }
 
+/* ?? загрузить фото и CV */
 .upload-cv-btn,
 .upload-photo-btn,
 .save-btn {
     background-color: #00bb00;
     color: #fff;
     border: none;
-    border-radius: 10px;
+    border-radius: 30px;
     font-size: 15px;
     padding: 8px 20px;
     cursor: pointer;
     margin-top: 5px;
     margin-bottom: 5px;
     transition: background 0.2s;
-    font-family: inherit;
+    font-family: 'headers', "Trebuchet MS", Helvetica, sans-serif;
 }
 
 .upload-cv-btn:hover,
@@ -418,35 +457,57 @@ input[type="email"]:focus,
     gap: 8px;
 }
 
+/* ?? статус уровень и о себе */
 .form-group label {
-    font-weight: 600;
-    color: #000;
+    font-family: 'headers', "Trebuchet MS", Helvetica, sans-serif;
+    color: rgb(0, 0, 0);
     margin-bottom: 6px;
     display: block;
 }
 
+.form-group label de {
+    color: rgb(0, 0, 0);
+    
+}
+
 .form-group {
     flex: 1;
-    min-width: 0; /* Минимальная ширина для flex элементов */
+    min-width: 0;
+}
+
+/* ?? расскажите о себе */
+#description::placeholder {
+    color: #555;
+    font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
+}
+
+/* ?? поиск навыков */
+#skillsSearch::placeholder {
+    color: #555;
+    font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
 }
 
 .form-actions {
     display: flex;
     justify-content: center;
     margin-top: 20px;
-    width: 100%; /* Полная ширина контейнера кнопок */
+    width: 100%;
 }
 
+/* ?? сохранить */
 .save-btn {
     min-width: 120px;
     font-size: 17px;
     font-weight: 600;
     letter-spacing: 0.4px;
+    font-family: 'headers', "Trebuchet MS", Helvetica, sans-serif;
 }
 
+/* ?? навыки */
 .skills-section label {
     font-weight: 600;
-    color: #000;
+    color: #000000;
+    font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
 }
 
 /* Remove box-shadow from inputs for a cleaner look */
@@ -480,16 +541,18 @@ textarea {
     transform: translateY(-50%) rotate(180deg);
 }
 
+/* ?? ввод навыков */
 .skills-search {
     padding: 10px 15px;
     font-size: 16px;
     font-weight: 380;
     width: 100%;
     box-sizing: border-box;
-    border: 1px solid #ddd;
+    border: 1px solid #0c194b1a;
     border-radius: 8px;
     background-color: white;
-    color: #666;
+    color: #555;
+    font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
 }
 
 .skills-search:focus {
@@ -507,19 +570,22 @@ textarea {
     transition: transform 0.3s ease;
 }
 
+/* ?? навыки */
 .skills-dropdown {
     position: absolute;
     top: 100%;
     left: 0;
     right: 0;
     background-color: white;
-    border: 1px solid #ddd;
+    border: 1px solid #0c194b1a;
     border-top: none;
     border-radius: 0 0 8px 8px;
     max-height: 200px;
     overflow-y: auto;
     z-index: 1000;
     display: none;
+    color: rgb(0, 0, 0);
+    font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
 }
 
 .skills-dropdown.show {
@@ -554,6 +620,7 @@ textarea {
     gap: 8px;
 }
 
+/* ?? скиллы выбранные */
 .skill-tag {
     background-color: #00bb002c;
     color: #008c00;
@@ -564,6 +631,7 @@ textarea {
     align-items: center;
     gap: 6px;
     border: 1px solid #008c0057;
+    font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
 }
 
 .skill-remove {
@@ -599,15 +667,17 @@ textarea {
     width: 100%;
 }
 
+/* ?? текст о себе */
 .form-textarea {
     width: 100%;
     padding: 15px;
-    border: 1px solid #ddd;
+    border: 1px solid #0c194b1a;
     border-radius: 8px;
     font-size: 14px;
-    font-family: inherit;
-    min-height: 150px; /* Минимальная высота без ограничений */
+    font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
+    min-height: 150px; 
     box-sizing: border-box;
+    color: rgb(0, 0, 0);
 }
 
 .form-textarea:focus {

@@ -1,5 +1,23 @@
+@font-face {
+    font-family: 'headers';
+    src: url('/fonts/заголовки.woff2') format('woff2'),
+    url('/fonts/заголовки.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'mains';
+    src: url('/fonts/основной.woff2') format('woff2'),
+    url('/fonts/основной.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
 body{
-    background-color: #f2f2f2;
+    background-color: hsl(194, 39%, 94%);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -37,6 +55,7 @@ width: 100%;
     gap: 0.5rem;
 }
 
+/* ?? лого */
 .header-left h2 {
     margin: 0;
     color: #ffffff;
@@ -45,6 +64,7 @@ width: 100%;
     gap:1px;
     font-size: 17px;
     font-weight: normal;
+    font-family: 'headers', "Trebuchet MS", Helvetica, sans-serif;
 }
 
 .header-left img {
@@ -59,7 +79,7 @@ width: 100%;
 }
 
 .other_body{
-    background-color: #f2f2f2;
+    background-color: hsl(194, 39%, 94%);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -75,7 +95,6 @@ width: 100%;
 
 .card {
     background-color: white;
-    /* border: 1px solid hsla(0, 0%, 33%, 0.18); */
     border-radius: 15px;
     padding: clamp(12px, 3vw, 20px);
     width: min(55vw, 386px);
@@ -83,7 +102,6 @@ width: 100%;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    /* gap: 15px; */
     display: flex;
 }
 
@@ -92,25 +110,26 @@ width: 100%;
     display: flex;
     position: relative;
     align-items: center;
-    background-color: #f2f2f2;
+    background-color: #f6fbff;
     border-radius: 30px;
     padding: clamp(1px, 2.7vw, 30px);
-    /* gap: 2px; */
     margin-top: 10px;
 
 }
 
+/* ?? создать аккаунт */
 .card_header h2 {
     /* margin: 0; */
     font-size: 17px;
     font-weight: bold;
-    color: #888;
+    color: #555;
     text-align: center;
     justify-content: center;
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
     letter-spacing: 0.4px;
+    font-family: 'headers', "Trebuchet MS", Helvetica, sans-serif;
 }
 
 .inputs{
@@ -120,38 +139,42 @@ width: 100%;
 }
 
 
-.login-form a{
+/* .login-form a{
     display: flex;
     font-size: 12px;
     text-align: right;
     margin-top: 5px;
-    color: #888;
     text-decoration: none;
     font-weight: bold;
     justify-content: right;
-    /* color: #00b34a; */
 
-}
+} */
 
-.login-form a:hover {
+/* .login-form a:hover {
     text-decoration: none;
-}
+} */
 
+/* ?? ввод */
 .login-form input {
     width: 100%;
     padding: 12px 20px;
     margin-top: 15px;
-    border: 1px solid #dcdcdc;
+    border: 1px solid #e8f4fd;
     border-radius: 30px;
     box-sizing: border-box;
     text-align: center;
     font-size: 14px;
+    color: rgb(0, 0, 0);
+    font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
 }
 
+/* ?? имя фамилия и  тд */
 .login-form input::placeholder {
-    color: #999;
+    color: #555;
+    font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
 }
 
+/* ?? зарегестрироваться */
 .login-form button {
     width: 70%;
     padding: 12px;
@@ -161,7 +184,7 @@ width: 100%;
     justify-content: center;
     align-items: center;
     border-radius: 30px;
-    background-color: #00bb00; /* Ярко-зеленый цвет */
+    background-color: #00bb00;
     color: white;
     font-size: 16px;
     font-weight: bold;
@@ -170,23 +193,27 @@ width: 100%;
     margin-top: 25px;
     margin-left: auto;
     margin-right: auto;
+    font-family: 'headers', "Trebuchet MS", Helvetica, sans-serif;
 }
 
 .login-form button:hover {
-    background-color: #008c00; /* Более темный зеленый при наведении */
+    background-color: #008c00;
 }
 
-/* Ссылка для входа */
+/* ?? уже зарегистрированы */
 .login-link {
     font-size: 12px;
-    color: #888;
+    color: #555;
     text-align: center;
+    font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
 }
 
+/* ?? войти */
 .login-link a {
-    color: #888;
+    color: #555;
     text-decoration: none;
     font-weight: bold;
+    font-family: 'headers', "Trebuchet MS", Helvetica, sans-serif;
 }
 
 .login-link a:hover {
@@ -198,6 +225,7 @@ width: 100%;
     outline: none;
 }
 
+/* ?? ошибки */
 .error-message {
     color: red;
     font-size: 0.75em;

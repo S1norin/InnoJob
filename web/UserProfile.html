@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8" />
     <title>InnoJob</title>
@@ -12,17 +13,19 @@
         <div class="header-content">
             <div class="header-left">
                 <a href="/logo">
-                    <img src="/pics/IU.png" alt="IU Logo">
+                    <img src="/pics/IU2.png" alt="IU2 Logo">
                 </a>
                 <h2>InnoJob</h2>
             </div>
             <div class="header-right">
                 <a href="/job_listing">
-                    <h2>Jobs</h2>
-                </a>
-                <a href="/welcome">
-                    <img src="../pics/logout.png" alt="logout">
-                </a>
+                    <a href="/job_listing">
+                        <h2>Jobs</h2>
+                    </a>
+                    <a href="/welcome">
+                        <a href="/welcome">
+                            <img src="../pics/logout.png" alt="logout">
+                        </a>
             </div>
         </div>
     </header>
@@ -36,14 +39,14 @@
                         <div class="image-placeholder">Фото</div>
                         <img id="profilePhoto" class="profile-photo" style="display:none;">
                         <input type="file" id="photoInput" accept="image/png, image/jpeg" style="display:none;">
-                        <button id="uploadPhotoBtn" class="upload-photo-btn">Upload Photo</button>
+                        <button id="uploadPhotoBtn" class="upload-photo-btn">Загрузить фото</button>
                     </div>
                     <div class="profile-info">
                         <input type="email" placeholder="Email" class="email-input" readonly>
                         <input type="text" placeholder="Имя" class="name-input">
                         <input type="text" placeholder="Фамилия" class="name-input">
                         <input type="file" id="cvInput" accept="application/pdf" style="display:none;">
-                        <button class="upload-cv-btn" id="uploadCvBtn">Upload CV</button>
+                        <button class="upload-cv-btn" id="uploadCvBtn">Загрузить CV</button>
                         <div id="cvPreview" class="cv-preview"></div>
                     </div>
                 </div>
@@ -56,27 +59,264 @@
                                 <!-- Выбранные навыки будут отображаться здесь -->
                             </div>
                             <div class="skills-input-wrapper">
-                                <input type="text" class="skills-search" id="skillsSearch" placeholder="Поиск навыков...">
+                                <input type="text" class="skills-search" id="skillsSearch"
+                                    placeholder="Поиск навыков...">
                             </div>
                             <div class="skills-dropdown" id="skillsDropdown">
                                 <div class="skills-option" data-value="javascript">JavaScript</div>
-                                <div class="skills-option" data-value="python">Python</div>
-                                <div class="skills-option" data-value="react">React</div>
-                                <div class="skills-option" data-value="nodejs">Node.js</div>
-                                <div class="skills-option" data-value="html">HTML/CSS</div>
-                                <div class="skills-option" data-value="vue">Vue.js</div>
-                                <div class="skills-option" data-value="angular">Angular</div>
-                                <div class="skills-option" data-value="php">PHP</div>
-                                <div class="skills-option" data-value="java">Java</div>
-                                <div class="skills-option" data-value="csharp">C#</div>
-                                <div class="skills-option" data-value="sql">SQL</div>
-                                <div class="skills-option" data-value="mongodb">MongoDB</div>
-                                <div class="skills-option" data-value="docker">Docker</div>
-                                <div class="skills-option" data-value="git">Git</div>
-                                <div class="skills-option" data-value="aws">AWS</div>
-                                <div class="skills-option" data-value="photoshop">Photoshop</div>
-                                <div class="skills-option" data-value="figma">Figma</div>
-                                <div class="skills-option" data-value="sketch">Sketch</div>
+                                    <div class="skills-option" data-value="typescript">TypeScript</div>
+                                    <div class="skills-option" data-value="python">Python</div>
+                                    <div class="skills-option" data-value="java">Java</div>
+                                    <div class="skills-option" data-value="csharp">C#</div>
+                                    <div class="skills-option" data-value="cpp">C++</div>
+                                    <div class="skills-option" data-value="c">C</div>
+                                    <div class="skills-option" data-value="go">Go</div>
+                                    <div class="skills-option" data-value="rust">Rust</div>
+                                    <div class="skills-option" data-value="kotlin">Kotlin</div>
+                                    <div class="skills-option" data-value="swift">Swift</div>
+                                    <div class="skills-option" data-value="php">PHP</div>
+                                    <div class="skills-option" data-value="ruby">Ruby</div>
+                                    <div class="skills-option" data-value="perl">Perl</div>
+                                    <div class="skills-option" data-value="scala">Scala</div>
+                                    <div class="skills-option" data-value="dart">Dart</div>
+                                    <div class="skills-option" data-value="objective-c">Objective-C</div>
+                                    <div class="skills-option" data-value="matlab">MATLAB</div>
+                                    <div class="skills-option" data-value="r">R</div>
+                                    <div class="skills-option" data-value="julia">Julia</div>
+                                    <div class="skills-option" data-value="shell">Shell</div>
+                                    <div class="skills-option" data-value="bash">Bash</div>
+                                    <div class="skills-option" data-value="powershell">PowerShell</div>
+                                    <div class="skills-option" data-value="html">HTML</div>
+                                    <div class="skills-option" data-value="css">CSS</div>
+                                    <div class="skills-option" data-value="html5">HTML5</div>
+                                    <div class="skills-option" data-value="css3">CSS3</div>
+                                    <div class="skills-option" data-value="sass">Sass</div>
+                                    <div class="skills-option" data-value="less">Less</div>
+                                    <div class="skills-option" data-value="bootstrap">Bootstrap</div>
+                                    <div class="skills-option" data-value="tailwind">Tailwind CSS</div>
+                                    <div class="skills-option" data-value="react">React</div>
+                                    <div class="skills-option" data-value="redux">Redux</div>
+                                    <div class="skills-option" data-value="vue">Vue.js</div>
+                                    <div class="skills-option" data-value="vuex">Vuex</div>
+                                    <div class="skills-option" data-value="angular">Angular</div>
+                                    <div class="skills-option" data-value="svelte">Svelte</div>
+                                    <div class="skills-option" data-value="nextjs">Next.js</div>
+                                    <div class="skills-option" data-value="nuxtjs">Nuxt.js</div>
+                                    <div class="skills-option" data-value="nodejs">Node.js</div>
+                                    <div class="skills-option" data-value="express">Express.js</div>
+                                    <div class="skills-option" data-value="nestjs">NestJS</div>
+                                    <div class="skills-option" data-value="fastify">Fastify</div>
+                                    <div class="skills-option" data-value="koa">Koa</div>
+                                    <div class="skills-option" data-value="graphql">GraphQL</div>
+                                    <div class="skills-option" data-value="restapi">REST API</div>
+                                    <div class="skills-option" data-value="soap">SOAP</div>
+                                    <div class="skills-option" data-value="microservices">Microservices</div>
+                                    <div class="skills-option" data-value="serverless">Serverless</div>
+                                    <div class="skills-option" data-value="sql">SQL</div>
+                                    <div class="skills-option" data-value="mysql">MySQL</div>
+                                    <div class="skills-option" data-value="postgresql">PostgreSQL</div>
+                                    <div class="skills-option" data-value="sqlite">SQLite</div>
+                                    <div class="skills-option" data-value="mariadb">MariaDB</div>
+                                    <div class="skills-option" data-value="oracle">Oracle DB</div>
+                                    <div class="skills-option" data-value="mongodb">MongoDB</div>
+                                    <div class="skills-option" data-value="redis">Redis</div>
+                                    <div class="skills-option" data-value="cassandra">Cassandra</div>
+                                    <div class="skills-option" data-value="firebase">Firebase</div>
+                                    <div class="skills-option" data-value="elasticsearch">Elasticsearch</div>
+                                    <div class="skills-option" data-value="dynamodb">DynamoDB</div>
+                                    <div class="skills-option" data-value="git">Git</div>
+                                    <div class="skills-option" data-value="github">GitHub</div>
+                                    <div class="skills-option" data-value="gitlab">GitLab</div>
+                                    <div class="skills-option" data-value="bitbucket">Bitbucket</div>
+                                    <div class="skills-option" data-value="svn">SVN</div>
+                                    <div class="skills-option" data-value="mercurial">Mercurial</div>
+                                    <div class="skills-option" data-value="docker">Docker</div>
+                                    <div class="skills-option" data-value="docker-compose">Docker Compose</div>
+                                    <div class="skills-option" data-value="kubernetes">Kubernetes</div>
+                                    <div class="skills-option" data-value="openshift">OpenShift</div>
+                                    <div class="skills-option" data-value="terraform">Terraform</div>
+                                    <div class="skills-option" data-value="ansible">Ansible</div>
+                                    <div class="skills-option" data-value="chef">Chef</div>
+                                    <div class="skills-option" data-value="puppet">Puppet</div>
+                                    <div class="skills-option" data-value="saltstack">SaltStack</div>
+                                    <div class="skills-option" data-value="jenkins">Jenkins</div>
+                                    <div class="skills-option" data-value="travisci">Travis CI</div>
+                                    <div class="skills-option" data-value="circleci">CircleCI</div>
+                                    <div class="skills-option" data-value="teamcity">TeamCity</div>
+                                    <div class="skills-option" data-value="vagrant">Vagrant</div>
+                                    <div class="skills-option" data-value="prometheus">Prometheus</div>
+                                    <div class="skills-option" data-value="grafana">Grafana</div>
+                                    <div class="skills-option" data-value="nagios">Nagios</div>
+                                    <div class="skills-option" data-value="splunk">Splunk</div>
+                                    <div class="skills-option" data-value="elk">ELK Stack</div>
+                                    <div class="skills-option" data-value="aws">AWS</div>
+                                    <div class="skills-option" data-value="azure">Azure</div>
+                                    <div class="skills-option" data-value="gcp">Google Cloud Platform</div>
+                                    <div class="skills-option" data-value="digitalocean">DigitalOcean</div>
+                                    <div class="skills-option" data-value="heroku">Heroku</div>
+                                    <div class="skills-option" data-value="netlify">Netlify</div>
+                                    <div class="skills-option" data-value="linux">Linux</div>
+                                    <div class="skills-option" data-value="ubuntu">Ubuntu</div>
+                                    <div class="skills-option" data-value="centos">CentOS</div>
+                                    <div class="skills-option" data-value="debian">Debian</div>
+                                    <div class="skills-option" data-value="windows">Windows</div>
+                                    <div class="skills-option" data-value="macos">macOS</div>
+                                    <div class="skills-option" data-value="android">Android</div>
+                                    <div class="skills-option" data-value="ios">iOS</div>
+                                    <div class="skills-option" data-value="unity">Unity</div>
+                                    <div class="skills-option" data-value="unreal">Unreal Engine</div>
+                                    <div class="skills-option" data-value="tensorflow">TensorFlow</div>
+                                    <div class="skills-option" data-value="pytorch">PyTorch</div>
+                                    <div class="skills-option" data-value="scikit-learn">Scikit-learn</div>
+                                    <div class="skills-option" data-value="pandas">Pandas</div>
+                                    <div class="skills-option" data-value="numpy">NumPy</div>
+                                    <div class="skills-option" data-value="opencv">OpenCV</div>
+                                    <div class="skills-option" data-value="hadoop">Hadoop</div>
+                                    <div class="skills-option" data-value="spark">Spark</div>
+                                    <div class="skills-option" data-value="kafka">Kafka</div>
+                                    <div class="skills-option" data-value="rabbitmq">RabbitMQ</div>
+                                    <div class="skills-option" data-value="oauth">OAuth</div>
+                                    <div class="skills-option" data-value="openid">OpenID</div>
+                                    <div class="skills-option" data-value="saml">SAML</div>
+                                    <div class="skills-option" data-value="jwt">JWT</div>
+                                    <div class="skills-option" data-value="ldap">LDAP</div>
+                                    <div class="skills-option" data-value="jira">Jira</div>
+                                    <div class="skills-option" data-value="confluence">Confluence</div>
+                                    <div class="skills-option" data-value="slack">Slack</div>
+                                    <div class="skills-option" data-value="trello">Trello</div>
+                                    <div class="skills-option" data-value="agile">Agile</div>
+                                    <div class="skills-option" data-value="scrum">Scrum</div>
+                                    <div class="skills-option" data-value="kanban">Kanban</div>
+                                    <div class="skills-option" data-value="devops">DevOps</div>
+                                    <div class="skills-option" data-value="ci-cd">CI/CD</div>
+                                    <div class="skills-option" data-value="webpack">Webpack</div>
+                                    <div class="skills-option" data-value="babel">Babel</div>
+                                    <div class="skills-option" data-value="eslint">ESLint</div>
+                                    <div class="skills-option" data-value="prettier">Prettier</div>
+                                    <div class="skills-option" data-value="storybook">Storybook</div>
+                                    <div class="skills-option" data-value="mocha">Mocha</div>
+                                    <div class="skills-option" data-value="jest">Jest</div>
+                                    <div class="skills-option" data-value="cypress">Cypress</div>
+                                    <div class="skills-option" data-value="selenium">Selenium</div>
+                                    <div class="skills-option" data-value="puppeteer">Puppeteer</div>
+                                    <div class="skills-option" data-value="playwright">Playwright</div>
+                                    <div class="skills-option" data-value="postman">Postman</div>
+                                    <div class="skills-option" data-value="swagger">Swagger</div>
+                                    <div class="skills-option" data-value="openapi">OpenAPI</div>
+                                    <div class="skills-option" data-value="restassured">Rest Assured</div>
+                                    <div class="skills-option" data-value="appium">Appium</div>
+                                    <div class="skills-option" data-value="xamarin">Xamarin</div>
+                                    <div class="skills-option" data-value="cordova">Cordova</div>
+                                    <div class="skills-option" data-value="electron">Electron</div>
+                                    <div class="skills-option" data-value="webassembly">WebAssembly</div>
+                                    <div class="skills-option" data-value="threejs">Three.js</div>
+                                    <div class="skills-option" data-value="d3js">D3.js</div>
+                                    <div class="skills-option" data-value="chartjs">Chart.js</div>
+                                    <div class="skills-option" data-value="ai">Artificial Intelligence (AI)</div>
+                                    <div class="skills-option" data-value="ml">Machine Learning</div>
+                                    <div class="skills-option" data-value="nlp">Natural Language Processing (NLP)</div>
+                                    <div class="skills-option" data-value="generative-ai">Generative AI</div>
+                                    <div class="skills-option" data-value="aiops">AIOps</div>
+                                    <div class="skills-option" data-value="computer-vision">Computer Vision</div>
+                                    <div class="skills-option" data-value="deep-learning">Deep Learning</div>
+                                    <div class="skills-option" data-value="data-science">Data Science</div>
+                                    <div class="skills-option" data-value="bigdata">Big Data</div>
+                                    <div class="skills-option" data-value="data-engineering">Data Engineering</div>
+                                    <div class="skills-option" data-value="databricks">Databricks</div>
+                                    <div class="skills-option" data-value="hive">Hive</div>
+                                    <div class="skills-option" data-value="spark-streaming">Spark Streaming</div>
+                                    <div class="skills-option" data-value="etl">ETL</div>
+                                    <div class="skills-option" data-value="data-analytics">Data Analytics</div>
+                                    <div class="skills-option" data-value="predictive-analytics">Predictive Analytics</div>
+                                    <div class="skills-option" data-value="cybersecurity">Cybersecurity</div>
+                                    <div class="skills-option" data-value="infosec">Information Security</div>
+                                    <div class="skills-option" data-value="pentesting">Penetration Testing</div>
+                                    <div class="skills-option" data-value="soc">Security Operations Center (SOC)</div>
+                                    <div class="skills-option" data-value="siem">SIEM</div>
+                                    <div class="skills-option" data-value="zero-trust">Zero Trust Security</div>
+                                    <div class="skills-option" data-value="blockchain">Blockchain</div>
+                                    <div class="skills-option" data-value="web3">Web3</div>
+                                    <div class="skills-option" data-value="smart-contracts">Smart Contracts</div>
+                                    <div class="skills-option" data-value="solidity">Solidity</div>
+                                    <div class="skills-option" data-value="defi">DeFi</div>
+                                    <div class="skills-option" data-value="iot">IoT (Internet of Things)</div>
+                                    <div class="skills-option" data-value="edge-computing">Edge Computing</div>
+                                    <div class="skills-option" data-value="embedded">Embedded Systems</div>
+                                    <div class="skills-option" data-value="rtos">RTOS</div>
+                                    <div class="skills-option" data-value="5g">5G Networks</div>
+                                    <div class="skills-option" data-value="networking">Networking</div>
+                                    <div class="skills-option" data-value="sdn">Software Defined Networking (SDN)</div>
+                                    <div class="skills-option" data-value="cloud-native">Cloud Native</div>
+                                    <div class="skills-option" data-value="multi-cloud">Multi-cloud</div>
+                                    <div class="skills-option" data-value="cloud-security">Cloud Security</div>
+                                    <div class="skills-option" data-value="openstack">OpenStack</div>
+                                    <div class="skills-option" data-value="vmware">VMware</div>
+                                    <div class="skills-option" data-value="virtualization">Virtualization</div>
+                                    <div class="skills-option" data-value="microservices">Microservices Architecture</div>
+                                    <div class="skills-option" data-value="containerization">Containerization</div>
+                                    <div class="skills-option" data-value="service-mesh">Service Mesh</div>
+                                    <div class="skills-option" data-value="api-management">API Management</div>
+                                    <div class="skills-option" data-value="api-gateway">API Gateway</div>
+                                    <div class="skills-option" data-value="devsecops">DevSecOps</div>
+                                    <div class="skills-option" data-value="sre">Site Reliability Engineering (SRE)</div>
+                                    <div class="skills-option" data-value="observability">Observability</div>
+                                    <div class="skills-option" data-value="monitoring">Monitoring</div>
+                                    <div class="skills-option" data-value="incident-response">Incident Response</div>
+                                    <div class="skills-option" data-value="business-intelligence">Business Intelligence (BI)</div>
+                                    <div class="skills-option" data-value="powerbi">Power BI</div>
+                                    <div class="skills-option" data-value="tableau">Tableau</div>
+                                    <div class="skills-option" data-value="bi-analytics">BI Analytics</div>
+                                    <div class="skills-option" data-value="digital-transformation">Digital Transformation</div>
+                                    <div class="skills-option" data-value="erp">ERP Systems</div>
+                                    <div class="skills-option" data-value="sap">SAP</div>
+                                    <div class="skills-option" data-value="crm">CRM Systems</div>
+                                    <div class="skills-option" data-value="salesforce">Salesforce</div>
+                                    <div class="skills-option" data-value="rpa">RPA (Robotic Process Automation)</div>
+                                    <div class="skills-option" data-value="uipath">UiPath</div>
+                                    <div class="skills-option" data-value="blueprism">Blue Prism</div>
+                                    <div class="skills-option" data-value="process-mining">Process Mining</div>
+                                    <div class="skills-option" data-value="digital-twin">Digital Twin</div>
+                                    <div class="skills-option" data-value="vr">Virtual Reality (VR)</div>
+                                    <div class="skills-option" data-value="ar">Augmented Reality (AR)</div>
+                                    <div class="skills-option" data-value="xr">Extended Reality (XR)</div>
+                                    <div class="skills-option" data-value="metaverse">Metaverse</div>
+                                    <div class="skills-option" data-value="quantum-computing">Quantum Computing</div>
+                                    <div class="skills-option" data-value="quantum-algorithms">Quantum Algorithms</div>
+                                    <div class="skills-option" data-value="digital-ethics">Digital Ethics</div>
+                                    <div class="skills-option" data-value="regtech">RegTech</div>
+                                    <div class="skills-option" data-value="fintech">FinTech</div>
+                                    <div class="skills-option" data-value="insurtech">InsurTech</div>
+                                    <div class="skills-option" data-value="edtech">EdTech</div>
+                                    <div class="skills-option" data-value="healthtech">HealthTech</div>
+                                    <div class="skills-option" data-value="govtech">GovTech</div>
+                                    <div class="skills-option" data-value="green-it">Green IT</div>
+                                    <div class="skills-option" data-value="energy-efficiency">Energy Efficiency</div>
+                                    <div class="skills-option" data-value="sustainable-it">Sustainable IT</div>
+                                    <div class="skills-option" data-value="digital-forensics">Digital Forensics</div>
+                                    <div class="skills-option" data-value="privacy">Privacy</div>
+                                    <div class="skills-option" data-value="gdpr">GDPR Compliance</div>
+                                    <div class="skills-option" data-value="dspm">Data Security Posture Management (DSPM)</div>
+                                    <div class="skills-option" data-value="mfa">Multi-factor Authentication (MFA)</div>
+                                    <div class="skills-option" data-value="sso">Single Sign-On (SSO)</div>
+                                    <div class="skills-option" data-value="idm">Identity Management</div>
+                                    <div class="skills-option" data-value="access-management">Access Management</div>
+                                    <div class="skills-option" data-value="risk-management">Risk Management</div>
+                                    <div class="skills-option" data-value="business-continuity">Business Continuity</div>
+                                    <div class="skills-option" data-value="disaster-recovery">Disaster Recovery</div>
+                                    <div class="skills-option" data-value="compliance">Compliance</div>
+                                    <div class="skills-option" data-value="regulatory">Regulatory Technology</div>
+                                    <div class="skills-option" data-value="digital-inclusion">Digital Inclusion</div>
+                                    <div class="skills-option" data-value="digital-literacy">Digital Literacy</div>
+                                    <div class="skills-option" data-value="change-management">Change Management</div>
+                                    <div class="skills-option" data-value="project-management">Project Management</div>
+                                    <div class="skills-option" data-value="product-management">Product Management</div>
+                                    <div class="skills-option" data-value="scrum-master">Scrum Master</div>
+                                    <div class="skills-option" data-value="agile-coach">Agile Coach</div>
+                                    <div class="skills-option" data-value="lean">Lean</div>
+                                    <div class="skills-option" data-value="six-sigma">Six Sigma</div>
+                                    <div class="skills-option" data-value="itil">ITIL</div>
+                                    <div class="skills-option" data-value="cobit">COBIT</div>
+
                             </div>
                         </div>
                     </div>
@@ -106,7 +346,8 @@
 
                     <div class="form-group">
                         <label>О себе</label>
-                        <textarea class="form-textarea" id="description" placeholder="Расскажите о себе, своем опыте и достижениях..." rows="6"></textarea>
+                        <textarea class="form-textarea" id="description"
+                            placeholder="Расскажите о себе, своем опыте и достижениях..." rows="6"></textarea>
                     </div>
 
                     <div class="form-actions">
@@ -122,6 +363,7 @@
         </div>
     </div>
 
-    <script src="/web/UserProfilePage.js"></script>
+    <script type="module" src="/web/UserProfilePage.js"></script>
 </body>
+
 </html>

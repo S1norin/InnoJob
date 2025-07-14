@@ -217,7 +217,7 @@ document.addEventListener('DOMContentLoaded', function () {
             selectedSkillsContainer.appendChild(skillTag);
         });
         selectedSkillsContainer.querySelectorAll('.skill-remove').forEach(btn => {
-            btn.addEventListener('click', function () {
+            btn.addEventListener('click', function() {
                 removeSkill(this.getAttribute('data-skill'));
             });
         });
@@ -423,9 +423,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 <p>${cardData.description}</p>
             </div>
             <div class="card-files-info">
-                <small style="color: #666;">
-                    📷 ${cardData.photoFileName || 'Фото не загружено'} | 
-                    📄 ${cardData.cvFileName || 'CV не загружено'}
+                <small style="color: #666;"> 
+                     ${cardData.cvFileName || 'CV не загружено'}
                 </small>
             </div>
             <div class="buttoms">
@@ -502,7 +501,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (card.cvFile && cvPreview) {
             const url = URL.createObjectURL(card.cvFile);
             currentCvUrl = url;
-            cvPreview.innerHTML = `<a href="${url}" target="_blank">📄 ${card.cvFileName || 'Загруженное CV'}</a>`;
+            cvPreview.innerHTML = `<a href="${url}" target="_blank"> ${card.cvFileName || 'Загруженное CV'}</a>`;
         }
         editingCardId = cardId; // ВАЖНО: устанавливаем перед сохранением
         if (saveBtn) saveBtn.textContent = 'Обновить';
@@ -590,13 +589,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // --- СОБЫТИЯ ---
     if (saveBtn) {
-        saveBtn.addEventListener('click', function (e) {
+        saveBtn.addEventListener('click', function(e) {
+            console.log('Нажата кнопка сохранения');
             e.preventDefault();
             createCard();
         });
     }
     if (addCvBtn) {
-        addCvBtn.addEventListener('click', function (e) {
+        addCvBtn.addEventListener('click', function(e) {
+            console.log('Нажата кнопка добавления CV');
             e.preventDefault();
             clearForm();
             editingCardId = null;
@@ -612,7 +613,7 @@ document.addEventListener('DOMContentLoaded', function () {
         uploadCvBtn.addEventListener('click', () => cvInput.click());
     }
     if (photoInput) {
-        photoInput.addEventListener('change', function () {
+        photoInput.addEventListener('change', function() {
             const file = this.files[0];
             if (file && ["image/png", "image/jpeg", "image/jpg"].includes(file.type)) {
                 if (file.size > 5 * 1024 * 1024) {
@@ -637,7 +638,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
     if (cvInput) {
-        cvInput.addEventListener('change', function () {
+        cvInput.addEventListener('change', function() {
             const file = this.files[0];
             if (file && file.type === "application/pdf") {
                 if (file.size > 10 * 1024 * 1024) {
@@ -659,16 +660,27 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
     if (nameInputs[0]) {
-        nameInputs[0].addEventListener('input', function () {
+        nameInputs[0].addEventListener('input', function() {
             localStorage.setItem('userName', this.value);
         });
     }
     if (nameInputs[1]) {
-        nameInputs[1].addEventListener('input', function () {
+        nameInputs[1].addEventListener('input', function() {
             localStorage.setItem('userSurname', this.value);
         });
     }
-    window.addEventListener('beforeunload', function () {
-        saveUserInfoToLocalStorage();
+
+    // Автосохранение при закрытии страницы
+    window.addEventListener('beforeunload', function() {
+        saveToLocalStorage();
     });
+
+    // Периодическое автосохранение каждые 30 секунд
+    setInterval(function() {
+        if (userCards.length > 0) {
+            saveToLocalStorage();
+        }
+    }, 30000);
+
+    console.log('Инициализация завершена успешно');
 });

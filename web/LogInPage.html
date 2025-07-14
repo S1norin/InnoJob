@@ -1,33 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>InnoJob LI</title>
+    <title>InnoJob</title>
     <link rel="stylesheet" href="/web/LogInPage.css">
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <!-- <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Jockey+One&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Jockey+One&display=swap" rel="stylesheet"> -->
 
 </head>
 
 <style>
-    .header-content {
+    /* .header-content {
         font-family: "Jockey One", sans-serif;
     }
+
     .card_header {
         font-family: "Jockey One", sans-serif;
-    }
+    } */
 </style>
 
 <body>
-    
+
     <header class="header">
         <div class="header-content">
             <div class="header-left">
                     <a href="/logo">
-                        <img src="/pics/IU.png" alt="IU Logo">
+                        <img src="/pics/IU2.png" alt="IU2 Logo">
                     </a>
                     <h2>InnoJob</h2>
                 </div>
@@ -35,32 +37,32 @@
           </div>
       </header>
 
-      <div class="other_body">
-          <div class="card">
-              <div class="card_header">
-                  <h2>Войти в аккаунт</h2>
-              </div>
-        
-              <form class="login-form">
-                    <div class="inputs">
-                        <input type="text" id="email" placeholder="Email" required>
-                        <span class="error-message" id="email-error"></span>
+    <div class="other_body">
+        <div class="card">
+            <div class="card_header">
+                <h2>Войти в аккаунт</h2>
+            </div>
 
-                        <input type="password" id="password" placeholder="Пароль" required>
-                        <span class="error-message" id="password-error"></span>
+            <form class="login-form">
+                <div class="inputs">
+                    <input type="text" id="email" placeholder="Email" required>
+                    <span class="error-message" id="email-error"></span>
 
-                    </div>
-                  <a href="#">Восстановить пароль</a>
-                  <button type="submit">Войти</button>
-              </form>
+                    <input type="password" id="password" placeholder="Пароль" required>
+                    <span class="error-message" id="password-error"></span>
 
-              <div class="login-link">
-                  <p>Ещё нет аккаунта? <a href="/sign_up_page">Зарегистрироваться</a></p>
-              </div>
-          </div>
-      </div>
+                </div>
+                <a href="#">Восстановить пароль</a>
+                <button type="submit">Войти</button>
+            </form>
 
-    <script src="web/LogInPage.js"></script>
-  </body>
-  
+            <div class="login-link">
+                <p>Ещё нет аккаунта? <a href="/sign_up_page">Зарегистрироваться</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="/web/LogInPage.js"></script>
+</body>
+
 </html>

@@ -1,3 +1,4 @@
+import { SERVER_URL } from "/web/config.js";
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
 document.querySelector('.login-form').addEventListener('submit', async (e) => {
@@ -37,7 +38,7 @@ document.querySelector('.login-form').addEventListener('submit', async (e) => {
     console.log("Password:", loginData.password);
 
     try {
-        const response = await fetch('http://localhost:8000/login', {
+        const response = await fetch(`${SERVER_URL}/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(loginData)
@@ -47,7 +48,7 @@ document.querySelector('.login-form').addEventListener('submit', async (e) => {
 
         if (response.ok && result.status === "success") {
             // Fetch user info
-            fetch(`http://localhost:8000/user_info?user_email=${encodeURIComponent(email)}`)
+            fetch(`${SERVER_URL}/user_info?user_email=${encodeURIComponent(email)}`)
                 .then(res => res.json())
                 .then(userInfo => {
                     if (userInfo.name) {
@@ -58,11 +59,6 @@ document.querySelector('.login-form').addEventListener('submit', async (e) => {
                     localStorage.setItem("userEmail", email);
                     window.location.href = "/job_listing";
                 });
-        } else if (result.status === "error" && result.message === "Код не подтвержден") {
-            // alert("Пожалуйста, подтвердите почту");
-            //  Code verification currently does not work, ignoring it for now
-            //  alert("Пожалуйста, подтвердите почту");
-            window.location.href = "/job_listing";
         } else {
             showError(passwordInput, result.detail || result.message || "Ошибка входа", "password-error");
         }
@@ -115,7 +111,7 @@ cvInput.addEventListener('change', async function () {
     formData.append('pdf_file', file);
 
     try {
-        const response = await fetch('http://localhost:8000/upload-cv', {
+        const response = await fetch('${SERVER_URL}/upload-cv', {
             method: 'POST',
             body: formData
         });
@@ -149,7 +145,7 @@ photoInput.addEventListener('change', async function () {
     formData.append('photo', file);
 
     try {
-        const response = await fetch('http://localhost:8000/upload-photo', {
+        const response = await fetch('${SERVER_URL}/upload-photo', {
             method: 'POST',
             body: formData
         });
@@ -164,3 +160,4 @@ photoInput.addEventListener('change', async function () {
         console.error(err);
     }
 });
+
