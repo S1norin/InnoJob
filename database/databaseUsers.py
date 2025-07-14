@@ -340,8 +340,8 @@ class UserManager:#Этот черт будет использоваться д�
         try:
             with self._get_connection() as conn:
                 with conn.cursor() as cur:
-                    cur.execute(query1, (user_id, card_id))
-                    cur.execute(query2, (user_id, card_id))
+                    cur.execute(query1, (user_id, card_number))
+                    cur.execute(query2, (user_id, card_number))
                     conn.commit()
         except psycopg2.Error as e:
             print(f"Ошибка БД при удалении информации о пользователе: {e}")
