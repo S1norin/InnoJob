@@ -48,7 +48,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     const cardIdx = e.target.closest('.cv-card').dataset.idx;
                     const card = this.filteredCVs()[cardIdx];
                     if (card && card.cvFileName && card.user_email && card.card_id) {
-                        // Download CV
                         const url = `${SERVER_URL}/users/cv/${encodeURIComponent(card.user_email)}/${card.card_id}`;
                         window.open(url, '_blank');
                     }
@@ -80,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     description: card.description || '',
                     skills: card.skills || [],
                     photoFileName: card.photo_name || '',
-                    cvFileName:`${SERVER_URL}/users/cv/${card.email}/${card.card_id}` || '',
+                    cvFileName: card.cv_name || '', // только имя файла!
                     photoUrl: `${SERVER_URL}/users/photo/${card.email}/${card.card_id}` || '',
                     user_email: card.email || '',
                     card_id: card.card_id,
@@ -285,7 +284,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (pageCount <= 1) {
                 this.elements.pagination.innerHTML = '';
+                this.elements.pagination.classList.add('hidden');
                 return;
+            }
+            else {
+                this.elements.pagination.classList.remove('hidden');
             }
 
             let html = '';
@@ -367,7 +370,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <p>${card.description ?? ''}</p>
                     </div>
                     <div class="buttoms">
-                        <button class="apply-button" ${card.cvFileName && card.email && card.card_id ? '' : 'disabled'}>Скачать CV</button>
+                        <button class="apply-button" ${card.cvFileName ? '' : 'disabled'}>Скачать CV</button>
                         <button class="apply-button" ${card.email ? '' : 'disabled'}>Связаться</button>
                     </div>
                 </div>
