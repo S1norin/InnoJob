@@ -318,6 +318,7 @@ class UserManager:#Этот черт будет использоваться д�
                     for skill in skills:
                         if skill: cur.execute(query3, (user_id, card_number, skill))  # вставляем новые
                     conn.commit()
+                    return card_number
         except psycopg2.Error as e:
             print(f"Ошибка БД при добавлении информации о пользователе: {e}")
             conn.rollback() # давай по новой миша все фигня
@@ -400,7 +401,7 @@ class UserManager:#Этот черт будет использоваться д�
                     # Build card dicts
                     card_dicts = []
                     for card in cards:
-                        card_id, level_of_education, education_full, age, description, cv_name, photo_name = card
+                        card_id, level_of_education, education_full, age, description, cv_name, cv_pdf, photo_name, photo_file = card
                         card_dicts.append({
                             "card_id": card_id,
                             "education_level": level_of_education,
@@ -408,7 +409,9 @@ class UserManager:#Этот черт будет использоваться д�
                             "age": age,
                             "description": description,
                             "cv_name": cv_name,
+                            "cv_pdf": cv_pdf,
                             "photo_name": photo_name,
+                            "photo_file": photo_file,
                             "skills": skills_map.get(card_id, [])
                         })
                     return card_dicts
