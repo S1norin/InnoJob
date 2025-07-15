@@ -36,3 +36,12 @@ class CreateCard(BaseModel):
     education_full: str
     description: str
     skills: List[str]
+
+class UserCardWithEmail(BaseModel):
+    email: str
+    name: str
+    education_level: str
+    age: int
+    education_full: str
+    description: str
+    skills: List[str]

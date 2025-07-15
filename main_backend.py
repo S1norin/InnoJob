@@ -553,7 +553,7 @@ async def edit_user_card(user_email: str, card_id: int, data:CreateCard, db: Use
     result = await run_in_threadpool(db.user_in_base, user_email) # проверяем что долбанафт есть в базе данных
     if result:
         await run_in_threadpool(db.edit_user_card, user_email, card_id, data.education_level, data.education_full, data.age, data.description, data.skills) # запихуиваем всю инфу в таблицу
-        return {"access":True, "message":"User in base"}
+        return {"access":True, "message": "User in base"}
     else:
         return {"access": False, "message": "User not in base"}
 

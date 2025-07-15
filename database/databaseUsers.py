@@ -419,7 +419,7 @@ class UserManager:#Этот черт будет использоваться д�
             raise
 
     def get_literally_all_cards(self):
-        query1 = "SELECT id, name FROM users"
+        query1 = "SELECT id, name, email FROM users"
         query2 = "SELECT card_id, level_of_education, education_full, age, description, cv_name, photo_name FROM cards WHERE user_id = %s ORDER BY card_id;"
         query3 = "SELECT card_id, skill FROM skills WHERE user_id = %s;"
         try:
@@ -431,6 +431,7 @@ class UserManager:#Этот черт будет использоваться д�
                     for user in result:
                         user_id = user[0]
                         user_name = user[1]
+                        user_email = user[2]
                         cur.execute(query2, (user_id,))
                         cards = cur.fetchall()
                         cur.execute(query3, (user_id,))
@@ -444,6 +445,7 @@ class UserManager:#Этот черт будет использоваться д�
                         for card in cards:
                             card_id, level_of_education, education_full, age, description, cv_name, photo_name = card
                             card_dicts.append({
+                                "email": user_email,
                                 "name": user_name,
                                 "card_id": card_id,
                                 "education_level": level_of_education,
