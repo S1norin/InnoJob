@@ -7,17 +7,17 @@ services:
     depends_on:
       - database
 
-  nginx:
-    image: nginx:latest
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx/conf/:/etc/nginx/conf.d/:ro
-      - ./nginx/ssl/:/etc/nginx/ssl/:ro
-    depends_on:
-      - server
-    restart: unless-stopped
+  # nginx:
+  #   image: nginx:latest
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./nginx/conf/:/etc/nginx/conf.d/:ro
+  #     - ./nginx/ssl/:/etc/nginx/ssl/:ro
+  #   depends_on:
+  #     - server
+  #   restart: unless-stopped
 
   database:
     image: postgres
