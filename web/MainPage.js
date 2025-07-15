@@ -684,12 +684,29 @@ document.addEventListener('DOMContentLoaded', () => {
             const tags = [];
             if (vacancy.format && vacancy.format !== "empty") {
                 tags.push(vacancy.format);
-            } 
+            }
+
+            let logoUrl = '';
+            if (vacancy.logo) {
+                logoUrl = vacancy.logo;
+
+            } else if (vacancy.picture) {
+                logoUrl = vacancy.picture;
+            }
+
+            if (logoUrl && !logoUrl.startsWith('http') && !logoUrl.startsWith('/')) {
+                logoUrl = '/logos/' + logoUrl;
+            }
+
+            let logoContent = '';
+            if (logoUrl) {
+                logoContent = `<img src="${logoUrl}" alt="Logo" style="width:100%;height:100%;object-fit:contain;border-radius:12px;display:block;" onerror="this.style.display='none'; this.parentElement.innerHTML='Нет лого';">`;
+            }
 
             return `
                 <div class="vacancy-card">
                     <div class="card-header">
-                        <div class="logo-place"></div>
+                        <div class="logo-place">${logoContent}</div>
 
                         <div class="job-title-info">
                             <h2>${vacancy.name ?? 'Vacancy Name'}</h2>
@@ -766,3 +783,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
     app.init();
 });
+

@@ -1,7 +1,7 @@
 @font-face {
     font-family: 'headers';
     src: url('/fonts/заголовки.woff2') format('woff2'),
-    url('/fonts/заголовки.woff') format('woff');
+        url('/fonts/заголовки.woff') format('woff');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -10,7 +10,7 @@
 @font-face {
     font-family: 'mains';
     src: url('/fonts/основной.woff2') format('woff2'),
-    url('/fonts/основной.woff') format('woff');
+        url('/fonts/основной.woff') format('woff');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -467,7 +467,7 @@ input[type="email"]:focus,
 
 .form-group label de {
     color: rgb(0, 0, 0);
-    
+
 }
 
 .form-group {
@@ -675,7 +675,7 @@ textarea {
     border-radius: 8px;
     font-size: 14px;
     font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
-    min-height: 150px; 
+    min-height: 150px;
     box-sizing: border-box;
     color: rgb(0, 0, 0);
 }

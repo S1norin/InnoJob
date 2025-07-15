@@ -1,7 +1,7 @@
 @font-face {
     font-family: 'headers';
     src: url('/fonts/заголовки.woff2') format('woff2'),
-    url('/fonts/заголовки.woff') format('woff');
+        url('/fonts/заголовки.woff') format('woff');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -10,7 +10,7 @@
 @font-face {
     font-family: 'mains';
     src: url('/fonts/основной.woff2') format('woff2'),
-    url('/fonts/основной.woff') format('woff');
+        url('/fonts/основной.woff') format('woff');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -28,7 +28,7 @@
     max-width: 900px;
 }
 
-body{
+body {
     background-color: hsl(194, 39%, 94%);
     display: flex;
     flex-direction: column;
@@ -41,8 +41,8 @@ body{
 
 }
 
-.header{
-width: 100%;
+.header {
+    width: 100%;
 }
 
 /* ВЕРХНЯЯ ШАПКА */
@@ -74,7 +74,7 @@ width: 100%;
     display: flex;
     align-items: right;
     font-family: 'headers', "Trebuchet MS", Helvetica, sans-serif;
-    gap:1px;
+    gap: 1px;
     font-size: 17px;
     font-weight: normal;
 }
@@ -106,7 +106,7 @@ width: 100%;
 /* OTHER BODY */
 
 
-.other_body{
+.other_body {
     background-color: hsl(194, 39%, 94%);
     display: flex;
     flex-direction: column;
@@ -124,7 +124,7 @@ width: 100%;
 /* ПОИСКОВАЯ СТРОКА */
 
 
-.search-container{
+.search-container {
     display: flex;
     width: 100%;
     height: 55px;
@@ -148,13 +148,13 @@ width: 100%;
     background-color: #f6fbff;
     color: #555;
     margin-right: 10px;
-     outline: none;
+    outline: none;
 }
 
 
 /* MAIN CONTENT */
 
-.main_content{
+.main_content {
     display: flex;
     align-items: flex-start;
     background-color: hsl(194, 39%, 94%);
@@ -171,7 +171,7 @@ width: 100%;
 
 /* ФИЛЬТРЫ */
 
-.filters-conteiner{
+.filters-conteiner {
     background-color: white;
     border-radius: 15px;
     padding: clamp(0px, 1.5vw, 20px);
@@ -185,7 +185,7 @@ width: 100%;
     gap: 15px;
 }
 
-.filters_header{
+.filters_header {
     display: flex;
     position: relative;
     align-items: center;
@@ -210,7 +210,7 @@ width: 100%;
     font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
 }
 
-.filters_header img{
+.filters_header img {
     width: clamp(16px, 1.9vw, 20px);
     height: auto;
     aspect-ratio: 1 / 1;
@@ -261,13 +261,14 @@ hr {
     background-color: #f6fbff;
     outline: none;
     border: none;
-    color:#333;
+    color: #333;
     font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
 }
 
 /* ?? от и до зп */
 .salary-inputs input::placeholder {
-    color: #555; /* Замените на желаемый цвет */
+    color: #555;
+    /* Замените на желаемый цвет */
     font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
 }
 
@@ -288,7 +289,7 @@ hr {
 }
 
 .filter_section .show-more-btn:hover {
-   background-color: #008c00;
+    background-color: #008c00;
 }
 
 
@@ -316,7 +317,8 @@ hr {
 
 /* ?? Поиск городов... */
 .city-search-input::placeholder {
-    color: #555; /* Замените на нужный вам цвет */
+    color: #555;
+    /* Замените на нужный вам цвет */
     font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
 }
 
@@ -358,7 +360,7 @@ hr {
     top: 3px;
 }
 
-.checkbox-label input[type="checkbox"]:checked + span:not(.vacancy-count)::before {
+.checkbox-label input[type="checkbox"]:checked+span:not(.vacancy-count)::before {
     background-color: #00bb00;
     background-image: url("/pics/tick.png");
     background-repeat: no-repeat;
@@ -382,7 +384,7 @@ hr {
     background-color: #f6fbff;
 }
 
-.checkbox-label input[type="checkbox"]:checked + span {
+.checkbox-label input[type="checkbox"]:checked+span {
     color: #00bb00;
     font-weight: bold;
 }
@@ -394,7 +396,7 @@ hr {
 }
 
 .checkbox-label:hover .vacancy-count,
-.checkbox-label input[type="checkbox"]:checked ~ .vacancy-count {
+.checkbox-label input[type="checkbox"]:checked~.vacancy-count {
     background-color: #00bb00;
     color: #fff;
 }
@@ -417,7 +419,7 @@ hr {
 
 /* !* Стили для скрытия элементов *! */
 .cities-container.collapsed .city-label:nth-child(n+6) {
-   display: none !important;
+    display: none !important;
 }
 
 
@@ -426,7 +428,7 @@ hr {
 /* CARDS */
 
 
-.cards{
+.cards {
     flex-grow: 1;
     background-color: hsl(194, 39%, 94%);
     width: 100%;
@@ -442,7 +444,7 @@ hr {
 
 
 /* ALL JOBS */
-.all_jobs{
+.all_jobs {
     background-color: white;
     width: 100%;
     display: flex;
@@ -454,7 +456,7 @@ hr {
     padding: 7px 13px;
 }
 
-.all_jobs_text{
+.all_jobs_text {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -463,7 +465,7 @@ hr {
 }
 
 /* ?? все вакансии */
-.all_jobs h2{
+.all_jobs h2 {
     margin: 0px;
     font-size: 20px;
     font-family: 'headers', "Trebuchet MS", Helvetica, sans-serif;
@@ -471,7 +473,7 @@ hr {
 }
 
 /* ?? показано х из у вакансий */
-.all_jobs p{
+.all_jobs p {
     margin: 0px;
     color: #555;
     font-size: 15px;
@@ -480,7 +482,7 @@ hr {
 }
 
 /* ?? отчистить все фильтры */
-.all_jobs button{
+.all_jobs button {
     height: 40px;
     box-sizing: border-box;
     border: none;
@@ -509,7 +511,7 @@ hr {
 
 /* VACANCIES */
 
-.vacancies{
+.vacancies {
     background-color: hsl(194, 39%, 94%);
     display: flex;
     flex-direction: column;
@@ -543,12 +545,26 @@ hr {
 
 
 .logo-place {
-    width: clamp(50px, 17.5%, 70px);
-    aspect-ratio: 1 / 1;
-    background-color: white;
-    border-radius: 21.4%;
-    flex-shrink: 0;
+    width: 80px;
+    height: 80px;
+    background-color: #f6fbff;
+    border: 1px solid #e8f4fd;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #555;
+    font-size: 14px;
+    font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
+    overflow: hidden;
+}
 
+.logo-place img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 12px;
+    display: block;
 }
 
 .job-title-info {
@@ -609,7 +625,8 @@ hr {
 }
 
 /* ?? тип работы и скилллы*/
-.job-type-tag, .skill-tag {
+.job-type-tag,
+.skill-tag {
     background-color: hsl(194, 39%, 94%);
     border-radius: 1rem;
     font-size: clamp(0.8rem, 1.2vw, 0.95rem);
@@ -619,11 +636,11 @@ hr {
 }
 
 
- .card-details img{
+.card-details img {
     width: clamp(16px, 1.9vw, 20px);
     height: auto;
     aspect-ratio: 1 / 1;
- }
+}
 
 /* ?? описание работы */
 .card-description {
@@ -680,12 +697,12 @@ hr {
 
 /* Пегинация */
 #pagination {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 20px;
-  margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 20px;
+    margin-bottom: 20px;
 }
 
 /* .page-btn {
@@ -701,17 +718,17 @@ hr {
 } */
 
 .page-btn:hover {
-  background-color: hsl(194, 39%, 94%);
-  border-color: #999;
+    background-color: hsl(194, 39%, 94%);
+    border-color: #999;
 }
 
 .page-btn.active,
 .page-btn[style*="font-weight:bold;"] {
-  background-color:#00bb00;
-  color: white;
-  border-color: #00bb00;
-  font-weight: bold;
-  /* font-family: 'test'; */
+    background-color: #00bb00;
+    color: white;
+    border-color: #00bb00;
+    font-weight: bold;
+    /* font-family: 'test'; */
 }
 
 #clear-filters.active {
@@ -823,38 +840,40 @@ hr {
 /* кнопка вверх */
 
 #scrollBtn {
-  position: fixed;
-  bottom: 30px;
-  right: 35px;
-  z-index: 1000;
+    position: fixed;
+    bottom: 30px;
+    right: 35px;
+    z-index: 1000;
 
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
 
-  background-image: url("/pics/topbtn.png");
-  background-size: 50%;
-  background-position: center;
-  background-repeat: no-repeat;
+    background-image: url("/pics/topbtn.png");
+    background-size: 50%;
+    background-position: center;
+    background-repeat: no-repeat;
 
-  background-color: #00bb00;
-  border: none;
-  cursor: pointer;
+    background-color: #00bb00;
+    border: none;
+    cursor: pointer;
 
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 
 #scrollBtn:hover {
-  background-color: #008c00;
+    background-color: #008c00;
 }
 
 @keyframes activePulse {
     0% {
         transform: scale(1);
     }
+
     50% {
         transform: scale(1.15);
     }
+
     100% {
         transform: scale(1.1);
     }
@@ -879,4 +898,3 @@ hr {
         font-size: 12px;
     }
 } */
-
