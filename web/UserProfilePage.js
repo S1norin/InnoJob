@@ -42,19 +42,28 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Only store user name/surname in localStorage
+    // Only store user email in localStorage
     function saveUserInfoToLocalStorage() {
         if (!checkLocalStorageSupport()) return;
-        if (nameInputs[0]) localStorage.setItem('userName', nameInputs[0].value);
-        if (nameInputs[1]) localStorage.setItem('userSurname', nameInputs[1].value);
         if (emailInput) localStorage.setItem('userEmail', emailInput.value);
     }
 
     function loadUserInfoFromLocalStorage() {
         if (emailInput) emailInput.value = localStorage.getItem('userEmail') || '';
-        if (nameInputs[0]) nameInputs[0].value = localStorage.getItem('userName') || '';
-        if (nameInputs[1]) nameInputs[1].value = localStorage.getItem('userSurname') || '';
+        // Имя и фамилию больше не трогаем из localStorage
         console.log('loadUserInfoFromLocalStorage, email:', emailInput ? emailInput.value : '(нет emailInput)');
+    }
+
+    // --- FETCH USER INFO FROM BACKEND ---
+    async function fetchUserInfo(email) {
+        try {
+            const res = await fetch(`/users/info?email=${encodeURIComponent(email)}`);
+            if (!res.ok) return { name: '', surname: '' };
+            const data = await res.json();
+            return { name: data.name || '', surname: data.surname || '' };
+        } catch (e) {
+            return { name: '', surname: '' };
+        }
     }
 
     // --- FETCH CARDS FROM BACKEND ---
@@ -71,6 +80,10 @@ document.addEventListener('DOMContentLoaded', function () {
             const res = await fetch(`/users/${emailInput.value.trim()}/cards`);
             if (!res.ok) throw new Error('Ошибка загрузки карточек');
             const cards = await res.json();
+            // Получаем имя и фамилию из базы
+            const userInfo = await fetchUserInfo(emailInput.value.trim());
+            if (nameInputs[0]) nameInputs[0].value = userInfo.name;
+            if (nameInputs[1]) nameInputs[1].value = userInfo.surname;
             // Для каждой карточки подгружаем фото
             userCards = await Promise.all(cards.map(async card => {
                 let photoUrl = null;
@@ -108,8 +121,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function clearLocalStorage() {
         if (!checkLocalStorageSupport()) return;
-        localStorage.removeItem('userName');
-        localStorage.removeItem('userSurname');
         localStorage.removeItem('userEmail');
     }
 
@@ -217,7 +228,7 @@ document.addEventListener('DOMContentLoaded', function () {
             selectedSkillsContainer.appendChild(skillTag);
         });
         selectedSkillsContainer.querySelectorAll('.skill-remove').forEach(btn => {
-            btn.addEventListener('click', function() {
+            btn.addEventListener('click', function () {
                 removeSkill(this.getAttribute('data-skill'));
             });
         });
@@ -394,9 +405,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         const cvButtonText = cardData.cvFileName ? 'Скачать CV' : 'CV отсутствует';
         const cvButtonDisabled = cardData.cvFileName ? '' : 'disabled';
-        // Get global user name and surname
-        const userName = (nameInputs[0] && nameInputs[0].value) || localStorage.getItem('userName') || '';
-        const userSurname = (nameInputs[1] && nameInputs[1].value) || localStorage.getItem('userSurname') || '';
+        const userName = nameInputs[0] ? nameInputs[0].value : '';
+        const userSurname = nameInputs[1] ? nameInputs[1].value : '';
         cardDiv.innerHTML = `
             <div class="card-header">
                 <div class="logo-place">
@@ -589,14 +599,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // --- СОБЫТИЯ ---
     if (saveBtn) {
-        saveBtn.addEventListener('click', function(e) {
+        saveBtn.addEventListener('click', function (e) {
             console.log('Нажата кнопка сохранения');
             e.preventDefault();
             createCard();
         });
     }
     if (addCvBtn) {
-        addCvBtn.addEventListener('click', function(e) {
+        addCvBtn.addEventListener('click', function (e) {
             console.log('Нажата кнопка добавления CV');
             e.preventDefault();
             clearForm();
@@ -613,7 +623,7 @@ document.addEventListener('DOMContentLoaded', function () {
         uploadCvBtn.addEventListener('click', () => cvInput.click());
     }
     if (photoInput) {
-        photoInput.addEventListener('change', function() {
+        photoInput.addEventListener('change', function () {
             const file = this.files[0];
             if (file && ["image/png", "image/jpeg", "image/jpg"].includes(file.type)) {
                 if (file.size > 5 * 1024 * 1024) {
@@ -638,7 +648,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
     if (cvInput) {
-        cvInput.addEventListener('change', function() {
+        cvInput.addEventListener('change', function () {
             const file = this.files[0];
             if (file && file.type === "application/pdf") {
                 if (file.size > 10 * 1024 * 1024) {
@@ -659,24 +669,15 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
-    if (nameInputs[0]) {
-        nameInputs[0].addEventListener('input', function() {
-            localStorage.setItem('userName', this.value);
-        });
-    }
-    if (nameInputs[1]) {
-        nameInputs[1].addEventListener('input', function() {
-            localStorage.setItem('userSurname', this.value);
-        });
-    }
+    // Удаляю обработчики input для имени и фамилии, а также автосохранение этих полей в localStorage
 
     // Автосохранение при закрытии страницы
-    window.addEventListener('beforeunload', function() {
+    window.addEventListener('beforeunload', function () {
         saveToLocalStorage();
     });
 
     // Периодическое автосохранение каждые 30 секунд
-    setInterval(function() {
+    setInterval(function () {
         if (userCards.length > 0) {
             saveToLocalStorage();
         }
