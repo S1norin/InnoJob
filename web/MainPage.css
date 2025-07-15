@@ -322,13 +322,16 @@ hr {
     font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
 }
 
-.cities-container {
+.cities-container,
+.filter_variants {
     display: flex;
     flex-direction: column;
     gap: 2px;
     color: #555;
     padding: 0.5rem 0;
     margin-top: 10px;
+    max-height: 432.5px;
+    overflow-y: auto;
 }
 
 .checkbox-label input[type="checkbox"] {
@@ -402,8 +405,11 @@ hr {
 }
 
 .filter_variants.collapsed label:nth-child(n+6),
-.cities-container.collapsed .checkbox-label:nth-child(n+6) {
+.cities-container.collapsed .checkbox-label:nth-child(n+6),
+.companies-container.collapsed {
     display: none !important;
+    max-height: none;
+    overflow-y: visible;
 }
 
 .vacancy-count {
@@ -489,7 +495,11 @@ hr {
     border-radius: 30px;
     font-size: 17px;
     font-weight: normal;
-    padding: 0 15px;
+    /* padding: 0 15px; */
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-top: 0px;
+    padding-bottom: 4.5px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -798,6 +808,12 @@ hr {
     transform: none;
 }
 
+#pagination.hidden,
+#pagination:empty {
+    display: none !important;
+}
+
+
 .arrow-btn {
     width: 35px;
     height: 35px;
@@ -898,3 +914,10 @@ hr {
         font-size: 12px;
     }
 } */
+
+/* ?? тех надписи */
+.loading, .error, .empty-state{
+    color: #555;
+    font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
+}
+

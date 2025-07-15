@@ -763,6 +763,12 @@ hr {
     transform: none;
 }
 
+#pagination.hidden,
+#pagination:empty {
+    display: none !important;
+}
+
+
 .arrow-btn {
     width: 35px;
     height: 35px;
@@ -830,3 +836,8 @@ hr {
   background-color: #008c00;
 }
 
+/* ?? тех надписи */
+.loading, .error, .empty-state{
+    color: #555;
+    font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
+}

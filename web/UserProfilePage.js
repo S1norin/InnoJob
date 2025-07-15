@@ -444,9 +444,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 </small>
             </div>
             <div class="buttoms">
-                <button class="apply-button" onclick="downloadCV(${cardData.id})" ${cvButtonDisabled}>${cvButtonText}</button>
-                <button class="apply-button" onclick="editCard(${cardData.id})">Редактировать</button>
-                <button class="apply-button delete-card" onclick="deleteCard(${cardData.id})">Удалить</button>
+                <div class="cv-buttons-row">
+                    <button class="apply-button" onclick="downloadCV(${cardData.id})" ${cvButtonDisabled}>${cvButtonText}</button>
+                    <button class="apply-button" onclick="editCard(${cardData.id})">Редактировать</button>
+                </div>
+                    <button class="apply-button delete-card" onclick="deleteCard(${cardData.id})">Удалить</button>
             </div>
         `;
         return cardDiv;

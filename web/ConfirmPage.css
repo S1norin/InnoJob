@@ -203,3 +203,19 @@ width: 100%;
 .login-form button:hover {
     background-color: #008c00;
 }
+
+/* ?? ошибки */
+.error-message {
+    color: red;
+    font-size: 0.75em;
+    margin-top: 4px;
+    margin-bottom: 8px;
+    display: block;
+    padding-left: 2px;
+}
+
+input.error {
+    border: 2px solid red;
+    background-color: #ffeaea;
+    border-radius: 30px;
+}
