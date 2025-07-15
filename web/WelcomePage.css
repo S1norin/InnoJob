@@ -154,7 +154,12 @@ body {
     align-items: center; 
     width: 200px;
     color: #FFFFFF;
-    padding: 14px 28px;
+    /* padding: 14px 28px; */
+    padding-left: 28px;
+    padding-right: 28px;
+    padding-top: 11px;
+    padding-bottom: 13px;
+    height: auto;
     border-radius: 15px;
     font-weight: normal;
     font-size: clamp(1.2rem, 1.8vw, 1.2rem);

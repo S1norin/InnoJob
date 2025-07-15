@@ -611,7 +611,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (pageCount <= 1) {
                 this.elements.pagination.innerHTML = '';
+                this.elements.pagination.classList.add('hidden');
                 return;
+            }
+            else {
+                this.elements.pagination.classList.remove('hidden');
             }
 
             let html = '';
