@@ -476,3 +476,17 @@ class UserManager:#Этот черт будет использоваться д�
             print(f"Ошибка БД при проверке пользователя: {e}")
             raise
 
+    def get_name(self, email):
+        query1 = "SELECT name FROM users WHERE email = %s;"
+        try:
+            with self._get_connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute(query1, (email,))
+                    result = cur.fetchone()
+                    if not result:
+                        raise ValueError(f"Пользователь с email '{email}' не найден.")
+                    return result[0]
+        except psycopg2.Error as e:
+            print(f"Ошибка БД при получении имени пользователя: {e}")
+            raise
+
