@@ -440,7 +440,7 @@ document.addEventListener('DOMContentLoaded', function () {
             </div>
             <div class="card-files-info">
                 <small style="color: #666;"> 
-                     ${cardData.cvFileName == null ? '' : 'CV не загружено'}
+                     ${cardData.cvFileName}
                 </small>
             </div>
             <div class="buttoms">
