@@ -896,3 +896,9 @@ hr {
     }
 } */
 
+/* ?? тех надписи */
+.loading, .error, .empty-state{
+    color: #555;
+    font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
+}
+

@@ -676,3 +676,9 @@ textarea {
     outline: none;
     border-color: #00bb00;
 }
+
+/* ?? СV не загружено */
+.card-files-info {
+  color: #555;
+  font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
+}
