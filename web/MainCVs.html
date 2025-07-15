@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -45,12 +46,12 @@
                 <h2>InnoJob</h2>
             </div>
             <div class="header-right">
-                <a href="UserProfile.html">
+                <a href="/user_profile">
                     <img src="/pics/profile.png" alt="profile">
                 </a>
                 <!-- Needs redirection to actual page that actually logs you out (on backend)-->
                 <!-- and then returns you to welcome page  -->
-                <a href="web/WelcomePage.html">
+                <a href="/welcome">
                     <img src="/pics/logout.png" alt="logout">
                 </a>
             </div>
@@ -67,14 +68,18 @@
                 </div>
 
                 <div class="filter_section">
-                    <div class="filter_section_header"><h2>Уровень образования</h2></div>
+                    <div class="filter_section_header">
+                        <h2>Уровень образования</h2>
+                    </div>
                     <div class="filter_variants"></div>
                     <button class="show-more-btn">Показать больше</button>
                 </div>
                 <hr>
 
                 <div class="filter_section">
-                    <div class="filter_section_header"><h2>Статус Образования</h2></div>
+                    <div class="filter_section_header">
+                        <h2>Статус Образования</h2>
+                    </div>
                     <div class="filter_variants"></div>
                     <button class="show-more-btn">Показать больше</button>
                 </div>
@@ -82,7 +87,9 @@
 
                 <!-- Location -->
                 <div class="filter_section">
-                    <div class="filter_section_header"><h2>Навыки</h2></div>
+                    <div class="filter_section_header">
+                        <h2>Навыки</h2>
+                    </div>
                     <div class="filter_variants"></div>
                     <!-- для удобства в css не меняла классы для поисковой строки, просто скопируй ту же поисковую строку с теми же названиями -->
                     <button class="show-more-btn">Показать больше</button>
@@ -102,52 +109,53 @@
 
                 <div class="vacancies" id="vacancies-list">
                     <div class="cv-card">
-                    <div class="card-header">
-                        <div class="logo-place"></div>
-                        <div class="job-title-info">
-                            <h2>Name</h2>
-                            <h2>Surname</h2>
-                        </div>
-                    </div>
-
-                    <div class="card-details">
-                        <div class="detail-item">
-                            <img src="/pics/education.png" alt="education">
-                            <span>Уровень образования</span>
-                        </div>
-                        <div class="detail-item">
-                            <span>Статус образования</span>
-                        </div>
-                    </div>
-
-                    <div class="cv-skills">
-                        <div class="cv-skill-tag">скилл1</div>
-                        <div class="cv-skill-tag">скилл222222</div>
-                        <div class="cv-skill-tag">скилл33333</div>
-                        <div class="cv-skill-tag">скил444</div>
+                        <div class="card-header">
+                            <div class="logo-place"></div>
+                            <div class="job-title-info">
+                                <h2>Name</h2>
+                                <h2>Surname</h2>
+                            </div>
                         </div>
 
-                    <div class="card-description">
-                        <p>Описание</p>
-                    </div>
+                        <div class="card-details">
+                            <div class="detail-item">
+                                <img src="/pics/education.png" alt="education">
+                                <span>Уровень образования</span>
+                            </div>
+                            <div class="detail-item">
+                                <span>Статус образования</span>
+                            </div>
+                        </div>
 
-                    <div class="buttoms">
-                        <button class="apply-button">Скачать CV</button>
-                        <button class="apply-button">Cвязаться</button>
+                        <div class="cv-skills">
+                            <div class="cv-skill-tag">скилл1</div>
+                            <div class="cv-skill-tag">скилл222222</div>
+                            <div class="cv-skill-tag">скилл33333</div>
+                            <div class="cv-skill-tag">скил444</div>
+                        </div>
+
+                        <div class="card-description">
+                            <p>Описание</p>
+                        </div>
+
+                        <div class="buttoms">
+                            <button class="apply-button">Скачать CV</button>
+                            <button class="apply-button">Cвязаться</button>
+                        </div>
                     </div>
-            </div>
                 </div>
                 <!-- в css такая же пагинация как в main page -->
                 <div id="pagination" class="pagination"></div>
             </div>
 
-            
+
         </div>
     </div>
 
     <button id="scrollBtn"></button>
 
     <!-- JS -->
-    <!-- <script src="/web/MainPage.js"></script> -->
+    <script type="module" src="/web/MainCV.js"></script>
 </body>
+
 </html>

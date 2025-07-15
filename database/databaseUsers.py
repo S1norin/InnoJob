@@ -318,21 +318,30 @@ class UserManager:#Этот черт будет использоваться д�
                     for skill in skills:
                         if skill: cur.execute(query3, (user_id, card_number, skill))  # вставляем новые
                     conn.commit()
-                    return card_number
         except psycopg2.Error as e:
             print(f"Ошибка БД при добавлении информации о пользователе: {e}")
             conn.rollback() # давай по новой миша все фигня
             raise
 
-    def delete_user_card(self, email, card_id):
-        query1 = "DELETE FROM skills WHERE user_id = %s AND card_id = %s;"
-        query2 = "DELETE FROM cards WHERE user_id = %s AND card_id = %s;"
+    def delete_user_card(self, email, card_number):
+        query1 = "DELETE FROM cards WHERE user_id = %s AND card_id = %s"  # умные запросы в базу данных
+        query2 = "DELETE FROM skills WHERE user_id = %s AND card_id = %s;"  # сносим нафиг все старые скилы которые были у юзера
+        update_higher_cards_query = """
+                UPDATE cards 
+                SET card_id = card_id - 1 
+                WHERE user_id = %s AND card_id > %s
+            """
+        update_higher_skills_query = """
+                UPDATE skills 
+                SET card_id = card_id - 1 
+                WHERE user_id = %s AND card_id > %s
+            """
         user_id = self.get_user_id(email)
         try:
             with self._get_connection() as conn:
                 with conn.cursor() as cur:
-                    cur.execute(query1, (user_id, card_id))
-                    cur.execute(query2, (user_id, card_id))
+                    cur.execute(query1, (user_id, card_number))
+                    cur.execute(query2, (user_id, card_number))
                     conn.commit()
         except psycopg2.Error as e:
             print(f"Ошибка БД при удалении информации о пользователе: {e}")
@@ -450,7 +459,6 @@ class UserManager:#Этот черт будет использоваться д�
             print(f"Ошибка БД при получении всех карточек пользователя: {e}")
             conn.rollback()
             raise
-
     def get_is_admin(self, email):
         query = "SELECT is_admin FROM users WHERE email = %s;"
         try:
