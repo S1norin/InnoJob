@@ -72,7 +72,7 @@ class UserManager:#Этот черт будет использоваться д�
         try:
             with self._get_connection() as conn:#НЕ ЗАБЫВАЕМ ПРО ПРЕКРАСНЕЙШУЮ КОНСТРУКЦИЮ
                 with conn.cursor() as cur:
-                    cur.execute(query, (name, email, hashed_password, "True"))#захерачиваем пользователя
+                    cur.execute(query, (name, email, hashed_password, "False"))#захерачиваем пользователя
                     user_id = cur.fetchone()[0]
                     return user_id#если понадобиться можно будет получат ид
         except psycopg2.IntegrityError:
