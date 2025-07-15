@@ -80,8 +80,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     description: card.description || '',
                     skills: card.skills || [],
                     photoFileName: card.photo_name || '',
-                    cvFileName: card.cv_name || '',
-                    photoUrl: null, // can be filled if you have photo endpoint
+                    cvFileName:`${SERVER_URL}/users/cv/${card.email}/${card.card_id}` || '',
+                    photoUrl: `${SERVER_URL}/users/photo/${card.email}/${card.card_id}` || '',
                     user_email: card.email || '',
                     card_id: card.card_id,
                 }));
