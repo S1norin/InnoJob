@@ -57,10 +57,15 @@ document.addEventListener('DOMContentLoaded', function () {
     // --- FETCH USER INFO FROM BACKEND ---
     async function fetchUserInfo(email) {
         try {
-            const res = await fetch(`/users/info?email=${encodeURIComponent(email)}`);
+            const res = await fetch(`/users/${encodeURIComponent(email)}/name`);
             if (!res.ok) return { name: '', surname: '' };
             const data = await res.json();
-            return { name: data.name || '', surname: data.surname || '' };
+            if (data.name) {
+                const [firstName, ...rest] = data.name.split(' ');
+                return { name: firstName || '', surname: rest.join(' ') || '' };
+            } else {
+                return { name: '', surname: '' };
+            }
         } catch (e) {
             return { name: '', surname: '' };
         }
@@ -84,6 +89,8 @@ document.addEventListener('DOMContentLoaded', function () {
             const userInfo = await fetchUserInfo(emailInput.value.trim());
             if (nameInputs[0]) nameInputs[0].value = userInfo.name;
             if (nameInputs[1]) nameInputs[1].value = userInfo.surname;
+            if (nameInputs[0]) nameInputs[0].setAttribute('readonly', true);
+            if (nameInputs[1]) nameInputs[1].setAttribute('readonly', true);
             // Для каждой карточки подгружаем фото
             userCards = await Promise.all(cards.map(async card => {
                 let photoUrl = null;
@@ -103,7 +110,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     description: card.description,
                     skills: card.skills,
                     photoFile: null,
-                    photoUrl, // вот тут!
+                    photoUrl,
                     cvFile: null,
                     photoFileName: card.photo_name,
                     cvFileName: card.cv_name,
@@ -112,7 +119,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }));
         } catch (error) {
             userCards = [];
-            // alert('Ошибка загрузки карточек: ' + error.message); // Remove debug alert
         } finally {
             isLoadingCards = false;
             renderCards();
