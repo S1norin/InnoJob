@@ -1,5 +1,7 @@
 import requests
 from time import sleep
+from random import shuffle
+
 
 from parsers.parser_configs import *
 from config import vacancies_to_find
@@ -235,6 +237,8 @@ def get_main_data():
     data = []
     data.extend(get_data_hh())
     data.extend(get_data_superjob())
+
+    shuffle(data)
     return data
 
 
