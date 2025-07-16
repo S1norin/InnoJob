@@ -190,29 +190,64 @@ async def get_companies(db: VacancyManager = Depends(get_vacancy_manager)):
 async def test():
     return {"message": "Hello World"}
 
-async def create_password(user_mail, db: UserManager = Depends(get_user_manager)):
-    code = secrets.randbelow(900000)+100000
+
+async def send_email_utility(message: EmailMessage):
+    """
+    Универсальная функция для отправки email.
+    Работает с портом 587 (STARTTLS).
+    """
+    smtp_client = aiosmtplib.SMTP(hostname=SMTP_HOST, port=SMTP_PORT)
+    try:
+        await smtp_client.connect()
+        # Вызов starttls() УБРАН, так как aiosmtplib делает это автоматически
+
+        await smtp_client.login(SMTP_USER, SMTP_PASSWORD)
+        await smtp_client.send_message(message)
+
+        print(f"Сообщение успешно отправлено на адрес {message['To']}")
+
+    except aiosmtplib.SMTPException as e:
+        print(f"Ошибка SMTP при отправке письма: {e}")
+        # Для бэкенда важно не раскрывать детали ошибки пользователю
+        raise HTTPException(
+            status_code=500,
+            detail="Не удалось отправить письмо. Попробуйте позже."
+        )
+    finally:
+        if smtp_client.is_connected:
+            await smtp_client.quit()
+
+
+# --- 2. ВАШИ ФУНКЦИИ С ИСПРАВЛЕНИЯМИ ---
+
+async def create_password(user_mail: str, db: UserManager = Depends(get_user_manager)):
+    """
+    Генерирует код, сохраняет его в БД и инициирует отправку.
+    """
+    code = secrets.randbelow(900000) + 100000
     await run_in_threadpool(db.set_confirmed_code, user_mail, code)
+    return {"detail": "Код подтверждения успешно отправлен."}
 
 
-async def send_verification(user_mail, db: UserManager = Depends(get_user_manager)):
+async def send_verification(user_mail: str, db: UserManager = Depends(get_user_manager)):
+    """
+    Формирует сообщение и ВЫЗЫВАЕТ утилиту для его отправки.
+    """
     code = await run_in_threadpool(db.get_confirmation_code, user_mail)
     if not code:
-        raise HTTPException(status_code=400, detail="Код подтверждения не найден")
+        raise HTTPException(status_code=400, detail="Код подтверждения не найден или истек.")
+
     message = EmailMessage()
     message["From"] = SMTP_USER
     message["To"] = user_mail
-    message["Subject"] = "Password"
-    message.set_content(f"Ваш код подтверждения: {code}")
+    message["Subject"] = "Ваш код подтверждения"
+    message.set_content(f"Здравствуйте!\n\nВаш код для подтверждения: {code}")
 
-    await aiosmtplib.send(
-        message,
-        hostname=SMTP_HOST,
-        port=SMTP_PORT,
-        username=SMTP_USER,
-        password=SMTP_PASSWORD,
-        use_tls=True,
-    )
+    # ДОБАВЛЕН вызов утилиты для отправки созданного сообщения
+    await send_email_utility(message)
+
+
+
 
 #уже поинтереснее
 @app.post("/users/register")
@@ -222,9 +257,9 @@ async def register_user(user_data: UserCreate, db: UserManager = Depends(get_use
             db.add_new_user,
             name=user_data.name, email=user_data.email, password=user_data.password
         )
-        #await create_password(user_data.email, db)
+        await create_password(user_data.email, db)
         # verification disabled due to email troubles
-        # await send_verification(user_data.email, db)
+        await send_verification(user_data.email, db)
         return {"message": "User registered", "user_id": user_id}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -362,30 +397,9 @@ async def read_signup():
 
     return FileResponse('web/SignUpPage.html')
 
-async def create_password(user_mail, db: UserManager = Depends(get_user_manager)):
-    code = secrets.randbelow(900000)+100000
-    await run_in_threadpool(db.set_confirmed_code, user_mail, code)
 
-
-async def send_verification(user_mail, db: UserManager = Depends(get_user_manager)):
-    code = await run_in_threadpool(db.get_confirmation_code, user_mail)
-    if not code:
-        raise HTTPException(status_code=400, detail="Код подтверждения не найден")
-    message = EmailMessage()
-    message["From"] = SMTP_USER
-    message["To"] = user_mail
-    message["Subject"] = "Password"
-    message.set_content(f"Ваш код подтверждения: {code}")
-
-    await aiosmtplib.send(
-        message,
-        hostname=SMTP_HOST,
-        port=SMTP_PORT,
-        username=SMTP_USER,
-        password=SMTP_PASSWORD,
-        use_tls=True,
-    )
-
+    # Используем нашу новую функцию-утилиту для отправки
+    await send_email_utility(message)
 @app.post("/login/confirm")
 async def check_password(data: ConfirmRequest, db: UserManager = Depends(get_user_manager)):
     code = await run_in_threadpool(db.get_confirmation_code, data.email)
