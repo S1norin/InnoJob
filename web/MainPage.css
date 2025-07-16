@@ -656,7 +656,7 @@ hr {
 .card-description {
     background-color: #f6fbff;
     width: 100%;
-    height: 60%;
+    height: 63%;
     border-radius: 1rem;
     padding: clamp(10px, 2vw, 15px);
     overflow-y: auto;
@@ -921,3 +921,93 @@ hr {
     font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
 }
 
+
+/* новый фронт для карточек из тг */
+
+
+
+/* ?? описание работы */
+.tg-card-description {
+    margin-top: 10px;
+    background-color: #f6fbff;
+    width: 100%;
+    height: 72%;
+    border-radius: 1rem;
+    padding: clamp(10px, 2vw, 15px);
+    overflow-y: auto;
+    box-sizing: border-box;
+    color: #000000;
+    font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
+}
+
+/* ?? тоже описание работы */
+.tg-card-description p {
+    margin: 0 0 1rem 0;
+    line-height: 1.5;
+    font-size: clamp(0.85rem, 2vw, 1rem);
+    color: #000000;
+    font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
+}
+
+
+.tg-skills-section {
+    display: flex;
+    /* justify-content: space-between; */
+    align-items: center;
+    margin-top: auto;
+}
+
+/* ?? откликнуться */
+.tg-apply-button {
+    background-color: #00bb00;
+    width: 100%;
+    color: white;
+    border: none;
+    padding: 0.5rem 1.5rem;
+    border-radius: 1rem;
+    font-size: clamp(0.9rem, 2.5vw, 1rem);
+    cursor: pointer;
+    transition: background-color 0.3s;
+    font-family: 'headers', "Trebuchet MS", Helvetica, sans-serif;
+}
+
+.tg-apply-button:hover {
+    background-color: #008c00;
+}
+
+
+.tg-job-title-info {
+    flex: 1;
+}
+
+/* ?? название вакансии */
+.tg-job-title-info h2 {
+    margin: 0 0 0.75rem 0;
+    font-size: clamp(1.1rem, 2vw, 1.1rem);
+    line-height: 1.35;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    word-break: break-word;
+    text-align: left;
+    font-family: 'headers', "Trebuchet MS", Helvetica, sans-serif;
+    color: #000000;
+}
+
+/* ?? название компании */
+.tg-job-title-info span {
+    margin-top: -5px;
+    color: #555;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: clamp(1.1rem, 2vw, 1.1rem);
+    font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
+}
+
+.tg-logo-place img {
+    width: 70px;
+    aspect-ratio: 1 / 1;
+}
