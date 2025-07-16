@@ -12,3 +12,5 @@ SMTP_PORT = 465  # для SSL
 SMTP_USER = "andreyilin03@mail.ru"
 SMTP_PASSWORD = "UT397BpgFo82s1YRC8kt"
 
+# to search all vacancies change to -1
+vacancies_to_find = -1
