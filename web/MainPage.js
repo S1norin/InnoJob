@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentPage: 1,
         itemsPerPage: 6,
         searchTerm: '',
-        sourceFilter: 'all', // фильтр по источнику
+        sourceFilter: 'all',
 
         filters: {
             jobTypes: new Set(),
@@ -19,7 +19,8 @@ document.addEventListener('DOMContentLoaded', () => {
             locations: new Set(),
             companies: new Set(),
             salaryFrom: null,
-            salaryTo: null
+            salaryTo: null,
+            sources: new Set(), // добавляем фильтр по источнику
         },
 
         init() {
@@ -56,7 +57,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         this.currentPage = page;
                         this.renderVacancies();
-                        // Удаляем: this.renderTgVacancies(); // рендерим TG вакансии при переключении страниц
 
                         setTimeout(() => {
                             const newActive = this.elements.pagination.querySelector('.page-btn.active');
@@ -140,20 +140,23 @@ document.addEventListener('DOMContentLoaded', () => {
             const experiencesSet = new Set();
             const locationsMap = new Map(); // Changed to Map to count vacancies
             const companiesSet = new Set();
-
+            const sourcesSet = new Set(); // для источников
+            const sourcesCountMap = new Map(); // для количества по источникам
             const salaries = [];
 
             this.combinedVacancies.forEach(vacancy => {
                 if (vacancy.format) jobTypesSet.add(vacancy.format);
                 if (vacancy.experience) experiencesSet.add(vacancy.experience);
                 if (vacancy.employer) companiesSet.add(vacancy.employer);
-
+                if (vacancy.source) {
+                    sourcesSet.add(vacancy.source);
+                    sourcesCountMap.set(vacancy.source, (sourcesCountMap.get(vacancy.source) || 0) + 1);
+                }
                 // Count vacancies per city
                 if (vacancy.city) {
                     const city = vacancy.city;
                     locationsMap.set(city, (locationsMap.get(city) || 0) + 1);
                 }
-
                 if (vacancy.salary_from && vacancy.salary_from > 0) {
                     salaries.push(vacancy.salary_from);
                 }
@@ -171,12 +174,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const orderMap = {
                     'нет опыта': 0,
                 };
-
                 const getMinYears = (str) => {
                     const match = str.match(/\d+/);
                     return match ? parseInt(match[0], 10) : Infinity;
                 };
-
                 if (orderMap.hasOwnProperty(a)) {
                     if (orderMap.hasOwnProperty(b)) {
                         return orderMap[a] - orderMap[b];
@@ -186,21 +187,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (orderMap.hasOwnProperty(b)) {
                     return 1;
                 }
-
                 return getMinYears(a) - getMinYears(b);
             };
 
-            // const createCheckboxes = (container, itemsSet, isExperience = false) 
             const createCheckboxes = (container, itemsSet, isExperience = false, showCount = false, countMap = null) => {
                 container.innerHTML = '';
                 let itemsArr = Array.from(itemsSet);
-
                 if (isExperience) {
                     itemsArr.sort(sortExperience);
                 } else {
                     itemsArr.sort();
                 }
-
                 itemsArr.forEach(item => {
                     const label = document.createElement('label');
                     label.className = 'checkbox-label';
@@ -209,14 +206,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     checkbox.value = item;
                     const span = document.createElement('span');
                     span.textContent = this.capitalizeWords(item);
-
                     label.appendChild(checkbox);
                     label.appendChild(span);
-
-
+                    if (showCount && countMap) {
+                        const countBadge = document.createElement('span');
+                        countBadge.className = 'vacancy-count';
+                        countBadge.textContent = countMap.get(item) || 0;
+                        label.appendChild(countBadge);
+                    }
                     container.appendChild(label);
                 });
-
                 if (itemsArr.length > 5) {
                     container.classList.add('collapsed');
                 } else {
@@ -226,53 +225,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const createCityFilter = (container, locationsMap) => {
                 container.innerHTML = '';
-
                 const searchWrapper = document.createElement('div');
                 searchWrapper.className = 'city-search-wrapper';
-
                 const searchInput = document.createElement('input');
                 searchInput.type = 'text';
                 searchInput.placeholder = 'Поиск городов...';
                 searchInput.className = 'city-search-input';
-
                 searchWrapper.appendChild(searchInput);
                 container.appendChild(searchWrapper);
-
                 const citiesContainer = document.createElement('div');
                 citiesContainer.className = 'cities-container';
                 container.appendChild(citiesContainer);
-
                 const sortedCities = Array.from(locationsMap.entries())
                     .sort((a, b) => b[1] - a[1]);
-
                 const renderCities = (filteredCities = sortedCities) => {
                     citiesContainer.innerHTML = '';
-
                     filteredCities.forEach(([city, count]) => {
-
                         const label = document.createElement('label');
                         label.className = 'checkbox-label';
-
                         const checkbox = document.createElement('input');
                         checkbox.type = 'checkbox';
                         checkbox.value = city;
-
                         const cityName = document.createElement('span');
                         cityName.textContent = this.capitalizeWords(city);
-
                         const countBadge = document.createElement('span');
                         countBadge.textContent = count;
                         countBadge.className = 'vacancy-count';
-
                         label.appendChild(checkbox);
                         label.appendChild(cityName);
                         label.appendChild(countBadge);
                         citiesContainer.appendChild(label);
                     });
                 };
-
                 renderCities();
-
                 searchInput.addEventListener('input', (e) => {
                     const searchTerm = e.target.value.toLowerCase();
                     const filteredCities = sortedCities.filter(([city]) =>
@@ -282,13 +267,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             };
 
-
             const sections = this.elements.filterContainer.querySelectorAll('.filter_section');
-
             sections.forEach(section => {
                 const header = section.querySelector('h2').textContent.toLowerCase();
                 const variantsContainer = section.querySelector('.filter_variants');
-
                 if (header.includes('тип работы')) {
                     createCheckboxes(variantsContainer, jobTypesSet);
                 } else if (header.includes('опыт работы')) {
@@ -297,9 +279,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     createCityFilter(variantsContainer, locationsMap);
                 } else if (header.includes('компания') || header.includes('company')) {
                     createCheckboxes(variantsContainer, companiesSet);
+                } else if (header.includes('источник')) {
+                    createCheckboxes(variantsContainer, sourcesSet, false, true, sourcesCountMap);
                 }
             });
-
             this.setupShowMoreButtons();
         },
 
@@ -414,13 +397,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const checkbox = e.target;
                 if (checkbox.tagName === 'INPUT' && checkbox.type === 'checkbox') {
                     const labelText = checkbox.nextElementSibling?.textContent.trim().toLowerCase();
-
                     if (!labelText) return;
-
                     const section = checkbox.closest('.filter_section');
                     if (!section) return;
                     const headerText = section.querySelector('h2').textContent.toLowerCase();
-
                     if (headerText.includes('тип работы')) {
                         this.toggleFilter(this.filters.jobTypes, labelText, checkbox.checked);
                     } else if (headerText.includes('опыт работы')) {
@@ -429,8 +409,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         this.toggleFilter(this.filters.locations, labelText, checkbox.checked);
                     } else if (headerText.includes('компания') || headerText.includes('company')) {
                         this.toggleFilter(this.filters.companies, labelText, checkbox.checked);
+                    } else if (headerText.includes('источник')) {
+                        this.toggleFilter(this.filters.sources, labelText, checkbox.checked);
                     }
-
                     this.currentPage = 1;
                     this.renderVacancies();
                 }
@@ -564,7 +545,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 locations: new Set(),
                 companies: new Set(),
                 salaryFrom: null,
-                salaryTo: null
+                salaryTo: null,
+                sources: new Set(), // добавляем фильтр по источнику
             };
 
             this.searchTerm = '';
@@ -612,6 +594,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (this.filters.companies.size > 0) {
                 filteredVacancies = filteredVacancies.filter(v =>
                     this.filters.companies.has((v.employer ?? '').toLowerCase())
+                );
+            }
+            if (this.filters.sources.size > 0) {
+                filteredVacancies = filteredVacancies.filter(v =>
+                    this.filters.sources.has((v.source ?? '').toLowerCase())
                 );
             }
             if (this.filters.salaryFrom !== null) {
