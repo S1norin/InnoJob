@@ -1,5 +1,6 @@
 import requests
 from time import sleep
+from random import shuffle
 
 
 from parsers.parser_configs import *
@@ -220,6 +221,8 @@ def get_main_data():
     data.extend(get_data_hh())
     data.extend(get_data_superjob())
     # data.extend(parse_channel('IUCareerFinder'))
+
+    shuffle(data)
     return data
 
 def get_employer_data_hh(e_id):
