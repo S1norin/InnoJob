@@ -16,6 +16,11 @@ document.addEventListener('DOMContentLoaded', () => {
         init() {
             this.cacheDOMElements();
             this.bindEvents();
+            // Восстановление страницы из localStorage
+            const savedPage = parseInt(localStorage.getItem('mainCVCurrentPage'), 10);
+            if (!isNaN(savedPage) && savedPage > 0) {
+                this.currentPage = savedPage;
+            }
             this.fetchAndRenderCVs();
             this.bindSearchEvents();
             this.bindFilterEvents();
@@ -38,6 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (!isNaN(page) && page !== this.currentPage && !e.target.disabled) {
                             this.currentPage = page;
                             this.renderCVs();
+                            localStorage.setItem('mainCVCurrentPage', this.currentPage);
                         }
                     }
                 });
@@ -142,6 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     checkbox.addEventListener('change', (e) => {
                         this.toggleFilter(this.filters.skills, skill, e.target.checked);
                         this.currentPage = 1;
+                        localStorage.setItem('mainCVCurrentPage', this.currentPage);
                         this.renderCVs();
                     });
                     const span = document.createElement('span');
@@ -178,6 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 checkbox.addEventListener('change', (e) => {
                     this.toggleFilter(this.filters[filterKey], item, e.target.checked);
                     this.currentPage = 1;
+                    localStorage.setItem('mainCVCurrentPage', this.currentPage);
                     this.renderCVs();
                 });
                 const span = document.createElement('span');
@@ -208,6 +216,7 @@ document.addEventListener('DOMContentLoaded', () => {
             searchInput.addEventListener('input', () => {
                 this.searchTerm = searchInput.value.trim().toLowerCase();
                 this.currentPage = 1;
+                localStorage.setItem('mainCVCurrentPage', this.currentPage);
                 this.renderCVs();
             });
         },
@@ -230,6 +239,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 education_full: new Set(),
             };
             this.currentPage = 1;
+            localStorage.setItem('mainCVCurrentPage', this.currentPage);
             this.populateFilters();
             this.renderCVs();
         },

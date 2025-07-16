@@ -22,6 +22,10 @@ document.addEventListener('DOMContentLoaded', () => {
         init() {
             this.cacheDOMElements();
             this.bindEvents();
+            const savedPage = parseInt(localStorage.getItem('mainPageCurrentPage'), 10);
+            if (!isNaN(savedPage) && savedPage > 0) {
+                this.currentPage = savedPage;
+            }
             this.fetchAndRenderVacancies();
             this.bindApplyButtons();
             this.bindSearchEvents();
@@ -51,6 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         this.currentPage = page;
                         this.renderVacancies();
+                        localStorage.setItem('mainPageCurrentPage', this.currentPage);
 
                         setTimeout(() => {
                             const newActive = this.elements.pagination.querySelector('.page-btn.active');
@@ -386,6 +391,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
 
                     this.currentPage = 1;
+                    localStorage.setItem('mainPageCurrentPage', this.currentPage);
                     this.renderVacancies();
                 }
             });
@@ -443,6 +449,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
 
                     this.currentPage = 1;
+                    localStorage.setItem('mainPageCurrentPage', this.currentPage);
                     this.renderVacancies();
                 });
 
@@ -524,6 +531,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('search-input').value = '';
 
             this.currentPage = 1;
+            localStorage.setItem('mainPageCurrentPage', this.currentPage);
 
             this.populateFilters();
             this.renderVacancies();
@@ -536,6 +544,7 @@ document.addEventListener('DOMContentLoaded', () => {
             searchInput.addEventListener('input', () => {
                 this.searchTerm = searchInput.value.trim().toLowerCase();
                 this.currentPage = 1;
+                localStorage.setItem('mainPageCurrentPage', this.currentPage);
                 this.renderVacancies();
             });
         },
