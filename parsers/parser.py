@@ -2,7 +2,7 @@ import requests
 from time import sleep
 
 from parsers.parser_configs import *
-from config_template import vacancies_to_find
+from config import vacancies_to_find
 
 COUNT = 0
 
