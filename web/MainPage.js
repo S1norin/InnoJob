@@ -6,9 +6,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         elements: {},
         allVacancies: [],
+        tgVacancies: [],
+        combinedVacancies: [],
         currentPage: 1,
         itemsPerPage: 6,
         searchTerm: '',
+        sourceFilter: 'all', // фильтр по источнику
 
         filters: {
             jobTypes: new Set(),
@@ -26,6 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
             this.bindApplyButtons();
             this.bindSearchEvents();
             this.bindFilterEvents();
+            this.fetchAndRenderTgVacancies();
         },
 
         cacheDOMElements() {
@@ -36,6 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
             this.elements.salaryInputs = document.querySelectorAll('.salary-inputs input');
             this.elements.clearFiltersBtn = document.getElementById('clear-filters');
             this.elements.searchInput = document.getElementById('search-input');
+            this.elements.tgVacanciesList = document.getElementById('tg-vacancies-list');
         },
 
         bindEvents() {
@@ -51,6 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         this.currentPage = page;
                         this.renderVacancies();
+                        // Удаляем: this.renderTgVacancies(); // рендерим TG вакансии при переключении страниц
 
                         setTimeout(() => {
                             const newActive = this.elements.pagination.querySelector('.page-btn.active');
@@ -72,14 +78,62 @@ document.addEventListener('DOMContentLoaded', () => {
                     throw new Error(`Ошибка HTTP: ${response.status}`);
                 }
                 this.allVacancies = await response.json();
-
-                this.populateFilters();
-                this.renderVacancies();
+                this.tryCombineAndRender();
             } catch (error) {
                 console.error('Ошибка при загрузке вакансий:', error);
                 this.setUIState('error', `Не удалось загрузить вакансии. Детали: ${error.message}`);
             }
         },
+
+        async fetchAndRenderTgVacancies() {
+            try {
+                const response = await fetch(`${SERVER_URL}/telegram_vacancies`);
+                if (!response.ok) throw new Error(`Ошибка HTTP: ${response.status}`);
+                this.tgVacancies = await response.json();
+                this.tryCombineAndRender();
+            } catch (error) {
+                console.error('Ошибка при загрузке TG вакансий:', error);
+            }
+        },
+
+        tryCombineAndRender() {
+            if (Array.isArray(this.allVacancies) && Array.isArray(this.tgVacancies)) {
+                this.combinedVacancies = [...this.allVacancies, ...this.tgVacancies];
+                this.populateFilters();
+                this.renderVacancies();
+            }
+        },
+
+        renderTgVacancies() {
+            const container = this.elements.tgVacanciesList;
+            if (!container) return;
+            container.innerHTML = this.tgVacancies.map(v => this.createTgCardHTML(v)).join('');
+        },
+
+        createTgCardHTML(vacancy) {
+            return `
+                <div class="vacancy-card">
+                    <div class="card-header">
+                        <div class="tg-logo-place">
+                            <img src="/pics/tg.png" alt="tg">
+                        </div>
+                        <div class="tg-job-title-info">         
+                            <h2>${vacancy.title ?? 'Telegram Пост'}</h2>
+                            <span>Telegram</span>
+                        </div>
+                    </div>
+
+                    <div class="tg-card-description">
+                        <p>${vacancy.description ? vacancy.description.replace(/\n/g, '<br>') : 'Описание отсуствует'}</p>
+                    </div>
+
+                    <div class="tg-skills-section">
+                        <button class="tg-apply-button" data-link="${vacancy.link ?? '#'}">Перейти в Телеграм</button>
+                    </div>
+                </div> 
+            `;
+        },
+
 
         populateFilters() {
             const jobTypesSet = new Set();
@@ -89,7 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const salaries = [];
 
-            this.allVacancies.forEach(vacancy => {
+            this.combinedVacancies.forEach(vacancy => {
                 if (vacancy.format) jobTypesSet.add(vacancy.format);
                 if (vacancy.experience) experiencesSet.add(vacancy.experience);
                 if (vacancy.employer) companiesSet.add(vacancy.employer);
@@ -159,12 +213,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     label.appendChild(checkbox);
                     label.appendChild(span);
 
-                    // if (showCount && countMap) {
-                    //     const countBadge = document.createElement('span');
-                    //     countBadge.className = 'vacancy-count';
-                    //     countBadge.textContent = countMap.get(item) || 0;
-                    //     label.appendChild(countBadge);
-                    // }
 
                     container.appendChild(label);
                 });
@@ -201,8 +249,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     citiesContainer.innerHTML = '';
 
                     filteredCities.forEach(([city, count]) => {
-                        // const label = document.createElement('label');
-                        // label.className = 'city-label';
 
                         const label = document.createElement('label');
                         label.className = 'checkbox-label';
@@ -487,6 +533,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         },
 
+        // Удаляем: bindSourceFilterEvents
         toggleFilter(set, value, isChecked) {
             if (isChecked) {
                 set.add(value);
@@ -541,70 +588,59 @@ document.addEventListener('DOMContentLoaded', () => {
         },
 
         renderVacancies() {
-            let filteredVacancies = this.allVacancies;
-
+            let filteredVacancies = this.combinedVacancies;
             if (this.searchTerm) {
                 filteredVacancies = filteredVacancies.filter(vacancy =>
-                    (vacancy.name ?? '').toLowerCase().includes(this.searchTerm)
+                    ((vacancy.name ?? vacancy.title ?? '').toLowerCase().includes(this.searchTerm))
                 );
             }
-
             if (this.filters.jobTypes.size > 0) {
                 filteredVacancies = filteredVacancies.filter(v =>
                     this.filters.jobTypes.has((v.format ?? '').toLowerCase())
                 );
             }
-
             if (this.filters.experiences.size > 0) {
                 filteredVacancies = filteredVacancies.filter(v =>
                     this.filters.experiences.has((v.experience ?? '').toLowerCase())
                 );
             }
-
             if (this.filters.locations.size > 0) {
                 filteredVacancies = filteredVacancies.filter(v =>
                     this.filters.locations.has((v.city ?? '').toLowerCase())
                 );
             }
-
             if (this.filters.companies.size > 0) {
                 filteredVacancies = filteredVacancies.filter(v =>
                     this.filters.companies.has((v.employer ?? '').toLowerCase())
                 );
             }
-
             if (this.filters.salaryFrom !== null) {
                 filteredVacancies = filteredVacancies.filter(v =>
                     (v.salary_from ?? 0) >= this.filters.salaryFrom
                 );
             }
-
             if (this.filters.salaryTo !== null) {
                 filteredVacancies = filteredVacancies.filter(v =>
                     (v.salary_to ?? Infinity) <= this.filters.salaryTo
                 );
             }
-
             const start = (this.currentPage - 1) * this.itemsPerPage;
             const end = start + this.itemsPerPage;
             const paginatedVacancies = filteredVacancies.slice(start, end);
-
             if (paginatedVacancies.length === 0) {
                 this.setUIState('empty');
                 this.elements.pagination.innerHTML = '';
                 this.elements.allJobsText.textContent = `No results for "${this.searchTerm}"`;
                 return;
             }
-
             this.elements.vacanciesList.innerHTML = paginatedVacancies
-                .map(vacancy => this.createVacancyCardHTML(vacancy))
+                .map(vacancy => this.isTgVacancy(vacancy) ? this.createTgCardHTML(vacancy) : this.createVacancyCardHTML(vacancy))
                 .join('');
-
             this.renderPagination(filteredVacancies.length);
-
             this.elements.allJobsText.textContent = `Показано ${Math.min(filteredVacancies.length, end)} из ${filteredVacancies.length} результатов`;
         },
 
+        // Удаляем: renderTgVacancies
         renderPagination(totalItems) {
             const pageCount = Math.ceil(totalItems / this.itemsPerPage);
             const current = this.currentPage;
@@ -678,7 +714,7 @@ document.addEventListener('DOMContentLoaded', () => {
         },
 
         createVacancyCardHTML(vacancy) {
-            let salaryText = '-';
+            let salaryText = 'Не указано';
             if (vacancy.salary_from || vacancy.salary_to) {
                 const from = vacancy.salary_from ? `от ${this.formatSalaryNumber(vacancy.salary_from)}` : '';
                 const to = vacancy.salary_to ? `до ${this.formatSalaryNumber(vacancy.salary_to)}` : '';
@@ -744,6 +780,8 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
         },
 
+        // Удаляем: createTgCardHTML
+
         setUIState(state, message = '') {
             const list = this.elements.vacanciesList;
             switch (state) {
@@ -765,6 +803,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         capitalizeWords(str) {
             return str.replace(/\b\w/g, char => char.toUpperCase());
+        },
+
+        isTgVacancy(vacancy) {
+            return (
+                typeof vacancy.title === 'string' &&
+                typeof vacancy.link === 'string' &&
+                !vacancy.employer &&
+                !vacancy.format
+            );
         }
     };
 
