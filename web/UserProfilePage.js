@@ -1,4 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
+    if (!localStorage.getItem('userEmail')) {
+        window.location.href = '/log_in_page';
+    }
     // --- ЭЛЕМЕНТЫ ---
     const skillsSearch = document.getElementById('skillsSearch');
     const skillsDropdown = document.getElementById('skillsDropdown');

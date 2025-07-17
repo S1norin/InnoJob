@@ -145,6 +145,19 @@ async def read_job_listing():
 async def read_welcome():
     return FileResponse('web/WelcomePage.html')
 
+@app.get("/confirmation")
+async def read_confirm():
+    return FileResponse('web/ConfirmPage.html')
+
+@app.get("/email_page")
+async def read_email():
+    return FileResponse('web/EmailPage.html')
+
+@app.get("/password_page")
+async def read_password():
+    return FileResponse('web/PasswordPage.html')
+
+
 @app.get("/cv_listing_page")
 async def serve_cv_listing_page():
     return FileResponse('web/MainCVs.html')

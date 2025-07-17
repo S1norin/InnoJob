@@ -1,5 +1,9 @@
 import { SERVER_URL } from "/web/config.js";
 
+if (!localStorage.getItem('userEmail')) {
+    window.location.href = '/log_in_page';
+}
+
 document.addEventListener('DOMContentLoaded', () => {
 
     const app = {
@@ -827,6 +831,24 @@ document.addEventListener('DOMContentLoaded', () => {
             behavior: 'smooth'
         });
     });
+
+    // ЛОГО: переход на welcome
+    const logoLink = document.getElementById('logo-link');
+    if (logoLink) {
+        logoLink.addEventListener('click', function (e) {
+            e.preventDefault();
+            window.location.href = '/welcome';
+        });
+    }
+    // ВЫХОД: очищаем localStorage и редиректим на welcome
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            localStorage.clear();
+            window.location.href = '/welcome';
+        });
+    }
 
     app.init();
 });

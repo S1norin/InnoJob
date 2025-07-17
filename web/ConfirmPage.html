@@ -1,55 +1,57 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>InnoJob</title>
-    <link rel="stylesheet" href="ConfirmPage.css">
+    <link rel="stylesheet" href="/web/ConfirmPage.css">
 
 </head>
 
 <body>
-    
+
     <header class="header">
         <div class="header-content">
             <div class="header-left">
                 <!-- I think it would be reasanable enough if logo would lead to welcome page -->
-                    <a href="/welcome">
-                        <img src="/pics/IU2.png" alt="IU2 Logo">
-                    </a>
-                    <h2>InnoJob</h2>
-                </div>
+                <a href="/welcome">
+                    <img src="/pics/IU2.png" alt="IU2 Logo">
+                </a>
+                <h2>InnoJob</h2>
             </div>
-          </div>
-      </header>
+        </div>
+        </div>
+    </header>
 
-      <div class="other_body">
-          <div class="card">
-              <div class="card_header">
-                  <h2>Подтвердите почту</h2>
-              </div>
-        
-              <form class="login-form">
-                    <div class="inputs">
-                        <div class="code-input-container">
-                            <input type="number" class="code-input" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="one-time-code" autofocus>
-                            <input type="number" class="code-input" maxlength="1" pattern="[0-9]" inputmode="numeric">
-                            <input type="number" class="code-input" maxlength="1" pattern="[0-9]" inputmode="numeric">
-                            <input type="number" class="code-input" maxlength="1" pattern="[0-9]" inputmode="numeric">
-                            <input type="number" class="code-input" maxlength="1" pattern="[0-9]" inputmode="numeric">
-                            <input type="number" class="code-input" maxlength="1" pattern="[0-9]" inputmode="numeric">
-                        </div>
+    <div class="other_body">
+        <div class="card">
+            <div class="card_header">
+                <h2>Подтвердите почту</h2>
+            </div>
+
+            <form class="login-form">
+                <div class="inputs">
+                    <div class="code-input-container">
+                        <input type="number" class="code-input" maxlength="1" pattern="[0-9]" inputmode="numeric"
+                            autocomplete="one-time-code" autofocus>
+                        <input type="number" class="code-input" maxlength="1" pattern="[0-9]" inputmode="numeric">
+                        <input type="number" class="code-input" maxlength="1" pattern="[0-9]" inputmode="numeric">
+                        <input type="number" class="code-input" maxlength="1" pattern="[0-9]" inputmode="numeric">
+                        <input type="number" class="code-input" maxlength="1" pattern="[0-9]" inputmode="numeric">
+                        <input type="number" class="code-input" maxlength="1" pattern="[0-9]" inputmode="numeric">
                     </div>
-                  <button type="submit">Подтвердить</button>
-              </form>
-
-              <div class="login-link">
-                    <a href="javascript:history.back()">&larr; Назад</a>
                 </div>
-          </div>
-      </div>
+                <button type="submit">Подтвердить</button>
+            </form>
 
-    <script src="web/ConfirmPage.js"></script>
-  </body>
-  
+            <div class="login-link">
+                <a href="javascript:history.back()">&larr; Назад</a>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="/web/ConfirmPage.js"></script>
+</body>
+
 </html>
