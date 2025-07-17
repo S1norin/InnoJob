@@ -81,11 +81,12 @@ body {
     font-family: 'headers', "Trebuchet MS", Helvetica, sans-serif;
 }
 
-/* ?? название */
 .header-right a {
     text-decoration: none;
-    font-family: 'headers', "Trebuchet MS", Helvetica, sans-serif;
 }
+
+/* ?? название */
+
 
 .header-left img {
     display: block;
@@ -96,13 +97,8 @@ body {
 .header-right {
     display: flex;
     align-items: center;
-    gap: 1rem;
-}
-
-.header-right a img {
-    display: block;
-    width: 26px;
-    aspect-ratio: 1 / 1;
+    gap: 3rem;
+    margin-right: 17px;
 }
 
 .header-content a:hover {
