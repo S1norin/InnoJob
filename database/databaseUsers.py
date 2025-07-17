@@ -28,7 +28,8 @@ class UserManager:#Этот черт будет использоваться д�
             confirmation_code INTEGER,
             confirmation_code_created_at INTEGER,  
             is_confirmed BOOLEAN DEFAULT FALSE,
-            is_admin BOOLEAN DEFAULT FALSE
+            is_admin BOOLEAN DEFAULT FALSE,
+            is_log BOOLEAN DEFAULT FALSE
         );
         CREATE TABLE IF NOT EXISTS cards (
             user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
@@ -221,8 +222,6 @@ class UserManager:#Этот черт будет использоваться д�
             with conn.cursor() as cur:
                 cur.execute(query, (user_email,))
 
-
-
     def change_password(self, mail, password):
         hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
         query = """
@@ -233,8 +232,6 @@ class UserManager:#Этот черт будет использоваться д�
         with self._get_connection() as conn:
             with conn.cursor() as cur:
                 cur.execute(query, (hashed_password, mail))
-
-
 
     def user_in_base(self, email):
         query = "SELECT id FROM users WHERE email = %s"
@@ -258,6 +255,50 @@ class UserManager:#Этот черт будет использоваться д�
                 else:
                     return None
 
+    def is_user_exist(self, email):
+        query = "SELECT id FROM users WHERE email = %s"
+        with self._get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(query, (email,))
+                result = cur.fetchone()
+                if result:
+                    return result
+                else:
+                    return None
+
+    def drop_user(self, email):
+        query = "DELETE FROM users WHERE email = %s;"
+        try:
+            with self._get_connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute(query, (email,))
+                    if cur.rowcount > 0:
+                        return
+                    else:
+                        return
+        except psycopg2.Error as e:
+            print(f"Ошибка БД при удалении пользователя: {e}")
+            raise
+    def is_login(self, email):
+        query = "SELECT is_log FROM users WHERE email = %s"
+        with self._get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(query, (email,))
+                result = cur.fetchone()
+                if result:
+                    return bool(result[0])
+                else:
+                    return None
+
+    def set_login_state(self, email, state):
+        query = """
+                    UPDATE users 
+                    SET is_log = %s
+                    WHERE email = %s
+                    """
+        with self._get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(query, (state, email))
 
     def get_user_card(self, email, card_number):
         query1 = "SELECT id, name FROM users WHERE email = %s;"

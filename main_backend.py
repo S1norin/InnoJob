@@ -192,10 +192,6 @@ async def test():
 
 
 async def send_email_utility(message: EmailMessage):
-    """
-    Универсальная функция для отправки email.
-    Работает с портом 587 (STARTTLS).
-    """
     smtp_client = aiosmtplib.SMTP(hostname=SMTP_HOST, port=SMTP_PORT)
     try:
         await smtp_client.connect()
@@ -217,22 +213,12 @@ async def send_email_utility(message: EmailMessage):
         if smtp_client.is_connected:
             await smtp_client.quit()
 
-
-# --- 2. ВАШИ ФУНКЦИИ С ИСПРАВЛЕНИЯМИ ---
-
 async def create_password(user_mail: str, db: UserManager = Depends(get_user_manager)):
-    """
-    Генерирует код, сохраняет его в БД и инициирует отправку.
-    """
     code = secrets.randbelow(900000) + 100000
     await run_in_threadpool(db.set_confirmed_code, user_mail, code)
     return {"detail": "Код подтверждения успешно отправлен."}
 
-
 async def send_verification(user_mail: str, db: UserManager = Depends(get_user_manager)):
-    """
-    Формирует сообщение и ВЫЗЫВАЕТ утилиту для его отправки.
-    """
     code = await run_in_threadpool(db.get_confirmation_code, user_mail)
     if not code:
         raise HTTPException(status_code=400, detail="Код подтверждения не найден или истек.")
@@ -243,24 +229,25 @@ async def send_verification(user_mail: str, db: UserManager = Depends(get_user_m
     message["Subject"] = "Ваш код подтверждения"
     message.set_content(f"Здравствуйте!\n\nВаш код для подтверждения: {code}")
 
-    # ДОБАВЛЕН вызов утилиты для отправки созданного сообщения
     await send_email_utility(message)
-
-
 
 
 #уже поинтереснее
 @app.post("/users/register")
 async def register_user(user_data: UserCreate, db: UserManager = Depends(get_user_manager)):
     try:
+        in_base = await run_in_threadpool(db.is_user_exist,email=user_data.email)
+        state = await run_in_threadpool(db.is_login, email = user_data.email)
+        if in_base and not(state):
+            await run_in_threadpool(db.drop_user, email=user_data.email)
         user_id = await run_in_threadpool(
             db.add_new_user,
             name=user_data.name, email=user_data.email, password=user_data.password
         )
         await create_password(user_data.email, db)
-        # verification disabled due to email troubles
         await send_verification(user_data.email, db)
         return {"message": "User registered", "user_id": user_id}
+
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
@@ -275,7 +262,7 @@ async def upload_cv(
     email: str = Form(...),
     pdf_file: UploadFile = File(...)#получаем файл (эта важна)
 ):
-    pdf_content_bytes = await pdf_file.read()#захерачиваем его в бинарный вид чтобы не сохранять
+    pdf_content_bytes = await pdf_file.read()
 
     if not pdf_content_bytes:#если он пуст то нахер его
         raise HTTPException(
@@ -363,6 +350,7 @@ async def login_user(
         password=login_data.password
     )
     if is_correct and db.get_is_confirmed(login_data.email):#если да то говорим что все круто
+        await run_in_threadpool(db.set_login_state, email=login_data.email, state = True)
         return {"status": "success", "message": "Вход выполнен успешно"}
     elif not(db.get_is_confirmed(login_data.email)):
         return {"status": "error", "message": "Код не подтвержден"}
@@ -372,6 +360,15 @@ async def login_user(
             detail="Неверный email или пароль"
         )
 
+@app.post("/is_log")
+async def is_log(email: UserMail ,db: UserManager = Depends(get_user_manager)):
+    state:bool = await run_in_threadpool(db.is_login, email = email.mail)
+    return {"is_log": state}
+
+@app.post("/cancle_log")
+async def not_log(email: UserMail ,db: UserManager = Depends(get_user_manager)):
+    await run_in_threadpool(db.set_login_state, email = email.mail, state = False)
+    return {"user_status": False}
 
 # Named function this strange to avoid name collision with /login
 @app.get("/log_in_page")
@@ -400,6 +397,7 @@ async def read_signup():
 
     # Используем нашу новую функцию-утилиту для отправки
     await send_email_utility(message)
+
 @app.post("/login/confirm")
 async def check_password(data: ConfirmRequest, db: UserManager = Depends(get_user_manager)):
     code = await run_in_threadpool(db.get_confirmation_code, data.email)
@@ -425,11 +423,25 @@ async def write_mail(data:UserMail, db: UserManager = Depends(get_user_manager))
         return {"access": False, "message": "User not in base"}
 
 
-
 @app.post("/change_password")
 async def change_password(data: NewPassword, db: UserManager = Depends(get_user_manager)):
     await run_in_threadpool(db.change_password, data.mail, data.new_password)
     return {"status":True, "message":"Password change"}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 @app.post("/users/photo/{user_email}/{card_number}")
@@ -522,7 +534,6 @@ async def download_photo(
             detail="Внутренняя ошибка сервера при получении файла."
         )
 
-
 @app.post("/users/{user_email}/cards")
 async def add_user_card(user_email: str, data:CreateCard, db: UserManager = Depends(get_user_manager)):
     result = await run_in_threadpool(db.user_in_base, user_email) # проверяем что долбанафт есть в базе данных
@@ -531,7 +542,6 @@ async def add_user_card(user_email: str, data:CreateCard, db: UserManager = Depe
         return {"access":True, "message":"User in base", "card_id":card_id}
     else:
         return {"access": False, "message": "User not in base"}
-
 
 #endpoint for checking
 @app.get("/users/{user_email}/cards")
@@ -542,7 +552,6 @@ async def get_all_user_cards(user_email: str, db: UserManager = Depends(get_user
     except Exception as e:
         print(f"Server error getting all user cards: {e}")
         raise HTTPException(status_code=500, detail="Could not fetch user cards.")
-
 
 @app.get("/users/{user_email}/cards/{card_id}")
 async def get_user_card(user_email: str, card_id: int, db: UserManager = Depends(get_user_manager)):
@@ -570,9 +579,6 @@ async def edit_user_card(user_email: str, card_id: int, data:CreateCard, db: Use
         return {"access":True, "message": "User in base"}
     else:
         return {"access": False, "message": "User not in base"}
-
-
-
 
 @app.get("/users/{user_email}/name")
 async def get_user_card(user_email: str, db: UserManager = Depends(get_user_manager)):
