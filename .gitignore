@@ -4,5 +4,5 @@ temp_uploads
 anon.session
 .DS_Store
 config.py
-config.js
+web/config.js
 ssl
