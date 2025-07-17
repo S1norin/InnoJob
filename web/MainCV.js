@@ -49,13 +49,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
             // Download and contact buttons
-            this.elements.vacanciesList.addEventListener('click', (e) => {
+            this.elements.vacanciesList.addEventListener('click', async (e) => {
                 if (e.target.matches('.apply-button') && e.target.textContent.includes('Скачать CV')) {
                     const cardIdx = e.target.closest('.cv-card').dataset.idx;
                     const card = this.filteredCVs()[cardIdx];
                     if (card && card.cvFileName && card.user_email && card.card_id) {
-                        const url = `${SERVER_URL}/users/cv/${encodeURIComponent(card.user_email)}/${card.card_id}`;
-                        window.open(url, '_blank');
+                        await this.downloadCV(card.user_email, card.card_id, card.cvFileName);
+                    } else {
+                        alert('CV не найдено для этой карточки.');
                     }
                 } else if (e.target.matches('.apply-button') && e.target.textContent.includes('Связаться')) {
                     const cardIdx = e.target.closest('.cv-card').dataset.idx;
@@ -85,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     description: card.description || '',
                     skills: card.skills || [],
                     photoFileName: card.photo_name || '',
-                    cvFileName: `${SERVER_URL}/users/cv/${card.email}/${card.card_id}` || '',
+                    cvFileName: card.card_id || '',
                     photoUrl: `${SERVER_URL}/users/photo/${card.email}/${card.card_id}` || '',
                     user_email: card.email || '',
                     card_id: card.card_id,
@@ -403,6 +404,27 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 default:
                     break;
+            }
+        },
+
+        /**
+         * Аналог downloadCV из UserProfilePage.js
+         */
+        async downloadCV(email, cardId, fileName) {
+            try {
+                const res = await fetch(`${SERVER_URL}/users/cv/${encodeURIComponent(email)}/${cardId}`);
+                if (!res.ok) throw new Error('CV не найдено на сервере');
+                const blob = await res.blob();
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = fileName || 'CV.pdf';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            } catch (e) {
+                alert('Ошибка при скачивании CV: ' + e.message);
             }
         },
     };

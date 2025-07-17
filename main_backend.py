@@ -2,6 +2,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.staticfiles import StaticFiles
 from database.database import VacancyManager
+from database.telegram_database import TelegramManager
 from config import *
 from fastapi.responses import StreamingResponse, FileResponse
 import io
@@ -40,6 +41,8 @@ security = HTTPBasic()
 async def startup_event():
     app.state.vacancy_manager = VacancyManager(host=db_host, dbname=db_name, user=db_user, password=db_password, port=db_port)
     app.state.user_manager = UserManager(host=db_host, dbname=db_name, user=db_user, password=db_password, port=db_port)
+    app.state.telegram_manager = TelegramManager(host=db_host, dbname=db_name, user=db_user, password=db_password, port=db_port)
+    await app.state.telegram_manager.initialize()
     print("Подключение к БД установлено и менеджеры готовы!")
 
 
@@ -48,6 +51,9 @@ def get_user_manager(request: Request) -> UserManager:
 
 def get_vacancy_manager(request: Request) -> VacancyManager:
     return request.app.state.vacancy_manager
+
+def get_telegram_manager(request: Request) -> TelegramManager:
+    return request.app.state.telegram_manager
 
 
 async def verify_admin(
@@ -149,6 +155,15 @@ async def read_user_profile():
 
 @app.get("/vacancies")
 async def get_all_vacancies(db: VacancyManager = Depends(get_vacancy_manager)):
+    try:
+        vacancies = await run_in_threadpool(db.get_vac_list)#по факту бахаем норм вызов получения джосона и чилим
+        return vacancies
+    except Exception as e:
+        print(f"Server error getting vacancies: {e}")
+        raise HTTPException(status_code=500, detail="Could not fetch vacancies.")
+
+@app.get("/telegram_vacancies")
+async def get_telegram_vacancies(db: TelegramManager = Depends(get_telegram_manager)):
     try:
         vacancies = await run_in_threadpool(db.get_vac_list)#по факту бахаем норм вызов получения джосона и чилим
         return vacancies

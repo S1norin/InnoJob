@@ -6,9 +6,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         elements: {},
         allVacancies: [],
+        tgVacancies: [],
+        combinedVacancies: [],
         currentPage: 1,
         itemsPerPage: 6,
         searchTerm: '',
+        sourceFilter: 'all',
 
         filters: {
             jobTypes: new Set(),
@@ -16,7 +19,8 @@ document.addEventListener('DOMContentLoaded', () => {
             locations: new Set(),
             companies: new Set(),
             salaryFrom: null,
-            salaryTo: null
+            salaryTo: null,
+            sources: new Set(), // добавляем фильтр по источнику
         },
 
         init() {
@@ -30,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
             this.bindApplyButtons();
             this.bindSearchEvents();
             this.bindFilterEvents();
+            this.fetchAndRenderTgVacancies();
         },
 
         cacheDOMElements() {
@@ -40,6 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
             this.elements.salaryInputs = document.querySelectorAll('.salary-inputs input');
             this.elements.clearFiltersBtn = document.getElementById('clear-filters');
             this.elements.searchInput = document.getElementById('search-input');
+            this.elements.tgVacanciesList = document.getElementById('tg-vacancies-list');
         },
 
         bindEvents() {
@@ -77,34 +83,85 @@ document.addEventListener('DOMContentLoaded', () => {
                     throw new Error(`Ошибка HTTP: ${response.status}`);
                 }
                 this.allVacancies = await response.json();
-
-                this.populateFilters();
-                this.renderVacancies();
+                this.tryCombineAndRender();
             } catch (error) {
                 console.error('Ошибка при загрузке вакансий:', error);
                 this.setUIState('error', `Не удалось загрузить вакансии. Детали: ${error.message}`);
             }
         },
 
+        async fetchAndRenderTgVacancies() {
+            try {
+                const response = await fetch(`${SERVER_URL}/telegram_vacancies`);
+                if (!response.ok) throw new Error(`Ошибка HTTP: ${response.status}`);
+                this.tgVacancies = await response.json();
+                this.tryCombineAndRender();
+            } catch (error) {
+                console.error('Ошибка при загрузке TG вакансий:', error);
+            }
+        },
+
+        tryCombineAndRender() {
+            if (Array.isArray(this.allVacancies) && Array.isArray(this.tgVacancies)) {
+                this.combinedVacancies = [...this.allVacancies, ...this.tgVacancies];
+                this.populateFilters();
+                this.renderVacancies();
+            }
+        },
+
+        renderTgVacancies() {
+            const container = this.elements.tgVacanciesList;
+            if (!container) return;
+            container.innerHTML = this.tgVacancies.map(v => this.createTgCardHTML(v)).join('');
+        },
+
+        createTgCardHTML(vacancy) {
+            return `
+                <div class="vacancy-card">
+                    <div class="card-header">
+                        <div class="tg-logo-place">
+                            <img src="/pics/tg.png" alt="tg">
+                        </div>
+                        <div class="tg-job-title-info">         
+                            <h2>${vacancy.title ?? 'Telegram Пост'}</h2>
+                            <span>Telegram</span>
+                        </div>
+                    </div>
+
+                    <div class="tg-card-description">
+                        <p>${vacancy.description ? vacancy.description.replace(/\n/g, '<br>') : 'Описание отсуствует'}</p>
+                    </div>
+
+                    <div class="tg-skills-section">
+                        <button class="tg-apply-button" data-link="${vacancy.link ?? '#'}">Перейти в Телеграм</button>
+                    </div>
+                </div> 
+            `;
+        },
+
+
         populateFilters() {
             const jobTypesSet = new Set();
             const experiencesSet = new Set();
             const locationsMap = new Map(); // Changed to Map to count vacancies
             const companiesSet = new Set();
-
+            const sourcesSet = new Set(); // для источников
+            const sourcesCountMap = new Map(); // для количества по источникам
             const salaries = [];
 
-            this.allVacancies.forEach(vacancy => {
+            this.combinedVacancies.forEach(vacancy => {
                 if (vacancy.format) jobTypesSet.add(vacancy.format);
                 if (vacancy.experience) experiencesSet.add(vacancy.experience);
                 if (vacancy.employer) companiesSet.add(vacancy.employer);
-
+                if (vacancy.source) {
+                    sourcesSet.add(vacancy.source);
+                    sourcesCountMap.set(vacancy.source, (sourcesCountMap.get(vacancy.source) || 0) + 1);
+                }
                 // Count vacancies per city
                 if (vacancy.city) {
                     const city = vacancy.city;
                     locationsMap.set(city, (locationsMap.get(city) || 0) + 1);
                 }
-
                 if (vacancy.salary_from && vacancy.salary_from > 0) {
                     salaries.push(vacancy.salary_from);
                 }
@@ -122,12 +179,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const orderMap = {
                     'нет опыта': 0,
                 };
-
                 const getMinYears = (str) => {
                     const match = str.match(/\d+/);
                     return match ? parseInt(match[0], 10) : Infinity;
                 };
-
                 if (orderMap.hasOwnProperty(a)) {
                     if (orderMap.hasOwnProperty(b)) {
                         return orderMap[a] - orderMap[b];
@@ -137,21 +192,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (orderMap.hasOwnProperty(b)) {
                     return 1;
                 }
-
                 return getMinYears(a) - getMinYears(b);
             };
 
-            // const createCheckboxes = (container, itemsSet, isExperience = false) 
             const createCheckboxes = (container, itemsSet, isExperience = false, showCount = false, countMap = null) => {
                 container.innerHTML = '';
                 let itemsArr = Array.from(itemsSet);
-
                 if (isExperience) {
                     itemsArr.sort(sortExperience);
                 } else {
                     itemsArr.sort();
                 }
-
                 itemsArr.forEach(item => {
                     const label = document.createElement('label');
                     label.className = 'checkbox-label';
@@ -160,20 +211,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     checkbox.value = item;
                     const span = document.createElement('span');
                     span.textContent = this.capitalizeWords(item);
-
                     label.appendChild(checkbox);
                     label.appendChild(span);
-
-                    // if (showCount && countMap) {
-                    //     const countBadge = document.createElement('span');
-                    //     countBadge.className = 'vacancy-count';
-                    //     countBadge.textContent = countMap.get(item) || 0;
-                    //     label.appendChild(countBadge);
-                    // }
-
+                    if (showCount && countMap) {
+                        const countBadge = document.createElement('span');
+                        countBadge.className = 'vacancy-count';
+                        countBadge.textContent = countMap.get(item) || 0;
+                        label.appendChild(countBadge);
+                    }
                     container.appendChild(label);
                 });
-
                 if (itemsArr.length > 5) {
                     container.classList.add('collapsed');
                 } else {
@@ -183,55 +230,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const createCityFilter = (container, locationsMap) => {
                 container.innerHTML = '';
-
                 const searchWrapper = document.createElement('div');
                 searchWrapper.className = 'city-search-wrapper';
-
                 const searchInput = document.createElement('input');
                 searchInput.type = 'text';
                 searchInput.placeholder = 'Поиск городов...';
                 searchInput.className = 'city-search-input';
-
                 searchWrapper.appendChild(searchInput);
                 container.appendChild(searchWrapper);
-
                 const citiesContainer = document.createElement('div');
                 citiesContainer.className = 'cities-container';
                 container.appendChild(citiesContainer);
-
                 const sortedCities = Array.from(locationsMap.entries())
                     .sort((a, b) => b[1] - a[1]);
-
                 const renderCities = (filteredCities = sortedCities) => {
                     citiesContainer.innerHTML = '';
-
                     filteredCities.forEach(([city, count]) => {
-                        // const label = document.createElement('label');
-                        // label.className = 'city-label';
-
                         const label = document.createElement('label');
                         label.className = 'checkbox-label';
-
                         const checkbox = document.createElement('input');
                         checkbox.type = 'checkbox';
                         checkbox.value = city;
-
                         const cityName = document.createElement('span');
                         cityName.textContent = this.capitalizeWords(city);
-
                         const countBadge = document.createElement('span');
                         countBadge.textContent = count;
                         countBadge.className = 'vacancy-count';
-
                         label.appendChild(checkbox);
                         label.appendChild(cityName);
                         label.appendChild(countBadge);
                         citiesContainer.appendChild(label);
                     });
                 };
-
                 renderCities();
-
                 searchInput.addEventListener('input', (e) => {
                     const searchTerm = e.target.value.toLowerCase();
                     const filteredCities = sortedCities.filter(([city]) =>
@@ -241,13 +272,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             };
 
-
             const sections = this.elements.filterContainer.querySelectorAll('.filter_section');
-
             sections.forEach(section => {
                 const header = section.querySelector('h2').textContent.toLowerCase();
                 const variantsContainer = section.querySelector('.filter_variants');
-
                 if (header.includes('тип работы')) {
                     createCheckboxes(variantsContainer, jobTypesSet);
                 } else if (header.includes('опыт работы')) {
@@ -256,9 +284,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     createCityFilter(variantsContainer, locationsMap);
                 } else if (header.includes('компания') || header.includes('company')) {
                     createCheckboxes(variantsContainer, companiesSet);
+                } else if (header.includes('источник')) {
+                    createCheckboxes(variantsContainer, sourcesSet, false, true, sourcesCountMap);
                 }
             });
-
             this.setupShowMoreButtons();
         },
 
@@ -373,13 +402,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const checkbox = e.target;
                 if (checkbox.tagName === 'INPUT' && checkbox.type === 'checkbox') {
                     const labelText = checkbox.nextElementSibling?.textContent.trim().toLowerCase();
-
                     if (!labelText) return;
-
                     const section = checkbox.closest('.filter_section');
                     if (!section) return;
                     const headerText = section.querySelector('h2').textContent.toLowerCase();
-
                     if (headerText.includes('тип работы')) {
                         this.toggleFilter(this.filters.jobTypes, labelText, checkbox.checked);
                     } else if (headerText.includes('опыт работы')) {
@@ -388,8 +414,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         this.toggleFilter(this.filters.locations, labelText, checkbox.checked);
                     } else if (headerText.includes('компания') || headerText.includes('company')) {
                         this.toggleFilter(this.filters.companies, labelText, checkbox.checked);
+                    } else if (headerText.includes('источник')) {
+                        this.toggleFilter(this.filters.sources, labelText, checkbox.checked);
                     }
-
                     this.currentPage = 1;
                     localStorage.setItem('mainPageCurrentPage', this.currentPage);
                     this.renderVacancies();
@@ -494,6 +521,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         },
 
+        // Удаляем: bindSourceFilterEvents
         toggleFilter(set, value, isChecked) {
             if (isChecked) {
                 set.add(value);
@@ -524,7 +552,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 locations: new Set(),
                 companies: new Set(),
                 salaryFrom: null,
-                salaryTo: null
+                salaryTo: null,
+                sources: new Set(), // добавляем фильтр по источнику
             };
 
             this.searchTerm = '';
@@ -550,70 +579,64 @@ document.addEventListener('DOMContentLoaded', () => {
         },
 
         renderVacancies() {
-            let filteredVacancies = this.allVacancies;
-
+            let filteredVacancies = this.combinedVacancies;
             if (this.searchTerm) {
                 filteredVacancies = filteredVacancies.filter(vacancy =>
-                    (vacancy.name ?? '').toLowerCase().includes(this.searchTerm)
+                    ((vacancy.name ?? vacancy.title ?? '').toLowerCase().includes(this.searchTerm))
                 );
             }
-
             if (this.filters.jobTypes.size > 0) {
                 filteredVacancies = filteredVacancies.filter(v =>
                     this.filters.jobTypes.has((v.format ?? '').toLowerCase())
                 );
             }
-
             if (this.filters.experiences.size > 0) {
                 filteredVacancies = filteredVacancies.filter(v =>
                     this.filters.experiences.has((v.experience ?? '').toLowerCase())
                 );
             }
-
             if (this.filters.locations.size > 0) {
                 filteredVacancies = filteredVacancies.filter(v =>
                     this.filters.locations.has((v.city ?? '').toLowerCase())
                 );
             }
-
             if (this.filters.companies.size > 0) {
                 filteredVacancies = filteredVacancies.filter(v =>
                     this.filters.companies.has((v.employer ?? '').toLowerCase())
                 );
             }
-
+            if (this.filters.sources.size > 0) {
+                filteredVacancies = filteredVacancies.filter(v =>
+                    this.filters.sources.has((v.source ?? '').toLowerCase())
+                );
+            }
             if (this.filters.salaryFrom !== null) {
                 filteredVacancies = filteredVacancies.filter(v =>
                     (v.salary_from ?? 0) >= this.filters.salaryFrom
                 );
             }
-
             if (this.filters.salaryTo !== null) {
                 filteredVacancies = filteredVacancies.filter(v =>
                     (v.salary_to ?? Infinity) <= this.filters.salaryTo
                 );
             }
-
             const start = (this.currentPage - 1) * this.itemsPerPage;
             const end = start + this.itemsPerPage;
             const paginatedVacancies = filteredVacancies.slice(start, end);
-
             if (paginatedVacancies.length === 0) {
                 this.setUIState('empty');
                 this.elements.pagination.innerHTML = '';
                 this.elements.allJobsText.textContent = `No results for "${this.searchTerm}"`;
                 return;
             }
-
             this.elements.vacanciesList.innerHTML = paginatedVacancies
-                .map(vacancy => this.createVacancyCardHTML(vacancy))
+                .map(vacancy => this.isTgVacancy(vacancy) ? this.createTgCardHTML(vacancy) : this.createVacancyCardHTML(vacancy))
                 .join('');
-
             this.renderPagination(filteredVacancies.length);
-
             this.elements.allJobsText.textContent = `Показано ${Math.min(filteredVacancies.length, end)} из ${filteredVacancies.length} результатов`;
         },
 
+        // Удаляем: renderTgVacancies
         renderPagination(totalItems) {
             const pageCount = Math.ceil(totalItems / this.itemsPerPage);
             const current = this.currentPage;
@@ -687,7 +710,7 @@ document.addEventListener('DOMContentLoaded', () => {
         },
 
         createVacancyCardHTML(vacancy) {
-            let salaryText = '-';
+            let salaryText = 'Не указано';
             if (vacancy.salary_from || vacancy.salary_to) {
                 const from = vacancy.salary_from ? `от ${this.formatSalaryNumber(vacancy.salary_from)}` : '';
                 const to = vacancy.salary_to ? `до ${this.formatSalaryNumber(vacancy.salary_to)}` : '';
@@ -753,6 +776,8 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
         },
 
+        // Удаляем: createTgCardHTML
+
         setUIState(state, message = '') {
             const list = this.elements.vacanciesList;
             switch (state) {
@@ -774,6 +799,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         capitalizeWords(str) {
             return str.replace(/\b\w/g, char => char.toUpperCase());
+        },
+
+        isTgVacancy(vacancy) {
+            return (
+                typeof vacancy.title === 'string' &&
+                typeof vacancy.link === 'string' &&
+                !vacancy.employer &&
+                !vacancy.format
+            );
         }
     };
 
