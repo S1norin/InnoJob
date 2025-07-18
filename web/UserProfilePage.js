@@ -244,145 +244,81 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // --- СОЗДАНИЕ/ОБНОВЛЕНИЕ КАРТОЧКИ С ОТПРАВКОЙ В БД ---
-    async function createCard() {
+    async function saveCard() {
         try {
-            // Validate required fields
             const eduLevel = educationLevel?.value || '';
             const eduStatus = educationStatus?.value || '';
-            const desc = description?.value.trim() || '';
-            const skills = selectedSkills.map(skill => skill.text);
-            const email = emailInput.value.trim();
-            if (!email) {
-                alert('Пожалуйста, укажите email');
+            const desc = description?.value || '';
+
+            if (!eduLevel || !eduStatus || !desc || !selectedSkills.length) {
+                alert('Пожалуйста, заполните все обязательные поля');
                 return;
             }
-            // if (!eduLevel || !eduStatus || !desc || skills.length === 0) {
-            //     alert('Пожалуйста, заполните все поля и выберите хотя бы один навык');
-            //     return;
-            // }
-            if (saveBtn) saveBtn.disabled = true;
-            let isNewCard = (editingCardId == null);
-            let cardId = null; // <-- объявляем cardId здесь
-            if (!isNewCard) {
-                // PATCH-запрос
-                cardId = editingCardId; // <-- присваиваем cardId
-                try {
-                    const updateResponse = await fetch(`/users/${email}/cards/${cardId}`, {
-                        method: 'PATCH',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            education_level: eduLevel,
-                            education_full: eduStatus,
-                            age: 0,
-                            description: desc,
-                            skills
-                        })
-                    });
-                    let updateData = {};
-                    let isJson = false;
-                    const contentType = updateResponse.headers.get('content-type');
-                    if (contentType && contentType.includes('application/json')) {
-                        updateData = await updateResponse.json();
-                        isJson = true;
-                    } else {
-                        updateData.message = await updateResponse.text();
-                    }
-                    if (!updateResponse.ok || (isJson && updateData.access === false)) {
-                        alert(updateData.message || 'Ошибка при обновлении карточки на сервере');
-                        return;
-                    }
-                    // После успешного обновления сбрасываем editingCardId
-                    editingCardId = null;
-                    if (saveBtn) saveBtn.textContent = 'Сохранить';
-                } catch (error) {
-                    alert('Ошибка при обновлении карточки: ' + error.message);
-                    return;
-                }
-            } else {
-                // POST-запрос
-                try {
-                    const createResponse = await fetch(`/users/${email}/cards`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            education_level: eduLevel,
-                            education_full: eduStatus,
-                            age: 0,
-                            description: desc,
-                            skills
-                        })
-                    });
-                    let createData = {};
-                    let isJson = false;
-                    const contentType = createResponse.headers.get('content-type');
-                    if (contentType && contentType.includes('application/json')) {
-                        createData = await createResponse.json();
-                        isJson = true;
-                    } else {
-                        createData.message = await createResponse.text();
-                    }
-                    if (!createResponse.ok || (isJson && createData.access === false)) {
-                        alert(createData.message || 'Ошибка при создании карточки на сервере');
-                        return;
-                    }
-                    cardId = createData.card_id; // <-- присваиваем cardId здесь
-                    if (cardId === undefined || cardId === null) {
-                        alert('Сервер не вернул card_id');
-                        await fetchUserCards();
-                        return;
-                    }
-                } catch (error) {
-                    alert('Ошибка при создании карточки: ' + error.message);
-                    return;
+
+            const email = emailInput.value.trim();
+            if (!email) {
+                alert('Email пользователя не найден.');
+                return;
+            }
+
+            const isEditing = editingCardId !== null;
+            const url = isEditing ? `/users/${email}/cards/${editingCardId}` : `/users/${email}/cards`;
+            const method = isEditing ? 'PATCH' : 'POST';
+
+            const cardData = {
+                education_level: eduLevel,
+                education_full: eduStatus,
+                description: desc,
+                skills: selectedSkills.map(s => s.value),
+                age: 0
+            };
+
+            const cardResponse = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(cardData)
+            });
+
+            if (!cardResponse.ok) {
+                const errorData = await cardResponse.json().catch(() => ({ detail: 'Не удалось сохранить карточку.' }));
+                throw new Error(errorData.detail);
+            }
+
+            const cardResult = await cardResponse.json();
+            const cardId = isEditing ? editingCardId : cardResult.card_id;
+
+            if (currentPhotoFile) {
+                const photoFormData = new FormData();
+                photoFormData.append('email', email);
+                photoFormData.append('photo', currentPhotoFile);
+                const photoResponse = await fetch(`/users/photo/${email}/${cardId}`, {
+                    method: 'POST',
+                    body: photoFormData
+                });
+
+                if (!photoResponse.ok) {
+                    alert('Карточка сохранена, но не удалось загрузить фото.');
                 }
             }
-            // 2. Загружаем файлы на сервер (только если есть новые файлы)
-            if (currentCvFile && cardId !== undefined && cardId !== null) {
-                try {
-                    const formData = new FormData();
-                    formData.append('email', email);
-                    formData.append('pdf_file', currentCvFile);
-                    const cvResponse = await fetch(`/users/cv/${email}/${cardId}`, {
-                        method: 'POST',
-                        body: formData
-                    });
-                    if (!cvResponse.ok) {
-                        const errText = await cvResponse.text();
-                        alert('Ошибка при загрузке CV: ' + errText);
-                        return;
-                    }
-                } catch (error) {
-                    alert(error.message);
-                    return;
+
+            if (currentCvFile) {
+                const cvFormData = new FormData();
+                cvFormData.append('email', email);
+                cvFormData.append('pdf_file', currentCvFile);
+                const cvResponse = await fetch(`/users/cv/${email}/${cardId}`, {
+                    method: 'POST',
+                    body: cvFormData
+                });
+                if (!cvResponse.ok) {
+                    alert('Карточка сохранена, но не удалось загрузить CV.');
                 }
             }
-            if (currentPhotoFile && cardId !== undefined && cardId !== null) {
-                try {
-                    const formData = new FormData();
-                    formData.append('email', email);
-                    formData.append('photo', currentPhotoFile);
-                    const photoResponse = await fetch(`/users/photo/${email}/${cardId}`, {
-                        method: 'POST',
-                        body: formData
-                    });
-                    if (!photoResponse.ok) {
-                        const errText = await photoResponse.text();
-                        alert('Ошибка при загрузке фото: ' + errText);
-                        return;
-                    }
-                } catch (error) {
-                    alert(error.message);
-                    return;
-                }
-            }
-            // 3. Обновляем интерфейс
+
             await fetchUserCards();
             clearForm();
-            saveUserInfoToLocalStorage();
+
         } catch (error) {
-            alert('Ошибка: ' + error.message);
-        } finally {
-            if (saveBtn) saveBtn.disabled = false;
+            alert(`Ошибка при сохранении карточки: ${error.message}`);
         }
     }
 
@@ -613,7 +549,7 @@ document.addEventListener('DOMContentLoaded', function () {
         saveBtn.addEventListener('click', function (e) {
             console.log('Нажата кнопка сохранения');
             e.preventDefault();
-            createCard();
+            saveCard();
         });
     }
     if (addCvBtn) {

@@ -58,7 +58,7 @@ document.querySelector('.login-form').addEventListener('submit', async (e) => {
             if (localStorage.getItem('employerFlow')) {
                 window.location.href = "/confirmation";
             } else {
-                window.location.href = `${SERVER_URL}/confirmation`;
+                window.location.href = "/confirmation";
             }
         } else {
             document.getElementById('email-error').textContent = result.detail || "Ошибка регистрации";

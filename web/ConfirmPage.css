@@ -6,7 +6,7 @@
 @font-face {
     font-family: 'headers';
     src: url('/fonts/заголовки.woff2') format('woff2'),
-    url('/fonts/заголовки.woff') format('woff');
+        url('/fonts/заголовки.woff') format('woff');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -15,12 +15,13 @@
 @font-face {
     font-family: 'mains';
     src: url('/fonts/основной.woff2') format('woff2'),
-    url('/fonts/основной.woff') format('woff');
+        url('/fonts/основной.woff') format('woff');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
 }
-body{
+
+body {
     background-color: hsl(194, 39%, 94%);
     display: flex;
     flex-direction: column;
@@ -34,8 +35,8 @@ body{
 
 }
 
-.header{
-width: 100%;
+.header {
+    width: 100%;
 }
 
 
@@ -65,7 +66,7 @@ width: 100%;
     color: #ffffff;
     display: flex;
     align-items: right;
-    gap:1px;
+    gap: 1px;
     font-size: 17px;
     font-weight: normal;
     font-family: 'headers', "Trebuchet MS", Helvetica, sans-serif;
@@ -82,7 +83,7 @@ width: 100%;
     transition: opacity 0.2s;
 }
 
-.other_body{
+.other_body {
     background-color: hsl(194, 39%, 94%);
     display: flex;
     flex-direction: column;
@@ -110,7 +111,7 @@ width: 100%;
 }
 
 
-.card_header{
+.card_header {
     display: flex;
     position: relative;
     align-items: center;
@@ -135,10 +136,10 @@ width: 100%;
     font-family: 'headers', "Trebuchet MS", Helvetica, sans-serif;
 }
 
-.inputs{
+.inputs {
     margin-bottom: 0px;
     margin-top: 20px;
-    
+
 }
 
 .code-input-container {
@@ -170,6 +171,11 @@ width: 100%;
     margin: 0;
 }
 
+/* Firefox */
+.code-input[type=number] {
+    -moz-appearance: textfield;
+}
+
 .code-input:focus {
     border-color: #00bb00;
     outline: none;
@@ -190,7 +196,7 @@ width: 100%;
 
 /* ?? Подтвердить */
 .login-form button {
-    width: 70%;
+    width: 100%;
     padding: 12px;
     border: none;
     display: flex;

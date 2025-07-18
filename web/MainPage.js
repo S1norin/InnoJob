@@ -98,7 +98,8 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const response = await fetch(`${SERVER_URL}/telegram_vacancies`);
                 if (!response.ok) throw new Error(`Ошибка HTTP: ${response.status}`);
-                this.tgVacancies = await response.json();
+                const tgData = await response.json();
+                this.tgVacancies = tgData.map(v => ({ ...v, source: 'Telegram' }));
                 this.tryCombineAndRender();
             } catch (error) {
                 console.error('Ошибка при загрузке TG вакансий:', error);
@@ -396,6 +397,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         window.open(link, '_blank');
                     } else {
                         alert('Ссылка для отклика не указана.');
+                    }
+                } else if (e.target.matches('.tg-apply-button')) {
+                    const link = e.target.dataset.link;
+                    if (link && link !== '#') {
+                        window.open(link, '_blank');
                     }
                 }
             });

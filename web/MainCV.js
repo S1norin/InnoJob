@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (e.target.matches('.apply-button') && e.target.textContent.includes('Скачать CV')) {
                     const cardIdx = e.target.closest('.cv-card').dataset.idx;
                     const card = this.filteredCVs()[cardIdx];
-                    if (card && card.cvFileName && card.user_email && card.card_id) {
+                    if (card && card.cvFileName && card.user_email && typeof card.card_id === 'number') {
                         await this.downloadCV(card.user_email, card.card_id, card.cvFileName);
                     } else {
                         alert('CV не найдено для этой карточки.');
@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     description: card.description || '',
                     skills: card.skills || [],
                     photoFileName: card.photo_name || '',
-                    cvFileName: card.card_id || '',
+                    cvFileName: card.cv_name || '',
                     photoUrl: `${SERVER_URL}/users/photo/${card.email}/${card.card_id}` || '',
                     user_email: card.email || '',
                     card_id: card.card_id,
@@ -356,41 +356,39 @@ document.addEventListener('DOMContentLoaded', () => {
         },
 
         createCVCardHTML(card, idx) {
-            const skillsHTML = (card.skills || []).map(skill =>
-                `<div class="cv-skill-tag">${skill}</div>`
-            ).join(' ');
-            let photoContent = 'Фото';
-            if (card.photoUrl) {
-                photoContent = `<img src="${card.photoUrl}" alt="Photo" style="width:100%;height:100%;object-fit:cover;border-radius:12px;" onerror="this.style.display='none'; this.parentElement.innerHTML='Ошибка загрузки фото';">`;
-            }
+            const photoUrl = card.photoFileName ? `${SERVER_URL}/users/photo/${card.user_email}/${card.card_id}` : '/pics/profile.png';
+            const skillsHTML = card.skills.map(skill => `<div class="cv-skill-tag">${skill}</div>`).join('');
+
             return `
                 <div class="cv-card" data-idx="${idx}">
                     <div class="card-header">
-                        <div class="logo-place">${photoContent}</div>
+                        <div class="logo-place">
+                            <img src="${photoUrl}" alt="User photo" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+                        </div>
                         <div class="job-title-info">
-                            <h2>${card.name ?? ''}</h2>
-                            <span>${card.surname ?? ''}</span>
+                            <h2>${card.name} ${card.surname}</h2>
                         </div>
                     </div>
                     <div class="card-details">
                         <div class="detail-item">
                             <img src="/pics/education.png" alt="education">
-                            <span>${card.education_level ?? ''}</span>
+                            <span>${card.education_level}</span>
                         </div>
                         <div class="detail-item">
-                            <span>${card.education_full ?? ''}</span>
+                            <span>${card.education_full}</span>
                         </div>
                     </div>
-                    <div class="cv-skills">${skillsHTML}</div>
+                    <div class="cv-skills">
+                        ${skillsHTML}
+                    </div>
                     <div class="card-description">
-                        <p>${card.description ?? ''}</p>
+                        <p>${card.description}</p>
                     </div>
                     <div class="buttoms">
-                        <button class="apply-button" ${card.cvFileName ? '' : 'disabled'}>Скачать CV</button>
-                        <button class="apply-button" ${card.email ? '' : 'disabled'}>Связаться</button>
+                        <button class="apply-button">Скачать CV</button>
+                        <button class="apply-button">Cвязаться</button>
                     </div>
-                </div>
-            `;
+                </div>`;
         },
 
         setUIState(state, message = '') {
@@ -462,3 +460,4 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+

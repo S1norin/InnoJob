@@ -457,21 +457,6 @@ async def change_password(data: NewPassword, db: UserManager = Depends(get_user_
     return {"status":True, "message":"Password change"}
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 @app.post("/users/photo/{user_email}/{card_number}")
 async def upload_photo(
     card_number: int,

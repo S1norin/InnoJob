@@ -14,16 +14,14 @@
     <header class="header">
         <div class="header-content">
             <div class="header-left">
-                <!-- href to /welcome does not actually take you anywhere meaningful -->
                 <a href="/welcome">
                     <img src="/pics/IU2.png" alt="IU2 Logo">
                 </a>
                 <h2>InnoJob</h2>
             </div>
             <div class="header-right">
-                <a href="/user_profile">
-                    <img src="/pics/profile.png" alt="profile">
-                </a>
+                <a href="/user_profile">Профиль</a>
+                <a href="/cv_listing_page">Резюме</a>
                 <a href="#" class="logout-link" id="logout-btn">Выйти</a>
 
             </div>
@@ -79,43 +77,7 @@
                     <button id="clear-filters">Очистить все фильтры</button>
                 </div>
 
-                <div class="vacancies" id="vacancies-list">
-                    <div class="cv-card">
-                        <div class="card-header">
-                            <div class="logo-place"></div>
-                            <div class="job-title-info">
-                                <h2>Name</h2>
-                                <h2>Surname</h2>
-                            </div>
-                        </div>
-
-                        <div class="card-details">
-                            <div class="detail-item">
-                                <img src="/pics/education.png" alt="education">
-                                <span>Уровень образования</span>
-                            </div>
-                            <div class="detail-item">
-                                <span>Статус образования</span>
-                            </div>
-                        </div>
-
-                        <div class="cv-skills">
-                            <div class="cv-skill-tag">скилл1</div>
-                            <div class="cv-skill-tag">скилл222222</div>
-                            <div class="cv-skill-tag">скилл33333</div>
-                            <div class="cv-skill-tag">скил444</div>
-                        </div>
-
-                        <div class="card-description">
-                            <p>Описание</p>
-                        </div>
-
-                        <div class="buttoms">
-                            <button class="apply-button">Скачать CV</button>
-                            <button class="apply-button">Cвязаться</button>
-                        </div>
-                    </div>
-                </div>
+                <div class="vacancies" id="vacancies-list"></div>
                 <!-- в css такая же пагинация как в main page -->
                 <div id="pagination" class="pagination"></div>
             </div>

@@ -114,8 +114,9 @@ body {
     background-color: hsl(194, 39%, 94%);
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 50px;
-    margin-left: 30px;
     margin: 0 auto;
     align-items: flex-start;
     width: 100%;
@@ -133,7 +134,6 @@ body {
     width: 100%;
     max-width: 700px;
     font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
-    margin: 0 auto;
     padding: 0;
     gap: 25px;
     flex: 1;
@@ -144,13 +144,10 @@ body {
     flex: 1;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: repeat(3, auto);
     gap: 20px;
     background-color: hsl(194, 39%, 94%);
     padding: 0;
     margin: 0;
-    margin-left: 30px;
-    min-width: 800px;
     max-width: 1000px;
 }
 
@@ -293,7 +290,7 @@ body {
 }
 
 .cv-buttons-row {
-    display: flex; 
+    display: flex;
     flex-direction: row;
     gap: 12px;
     width: 100%;
@@ -331,15 +328,12 @@ body {
     background-color: #c82333;
 }
 
-
-/* Карточка заполнения CV */
 .profile-form {
     background-color: #ffffff;
+    padding: 30px;
     border-radius: 15px;
-    padding: clamp(12px, 3vw, 32px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     width: 100%;
-    max-width: 600px;
-    margin: 0 auto;
 }
 
 .profile-header {
@@ -360,7 +354,6 @@ body {
     gap: 10px;
 }
 
-/* ?? фото */
 .image-placeholder,
 .profile-photo {
     width: 120px;
@@ -675,6 +668,6 @@ textarea {
 
 /* ?? СV не загружено */
 .card-files-info {
-  color: #555;
-  font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
+    color: #555;
+    font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
 }

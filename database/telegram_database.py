@@ -57,6 +57,7 @@ class TelegramManager:
                             "title": title,
                             "description": description,
                             "link": link,
+                            "origin": "Telegram"
                         }
         return list(vacancies.values())
 
