@@ -55,20 +55,29 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             // Download and contact buttons
             this.elements.vacanciesList.addEventListener('click', async (e) => {
-                if (e.target.matches('.apply-button') && e.target.textContent.includes('Скачать CV')) {
-                    const cardIdx = e.target.closest('.cv-card').dataset.idx;
-                    const card = this.filteredCVs()[cardIdx];
-                    if (card && card.cvFileName && card.user_email && typeof card.card_id === 'number') {
-                        await this.downloadCV(card.user_email, card.card_id, card.cvFileName);
-                    } else {
-                        alert('CV не найдено для этой карточки.');
-                    }
-                } else if (e.target.matches('.apply-button') && e.target.textContent.includes('Связаться')) {
-                    const cardIdx = e.target.closest('.cv-card').dataset.idx;
-                    const card = this.filteredCVs()[cardIdx];
-                    if (card && card.user_email) {
-                        window.location.href = `mailto:${card.user_email}`;
-                    }
+                const target = e.target;
+                if (!target.matches('.apply-button')) return;
+
+                const action = target.dataset.action;
+                const email = target.dataset.email;
+
+                switch (action) {
+                    case 'download':
+                        const cardId = target.dataset.id;
+                        const cvFileName = target.dataset.cv;
+                        if (email && cvFileName && cardId) {
+                            await this.downloadCV(email, cardId, cvFileName);
+                        } else {
+                            alert('CV не найдено для этой карточки.');
+                        }
+                        break;
+                    case 'contact':
+                        if (email) {
+                            window.location.href = `mailto:${email}`;
+                        } else {
+                            alert('Email для связи не найден.');
+                        }
+                        break;
                 }
             });
         },
@@ -288,7 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             this.elements.vacanciesList.innerHTML = paginatedCVs
-                .map((card, idx) => this.createCVCardHTML(card, idx))
+                .map((card, idx) => this.createCVCardHTML(card))
                 .join('');
             this.renderPagination(filteredCVs.length);
             if (this.elements.allJobsText) this.elements.allJobsText.textContent = `Показано ${Math.min(filteredCVs.length, end)} из ${filteredCVs.length} результатов`;
@@ -355,12 +364,12 @@ document.addEventListener('DOMContentLoaded', () => {
             this.elements.pagination.innerHTML = html;
         },
 
-        createCVCardHTML(card, idx) {
+        createCVCardHTML(card) {
             const photoUrl = card.photoFileName ? `${SERVER_URL}/users/photo/${card.user_email}/${card.card_id}` : '/pics/profile.png';
             const skillsHTML = card.skills.map(skill => `<div class="cv-skill-tag">${skill}</div>`).join('');
 
             return `
-                <div class="cv-card" data-idx="${idx}">
+                <div class="cv-card">
                     <div class="card-header">
                         <div class="logo-place">
                             <img src="${photoUrl}" alt="User photo" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
@@ -385,8 +394,16 @@ document.addEventListener('DOMContentLoaded', () => {
                         <p>${card.description}</p>
                     </div>
                     <div class="buttoms">
-                        <button class="apply-button">Скачать CV</button>
-                        <button class="apply-button">Cвязаться</button>
+                        <button class="apply-button" 
+                                data-action="download"
+                                data-id="${card.card_id}" 
+                                data-email="${card.user_email}" 
+                                data-cv="${card.cvFileName}">
+                            Скачать CV
+                        </button>
+                        <button class="apply-button" 
+                                data-action="contact" 
+                                data-email="${card.user_email}">Cвязаться</button>
                     </div>
                 </div>`;
         },
