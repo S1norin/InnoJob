@@ -57,6 +57,34 @@ In order to deploy project, you need to instal `docker`
 
 Run `docker compose up --build` to run the project. By default, the site can be accessed via your IP addres and port `80`, however, you can change port by editing `nginx/nginx.conf`
 
+- By default, the config file is not generated. You should copy `config_template.y` and rename it to `config.py`
+
+```shell
+cp config_template.py config.py
+```
+
+- You should also changed `SERVER_URL` to URL of your server or `https://localhost:8000` if you want to run site locally
+
+```js
+export const SERVER_URL = "http://localhost:8000";
+```
+
+- By default, `nginx` configuration reads SSL certificates. You can disable this by commenting out whole nginx configuraion in `compose.yaml`
+
+```yaml
+  # nginx:
+  #   image: nginx:latest
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./nginx/conf/:/etc/nginx/conf.d/:ro
+  #     - ./nginx/ssl/:/etc/nginx/ssl/:ro
+  #   depends_on:
+  #     - server
+  #   restart: unless-stopped
+```
+
 # Architecture
 
 [docs/architecture/architecture.md](docs/architecture/architecture.md)
