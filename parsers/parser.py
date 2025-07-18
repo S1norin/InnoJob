@@ -4,7 +4,7 @@ from random import shuffle
 
 
 from parsers.parser_configs import *
-from config import vacancies_to_find
+from config_template import vacancies_to_find
 
 COUNT = 0
 
@@ -37,7 +37,7 @@ def get_params_sj():
 def get_data_superjob():
     global COUNT
 
-    if COUNT >= vacancies_to_find != -1:
+    if COUNT >= vacancies_to_find - 1 != -2:
         return []
 
     print("Запрос вакансий с SuperJob.ru...")
@@ -119,7 +119,7 @@ def get_data_superjob():
                 "picture": vacancy_sj.get("client", {}).get("logo", "#"),
                 "requirements": skills
             })
-            if COUNT >= vacancies_to_find != -1:
+            if COUNT >= vacancies_to_find -1 != -2:
                 break
             COUNT += 1
         if vacancies_to_find == -1:
@@ -134,7 +134,7 @@ def get_data_superjob():
 def get_data_hh():
     global COUNT
 
-    if COUNT >= vacancies_to_find != -1:
+    if COUNT >= vacancies_to_find - 1 != -2:
         return []
 
     print("Запрос вакансий с HH.ru...")
@@ -222,7 +222,7 @@ def get_data_hh():
                 "picture": picture if picture is not None else "#",
                 "requirements": requirements_list
             })
-            if COUNT >= vacancies_to_find != -1:
+            if COUNT >= vacancies_to_find - 1 != -2:
                 break
             COUNT += 1
         if vacancies_to_find == -1:
@@ -263,7 +263,7 @@ def get_employer_data_sj(e_id):
         'logo': response.get('client_logo'),
         'source': '2',
     }
-    if data['logo'] == None:
+    if data['logo'] is None:
         data['logo'] = "#"
     # print(*[f'{i}: {response[i]}' for i in response], sep='\n')
     # print(data)
