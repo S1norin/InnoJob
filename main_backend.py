@@ -381,7 +381,7 @@ async def login_user(
         await run_in_threadpool(db.set_login_state, email=login_data.email, state = True)
         return {"status": "success", "message": "Вход выполнен успешно"}
     elif not(db.get_is_confirmed(login_data.email)):
-        return {"status": "error", "message": "Код не подтвержден"}
+        return {"status": "error", "message": "Код не подтвержден. Пройдите регистрацию заново"}
     else:
         raise HTTPException(#в ином случае ну и пошло все в жопу
             status_code=status.HTTP_401_UNAUTHORIZED,
