@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!email) {
         alert("Email не найден. Пожалуйста, зарегистрируйтесь заново.");
-        window.location.href = "SignUpPage.html";
+        window.location.href = "/sign_up_page";
         return;
     }
 
