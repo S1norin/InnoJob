@@ -16,6 +16,10 @@
     font-display: swap;
 }
 
+.search-container {
+    display: none;
+}
+
 #vacancies-list {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -453,26 +457,28 @@ hr {
 }
 
 /* ?? отчистить все фильтры */
-.all_jobs button{
+.all_jobs button {
     height: 40px;
     box-sizing: border-box;
     border: none;
     border-radius: 30px;
     font-size: 17px;
     font-weight: normal;
-    padding: 0 15px;
+    /* padding: 0 15px; */
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-top: 2px;
+    padding-bottom: 4px;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    background-color: #f2f2f2;
     cursor: pointer;
     color: white;
     white-space: nowrap;
     transition: background-color 0.2s;
     background-color: #00bb00;
-    letter-spacing: 0.4px;
-    font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
+    font-family: 'headers', "Trebuchet MS", Helvetica, sans-serif;
 }
 
 .all_jobs button:hover {
@@ -874,4 +880,243 @@ hr {
 .loading, .error, .empty-state{
     color: #555;
     font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
+}
+
+@media (max-width: 750px) {
+    body {
+        min-height: 100vh;
+        margin: 0;
+    }
+
+    .header {
+        height: 40px;
+        min-height: 0;
+        padding: 0;
+    }
+    .header-content {
+        height: 40px;
+        padding: 0 8px;
+        flex-wrap: nowrap;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .header-left {
+        gap: 10px;
+    }
+    .header-right {
+        gap: 3px;
+    }
+    .header-left h2 {
+        font-size: 0.8rem;
+    }
+    .header-left img {
+        width: 30px;
+    }
+    .header-right a {
+        font-size: 0.8rem;
+        padding: 10px 8px;
+    }
+
+    .other_body {
+        min-height: 100vh;
+        width: 93%;
+        margin: 0 auto;
+        padding: 0;
+        gap: 15px;
+        margin-top: -10px;
+    }
+
+    .search-container {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        padding: 13px 13px;
+        border-radius: 15px;
+        box-sizing: border-box;
+        justify-content: flex-end;
+        margin-top: -15px;
+        margin-bottom: -15px;
+    }
+
+    .search-container input[type="text"] {
+        display: none;
+        flex-grow: 1;
+        box-sizing: border-box;
+        border: none;
+        border-radius: 10px;
+        font-size: 1rem;
+        font-weight: normal;
+        padding: 9px 15px;
+        font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
+        background-color: #f6fbff;
+        color: #555;
+        outline: none;
+    }
+
+    .mobile-filter-btn {
+        background: #00bb00;
+        color: #fff;
+        border: none;
+        border-radius: 15px;
+        padding: 9px 15px;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'headers', "Trebuchet MS", Helvetica, sans-serif;
+        margin-left: 0;
+        width: 100px;
+        flex-shrink: 0;
+        box-sizing: border-box;
+    }
+
+    .mobile-filters-panel {
+        width: 93%; 
+        border-radius: 15px;
+        margin: 10px 0;
+        z-index: 500;
+        position: relative;
+        flex-direction: column;
+        padding-bottom: 40px;
+        background-color: white;
+        padding: clamp(15px, 1.5vw, 20px);
+        gap: 15px;
+        margin-top: -5px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .mobile-filters-hide {
+        bottom: 10px;                  
+        left: 50%;                       
+        transform: translateX(-50%);      
+        background: #e7ffe0;               
+        border: none;                         
+        border-radius: 15px;                  
+        width: 100%;                          
+        height: 30px;                     
+        font-size: 1.4em;                   
+        color: #00bb00;                  
+        display: flex;                     
+        align-items: center;                
+        justify-content: center;            
+        cursor: pointer;
+        align-self: center;
+        margin-top: auto;
+        position: static;
+        left: auto;
+        transform: none;
+    }
+
+    .filter_section h2 {
+        margin: 0 0 3px 0;
+        font-size: 1.2rem;
+        color: #000;
+        font-family: 'headers', "Trebuchet MS", Helvetica, sans-serif;
+    }
+
+    .filter_variants {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        color: #555;
+        padding: 0.5rem 0;
+        font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
+    }
+
+    .cities-container,
+    .filter_variants {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        color: #555;
+        padding: 0.5rem 0;
+        margin-top: 10px;
+        max-height: 350px;
+        overflow-y: auto;
+    }
+
+    .city-search-input {
+        font-size: 1rem;
+    }
+    .city-search-input::placeholder {
+        font-size: 1rem;
+    }
+    .show-more-btn {
+        font-size: 1rem;
+    }
+
+    .filters-conteiner { display: none !important; }
+    .mobile-filter-btn { display: block !important; }
+    .mobile-filters-panel.active { display: flex !important; }
+    .cards { margin-top: 0 !important; }
+
+    .main_content {
+        width: 100%;
+    }
+    .all_jobs {
+        width: 100%;
+    }
+    .all_jobs h2 {
+        font-size: 1.2rem;
+    }
+    .all_jobs p {
+        font-size: 0.9rem;
+    }
+    .all_jobs_text {
+        width: 60%;
+    }
+    .all_jobs button {
+        min-height: 30px;
+        height: auto;
+        width: 100px;
+        padding: 9px 15px;
+        white-space: normal;
+        border-radius: 15px;
+        font-size: 0.9rem;
+        margin-right: -1px;
+        flex-shrink: 0;
+        box-sizing: border-box;
+    }
+
+    #vacancies-list {
+        grid-template-columns: 1fr;
+    }
+    .vacancies {
+        margin-top: -20px;
+    }
+    .cv-card {
+        width: 100%;
+    }
+
+    .pagination, #pagination {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        overflow-y: hidden;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+        gap: 6px;
+        padding: 10px 10px;
+        box-sizing: border-box;
+        justify-content: flex-start;
+    }
+    .pagination > *,
+    #pagination > * {
+        flex: 0 0 auto;
+    }
+
+    .page-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+    }
+    .arrow-btn {
+        width: 28px;
+        height: 28px;
+        font-size: 12px;
+    }
+    .ellipsis {
+        font-size: 14px;
+    }
 }

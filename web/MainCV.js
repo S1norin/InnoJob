@@ -1,11 +1,53 @@
 import { SERVER_URL } from "/web/config.js";
 
-if (!localStorage.getItem('userEmail')) {
-    window.location.href = '/log_in_page';
-}
+// if (!localStorage.getItem('userEmail')) {
+//     window.location.href = '/log_in_page';
+// }
 
 
 document.addEventListener('DOMContentLoaded', () => {
+
+    const mobileFilterBtn = document.querySelector('.mobile-filter-btn');
+    const mobileFiltersPanel = document.querySelector('.mobile-filters-panel');
+    const mobileFiltersHideBtn = document.querySelector('.mobile-filters-hide');
+    const mainContentWrapper = document.querySelector('.main_content');
+    const desktopFilters = document.querySelector('.filters-conteiner');
+    const searchContainer = document.querySelector('.search-container');
+
+    function isMobile() {
+        return window.innerWidth <= 750;
+    }
+
+    function toggleFiltersVisibility() {
+        if (isMobile()) {
+            if (desktopFilters) desktopFilters.style.display = 'none';
+            if (mobileFiltersPanel) mobileFiltersPanel.style.display = 'none';
+            if (searchContainer) searchContainer.style.display = 'flex';
+            if (mainContentWrapper) mainContentWrapper.style.marginTop = '0';
+        } else {
+            if (mobileFiltersPanel) mobileFiltersPanel.style.display = 'none';
+            if (desktopFilters) desktopFilters.style.display = '';
+            if (searchContainer) searchContainer.style.display = 'none';
+            if (mainContentWrapper) mainContentWrapper.style.marginTop = '';
+        }
+    }
+
+    if (mobileFilterBtn && mobileFiltersPanel && mobileFiltersHideBtn) {
+        mobileFilterBtn.addEventListener('click', function() {
+            if (mobileFiltersPanel.style.display === 'none' || mobileFiltersPanel.style.display === '') {
+                mobileFiltersPanel.style.display = 'flex';
+            }
+        });
+
+        mobileFiltersHideBtn.addEventListener('click', function() {
+            if (isMobile()) mobileFiltersPanel.style.display = 'none';
+        });
+    }
+
+    window.addEventListener('resize', toggleFiltersVisibility);
+    toggleFiltersVisibility();
+
+
     const app = {
         elements: {},
         allCVs: [],
@@ -38,6 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
             this.elements.filterContainer = document.querySelector('.filters-conteiner');
             this.elements.clearFiltersBtn = document.getElementById('clear-filters');
             this.elements.searchInput = document.getElementById('search-input');
+            this.elements.mobileFiltersPanel = document.querySelector('.mobile-filters-panel');
         },
 
         bindEvents() {
@@ -57,7 +100,8 @@ document.addEventListener('DOMContentLoaded', () => {
             this.elements.vacanciesList.addEventListener('click', async (e) => {
                 if (e.target.matches('.apply-button') && e.target.textContent.includes('Скачать CV')) {
                     const cardIdx = e.target.closest('.cv-card').dataset.idx;
-                    const card = this.filteredCVs()[cardIdx];
+                    const filteredCVs = this.filteredCVs();
+                    const card = filteredCVs[cardIdx];
                     if (card && card.cvFileName && card.user_email && typeof card.card_id === 'number') {
                         await this.downloadCV(card.user_email, card.card_id, card.cvFileName);
                     } else {
@@ -108,22 +152,36 @@ document.addEventListener('DOMContentLoaded', () => {
             const skillsSet = new Set();
             const educationLevelSet = new Set();
             const educationFullSet = new Set();
+
             this.allCVs.forEach(card => {
                 if (card.skills) card.skills.forEach(skill => skillsSet.add(skill));
                 if (card.education_level) educationLevelSet.add(card.education_level);
                 if (card.education_full) educationFullSet.add(card.education_full);
             });
-            const sections = document.querySelectorAll('.filter_section');
-            sections.forEach(section => {
+
+            const populateSection = (section, mobileSection) => {
                 const header = section.querySelector('h2').textContent.toLowerCase();
                 const variantsContainer = section.querySelector('.filter_variants');
+                const mobileVariantsContainer = mobileSection ? mobileSection.querySelector('.filter_variants') : null;
+
                 if (header.includes('навыки') || header.includes('skills')) {
                     this.createSkillFilter(variantsContainer, skillsSet);
+                    if (mobileVariantsContainer) this.createSkillFilter(mobileVariantsContainer, skillsSet);
                 } else if (header.includes('уровень')) {
                     this.createCheckboxes(variantsContainer, educationLevelSet, 'education_level');
+                    if (mobileVariantsContainer) this.createCheckboxes(mobileVariantsContainer, educationLevelSet, 'education_level');
                 } else if (header.includes('статус')) {
                     this.createCheckboxes(variantsContainer, educationFullSet, 'education_full');
+                    if (mobileVariantsContainer) this.createCheckboxes(mobileVariantsContainer, educationFullSet, 'education_full');
                 }
+            };
+            
+            const desktopSections = this.elements.filterContainer.querySelectorAll('.filter_section');
+            const mobileSections = this.elements.mobileFiltersPanel.querySelectorAll('.filter_section');
+
+            desktopSections.forEach((section, index) => {
+                const mobileSection = mobileSections[index] || null;
+                populateSection(section, mobileSection);
             });
         },
 
@@ -228,15 +286,35 @@ document.addEventListener('DOMContentLoaded', () => {
         },
 
         bindFilterEvents() {
-            if (!this.elements.clearFiltersBtn) return;
-            this.elements.clearFiltersBtn.addEventListener('click', () => {
-                this.clearAllFilters();
-            });
+            const setupFilterListeners = (container) => {
+                if (!container) return;
+                container.addEventListener('change', (e) => {
+                    const checkbox = e.target;
+                    if (checkbox.tagName === 'INPUT' && checkbox.type === 'checkbox') {
+                        const filterKey = checkbox.closest('.filter_section').dataset.filterKey;
+                        const value = checkbox.value;
+                        this.toggleFilter(this.filters[filterKey], value, checkbox.checked);
+                        this.currentPage = 1;
+                        localStorage.setItem('mainCVCurrentPage', this.currentPage);
+                        this.renderCVs();
+                    }
+                });
+            };
+
+            setupFilterListeners(this.elements.filterContainer);
+            setupFilterListeners(this.elements.mobileFiltersPanel);
+
+            if (this.elements.clearFiltersBtn) {
+                this.elements.clearFiltersBtn.addEventListener('click', () => {
+                    this.clearAllFilters();
+                });
+            }
         },
 
         clearAllFilters() {
-            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-            checkboxes.forEach(cb => cb.checked = false);
+            this.elements.filterContainer.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+            this.elements.mobileFiltersPanel.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+            
             if (this.elements.searchInput) this.elements.searchInput.value = '';
             this.searchTerm = '';
             this.filters = {
@@ -441,6 +519,28 @@ document.addEventListener('DOMContentLoaded', () => {
             scrollBtn.style.display = 'flex';
         } else {
             scrollBtn.style.display = 'none';
+        }
+
+        if (window.innerWidth <= 750) { // Only for mobile
+            const paginationContainer = document.getElementById('pagination');
+            if (!paginationContainer || getComputedStyle(paginationContainer).display === 'none') {
+                scrollBtn.style.bottom = '30px';
+                return;
+            };
+
+            const docHeight = document.documentElement.scrollHeight;
+            const viewportBottom = window.innerHeight + window.scrollY;
+            
+            const footerStop = docHeight - paginationContainer.offsetHeight;
+
+            if (viewportBottom >= footerStop) {
+                const newBottom = (viewportBottom - footerStop) + 37;
+                scrollBtn.style.bottom = `${newBottom}px`;
+            } else {
+                scrollBtn.style.bottom = '30px';
+            }
+        } else {
+            scrollBtn.style.bottom = '30px';
         }
     });
     scrollBtn.addEventListener('click', () => {

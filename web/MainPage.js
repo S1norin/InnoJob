@@ -1,10 +1,49 @@
 import { SERVER_URL } from "/web/config.js";
 
-if (!localStorage.getItem('userEmail')) {
-    window.location.href = '/log_in_page';
-}
+// if (!localStorage.getItem('userEmail')) {
+//     window.location.href = '/log_in_page';
+// }
 
 document.addEventListener('DOMContentLoaded', () => {
+
+    const mobileFilterBtn = document.querySelector('.mobile-filter-btn');
+    const mobileFiltersPanel = document.querySelector('.mobile-filters-panel');
+    const mobileFiltersHideBtn = document.querySelector('.mobile-filters-hide');
+    const mainContentWrapper = document.querySelector('.main_content');
+    const desktopFilters = document.querySelector('.filters-conteiner');
+    
+    function isMobile() {
+        return window.innerWidth <= 750;
+    }
+
+    function toggleFiltersVisibility() {
+        if (isMobile()) {
+            if (desktopFilters) desktopFilters.style.display = 'none';
+            if (mobileFiltersPanel) mobileFiltersPanel.style.display = 'none';
+            if (mobileFilterBtn) mobileFilterBtn.style.display = 'block';
+            if (mainContentWrapper) mainContentWrapper.style.marginTop = '0';
+        } else {
+            if (mobileFiltersPanel) mobileFiltersPanel.style.display = 'none';
+            if (desktopFilters) desktopFilters.style.display = '';
+            if (mobileFilterBtn) mobileFilterBtn.style.display = 'none';
+            if (mainContentWrapper) mainContentWrapper.style.marginTop = '';
+        }
+    }
+
+    if (mobileFilterBtn && mobileFiltersPanel && mobileFiltersHideBtn) {
+        mobileFilterBtn.addEventListener('click', function() {
+            if (mobileFiltersPanel.style.display === 'none' || mobileFiltersPanel.style.display === '') {
+                mobileFiltersPanel.style.display = 'flex';
+            }
+        });
+
+        mobileFiltersHideBtn.addEventListener('click', function() {
+            if (isMobile()) mobileFiltersPanel.style.display = 'none';
+        });
+    }
+
+    window.addEventListener('resize', toggleFiltersVisibility); // !!!!!!!!!!!!!!!!
+    toggleFiltersVisibility();
 
     const app = {
 
@@ -50,6 +89,155 @@ document.addEventListener('DOMContentLoaded', () => {
             this.elements.clearFiltersBtn = document.getElementById('clear-filters');
             this.elements.searchInput = document.getElementById('search-input');
             this.elements.tgVacanciesList = document.getElementById('tg-vacancies-list');
+            this.elements.mobileFiltersPanel = document.querySelector('.mobile-filters-panel');
+        },
+
+        bindFilterEvents() {
+            const handleCheckboxChange = (checkbox) => {
+                const labelText = checkbox.nextElementSibling?.textContent.trim().toLowerCase();
+                if (!labelText) return;
+
+                const section = checkbox.closest('.filter_section');
+                if (!section) return;
+
+                const headerText = section.querySelector('h2').textContent.toLowerCase();
+
+                if (headerText.includes('тип работы')) {
+                    this.toggleFilter(this.filters.jobTypes, labelText, checkbox.checked);
+                } else if (headerText.includes('опыт работы')) {
+                    this.toggleFilter(this.filters.experiences, labelText, checkbox.checked);
+                } else if (headerText.includes('город')) {
+                    this.toggleFilter(this.filters.locations, labelText, checkbox.checked);
+                } else if (headerText.includes('компания') || headerText.includes('company')) {
+                    this.toggleFilter(this.filters.companies, labelText, checkbox.checked);
+                } else if (headerText.includes('источник')) {
+                    this.toggleFilter(this.filters.sources, labelText, checkbox.checked);
+                }
+
+                this.currentPage = 1;
+                localStorage.setItem('mainPageCurrentPage', this.currentPage);
+                this.renderVacancies();
+            };
+
+            const syncCheckboxes = (sourceCheckbox) => {
+                const sourceContainer = sourceCheckbox.closest('.filters-conteiner, .mobile-filters-panel');
+                const targetContainer = sourceContainer.classList.contains('filters-conteiner')
+                    ? this.elements.mobileFiltersPanel
+                    : this.elements.filterContainer;
+
+                if (targetContainer) {
+                    const targetCheckbox = targetContainer.querySelector(`input[type="checkbox"][value="${sourceCheckbox.value}"]`);
+                    if (targetCheckbox) {
+                        targetCheckbox.checked = sourceCheckbox.checked;
+                    }
+                }
+            };
+
+            const setupCheckboxListeners = (container) => {
+                if (!container) return;
+                container.addEventListener('change', (e) => {
+                    const checkbox = e.target;
+                    if (checkbox.tagName === 'INPUT' && checkbox.type === 'checkbox') {
+                        syncCheckboxes(checkbox);
+                        handleCheckboxChange(checkbox);
+                    }
+                });
+            };
+
+            setupCheckboxListeners(this.elements.filterContainer);
+            setupCheckboxListeners(this.elements.mobileFiltersPanel);
+
+            const handleSalaryInput = (input, index) => {
+                let value = input.value.replace(/\D/g, '');
+                const maxValue = 10000000;
+                if (parseInt(value) > maxValue) {
+                    value = maxValue.toString();
+                }
+                input.value = value;
+
+                const val = parseInt(value, 10);
+                if (index === 0) {
+                    this.filters.salaryFrom = !isNaN(val) ? val : null;
+                } else {
+                    this.filters.salaryTo = !isNaN(val) ? val : null;
+                }
+                this.currentPage = 1;
+                localStorage.setItem('mainPageCurrentPage', this.currentPage);
+                this.renderVacancies();
+            };
+
+            const syncSalaryInputs = (sourceInput, index) => {
+                const sourceContainer = sourceInput.closest('.filters-conteiner, .mobile-filters-panel');
+                const isDesktop = sourceContainer.classList.contains('filters-conteiner');
+                const targetContainer = isDesktop ? this.elements.mobileFiltersPanel : this.elements.filterContainer;
+
+                if (targetContainer) {
+                    const targetInput = targetContainer.querySelectorAll('.salary-inputs input')[index];
+                    if (targetInput) {
+                        targetInput.value = sourceInput.value;
+                    }
+                }
+            };
+
+            const setupSalaryInputListeners = (container) => {
+                if (!container) return;
+                const salaryInputs = container.querySelectorAll('.salary-inputs input');
+                salaryInputs.forEach((input, index) => {
+                    input.addEventListener('input', () => {
+                        syncSalaryInputs(input, index);
+                        handleSalaryInput(input, index);
+                    });
+                });
+            };
+
+            setupSalaryInputListeners(this.elements.filterContainer);
+            setupSalaryInputListeners(this.elements.mobileFiltersPanel);
+
+            this.elements.clearFiltersBtn.addEventListener('click', () => {
+                this.clearAllFilters();
+            });
+        },
+
+        toggleFilter(set, value, isChecked) {
+            if (isChecked) {
+                set.add(value);
+            } else {
+                set.delete(value);
+            }
+        },
+
+        clearAllFilters() {
+            const clearContainerFilters = (container) => {
+                if (!container) return;
+                container.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+                container.querySelectorAll('.salary-inputs input').forEach(input => input.value = '');
+                const citySearchInput = container.querySelector('.city-search-input');
+                if (citySearchInput) {
+                    citySearchInput.value = '';
+                }
+            };
+
+            clearContainerFilters(this.elements.filterContainer);
+            clearContainerFilters(this.elements.mobileFiltersPanel);
+
+            this.elements.searchInput.value = '';
+            this.searchTerm = '';
+
+            this.filters = {
+                jobTypes: new Set(),
+                experiences: new Set(),
+                locations: new Set(),
+                companies: new Set(),
+                salaryFrom: null,
+                salaryTo: null,
+                sources: new Set(),
+            };
+
+            this.currentPage = 1;
+            localStorage.setItem('mainPageCurrentPage', this.currentPage);
+
+            this.populateFilters();
+            this.renderVacancies();
         },
 
         bindEvents() {
@@ -180,6 +368,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
             this.updateSalaryInputs(minSalary, maxSalary);
 
+            // Обновляем поля зарплаты для мобильной панели
+            if (this.elements.mobileFiltersPanel) {
+                const desktopSalaryFrom = this.elements.filterContainer.querySelector('[data-salary="salaryFrom"]');
+                const desktopSalaryTo = this.elements.filterContainer.querySelector('[data-salary="salaryTo"]');
+                const mobileSalaryFrom = this.elements.mobileFiltersPanel.querySelector('[data-salary="salaryFrom"]');
+                const mobileSalaryTo = this.elements.mobileFiltersPanel.querySelector('[data-salary="salaryTo"]');
+                if (desktopSalaryFrom && desktopSalaryTo && mobileSalaryFrom && mobileSalaryTo) {
+                    mobileSalaryFrom.min = desktopSalaryFrom.min = minSalary;
+                    mobileSalaryFrom.max = desktopSalaryFrom.max = maxSalary;
+                    mobileSalaryTo.min = desktopSalaryTo.min = minSalary;
+                    mobileSalaryTo.max = desktopSalaryTo.max = maxSalary;
+                }
+            }
+
             const sortExperience = (a, b) => {
                 const orderMap = {
                     'нет опыта': 0,
@@ -277,23 +479,39 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             };
 
-            const sections = this.elements.filterContainer.querySelectorAll('.filter_section');
-            sections.forEach(section => {
+            const populateSection = (section, mobileSection) => {
                 const header = section.querySelector('h2').textContent.toLowerCase();
                 const variantsContainer = section.querySelector('.filter_variants');
+                const mobileVariantsContainer = mobileSection ? mobileSection.querySelector('.filter_variants') : null;
+
                 if (header.includes('тип работы')) {
                     createCheckboxes(variantsContainer, jobTypesSet);
+                    if (mobileVariantsContainer) createCheckboxes(mobileVariantsContainer, jobTypesSet);
                 } else if (header.includes('опыт работы')) {
                     createCheckboxes(variantsContainer, experiencesSet, true);
+                    if (mobileVariantsContainer) createCheckboxes(mobileVariantsContainer, experiencesSet, true);
                 } else if (header.includes('город') || header.includes('location')) {
                     createCityFilter(variantsContainer, locationsMap);
+                    if (mobileVariantsContainer) createCityFilter(mobileVariantsContainer, locationsMap);
                 } else if (header.includes('компания') || header.includes('company')) {
                     createCheckboxes(variantsContainer, companiesSet);
+                    if (mobileVariantsContainer) createCheckboxes(mobileVariantsContainer, companiesSet);
                 } else if (header.includes('источник')) {
                     createCheckboxes(variantsContainer, sourcesSet, false, true, sourcesCountMap);
+                    if (mobileVariantsContainer) createCheckboxes(mobileVariantsContainer, sourcesSet, false, true, sourcesCountMap);
                 }
+            };
+
+            const desktopSections = this.elements.filterContainer.querySelectorAll('.filter_section');
+            const mobileSections = this.elements.mobileFiltersPanel.querySelectorAll('.filter_section');
+
+            desktopSections.forEach((section, index) => {
+                const mobileSection = mobileSections[index] || null;
+                populateSection(section, mobileSection);
             });
-            this.setupShowMoreButtons();
+
+            this.setupShowMoreButtons(this.elements.filterContainer);
+            this.setupShowMoreButtons(this.elements.mobileFiltersPanel);
         },
 
         updateSalaryInputs(minSalary, maxSalary) {
@@ -328,8 +546,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         },
 
-        setupShowMoreButtons() {
-            const filterSections = this.elements.filterContainer.querySelectorAll('.filter_section');
+        setupShowMoreButtons(container) {
+            if (!container) return;
+            const filterSections = container.querySelectorAll('.filter_section');
             filterSections.forEach(section => {
                 const header = section.querySelector('h2').textContent.toLowerCase();
                 const variantsContainer = section.querySelector('.filter_variants');
@@ -405,175 +624,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             });
-        },
-
-        bindFilterEvents() {
-            this.elements.filterContainer.addEventListener('change', (e) => {
-                const checkbox = e.target;
-                if (checkbox.tagName === 'INPUT' && checkbox.type === 'checkbox') {
-                    const labelText = checkbox.nextElementSibling?.textContent.trim().toLowerCase();
-                    if (!labelText) return;
-                    const section = checkbox.closest('.filter_section');
-                    if (!section) return;
-                    const headerText = section.querySelector('h2').textContent.toLowerCase();
-                    if (headerText.includes('тип работы')) {
-                        this.toggleFilter(this.filters.jobTypes, labelText, checkbox.checked);
-                    } else if (headerText.includes('опыт работы')) {
-                        this.toggleFilter(this.filters.experiences, labelText, checkbox.checked);
-                    } else if (headerText.includes('город')) {
-                        this.toggleFilter(this.filters.locations, labelText, checkbox.checked);
-                    } else if (headerText.includes('компания') || headerText.includes('company')) {
-                        this.toggleFilter(this.filters.companies, labelText, checkbox.checked);
-                    } else if (headerText.includes('источник')) {
-                        this.toggleFilter(this.filters.sources, labelText, checkbox.checked);
-                    }
-                    this.currentPage = 1;
-                    localStorage.setItem('mainPageCurrentPage', this.currentPage);
-                    this.renderVacancies();
-                }
-            });
-
-            this.elements.salaryInputs.forEach((input, index) => {
-                input.addEventListener('keydown', (e) => {
-                    const allowedKeys = [
-                        'Backspace', 'Delete', 'Tab', 'Enter',
-                        'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown',
-                        'Home', 'End'
-                    ];
-
-                    if (e.ctrlKey || e.metaKey) {
-                        return;
-                    }
-
-                    if (!allowedKeys.includes(e.key) && !/^[0-9]$/.test(e.key)) {
-                        e.preventDefault();
-                    }
-                });
-
-                input.addEventListener('input', (e) => {
-                    let value = e.target.value.replace(/\D/g, '');
-
-                    const maxValue = 10000000;
-                    if (parseInt(value) > maxValue) {
-                        value = maxValue.toString();
-                    }
-
-                    e.target.value = value;
-
-                    const minAllowed = parseInt(e.target.getAttribute('data-min')) || 0;
-                    const maxAllowed = parseInt(e.target.getAttribute('data-max')) || Infinity;
-                    const val = parseInt(value);
-
-                    if (!isNaN(val)) {
-                        if ((index === 0 && val < minAllowed) || (index === 1 && val > maxAllowed)) {
-                            e.target.style.borderColor = '#ff6b6b';
-                            e.target.title = index === 0
-                                ? `Минимальная зарплата: ${minAllowed}`
-                                : `Максимальная зарплата: ${maxAllowed}`;
-                        } else {
-                            e.target.style.borderColor = '';
-                            e.target.title = '';
-                        }
-                    } else {
-                        e.target.style.borderColor = '';
-                        e.target.title = '';
-                    }
-
-                    if (index === 0) {
-                        this.filters.salaryFrom = !isNaN(val) ? val : null;
-                    } else {
-                        this.filters.salaryTo = !isNaN(val) ? val : null;
-                    }
-
-                    this.currentPage = 1;
-                    localStorage.setItem('mainPageCurrentPage', this.currentPage);
-                    this.renderVacancies();
-                });
-
-                input.addEventListener('paste', (e) => {
-                    e.preventDefault();
-                    const paste = (e.clipboardData || window.clipboardData).getData('text');
-                    const numericValue = paste.replace(/\D/g, '');
-                    if (numericValue) {
-                        const maxValue = 10000000;
-                        const finalValue = Math.min(parseInt(numericValue), maxValue).toString();
-                        e.target.value = finalValue;
-                        e.target.dispatchEvent(new Event('input'));
-                    }
-                });
-
-                input.addEventListener('keypress', (e) => {
-                    if (!/[0-9]/.test(e.key) &&
-                        !['Backspace', 'Delete', 'Tab', 'Enter'].includes(e.key)) {
-
-                        input.style.borderColor = '#ff6b6b';
-                        input.title = 'Можно вводить только цифры';
-
-                        setTimeout(() => {
-                            if (input.style.borderColor === 'rgb(255, 107, 107)') {
-                                input.style.borderColor = '';
-                                input.title = '';
-                            }
-                        }, 2000);
-                    }
-                });
-
-                input.addEventListener('focus', (e) => {
-                    if (e.target.title === 'Можно вводить только цифры') {
-                        e.target.style.borderColor = '';
-                        e.target.title = '';
-                    }
-                });
-            });
-
-            this.elements.clearFiltersBtn.addEventListener('click', () => {
-                this.clearAllFilters();
-            });
-        },
-
-        // Удаляем: bindSourceFilterEvents
-        toggleFilter(set, value, isChecked) {
-            if (isChecked) {
-                set.add(value);
-            } else {
-                set.delete(value);
-            }
-        },
-
-        clearAllFilters() {
-            const checkboxes = this.elements.filterContainer.querySelectorAll('input[type="checkbox"]');
-            checkboxes.forEach(cb => cb.checked = false);
-
-            this.elements.salaryInputs[0].value = '';
-            this.elements.salaryInputs[1].value = '';
-            this.elements.searchInput.value = '';
-
-            // Clear city search input
-            const citySearchInput = this.elements.filterContainer.querySelector('.city-search-input');
-            if (citySearchInput) {
-                citySearchInput.value = '';
-            }
-
-            this.searchTerm = '';
-
-            this.filters = {
-                jobTypes: new Set(),
-                experiences: new Set(),
-                locations: new Set(),
-                companies: new Set(),
-                salaryFrom: null,
-                salaryTo: null,
-                sources: new Set(), // добавляем фильтр по источнику
-            };
-
-            this.searchTerm = '';
-            document.getElementById('search-input').value = '';
-
-            this.currentPage = 1;
-            localStorage.setItem('mainPageCurrentPage', this.currentPage);
-
-            this.populateFilters();
-            this.renderVacancies();
         },
 
         bindSearchEvents() {
@@ -828,6 +878,28 @@ document.addEventListener('DOMContentLoaded', () => {
             scrollBtn.style.display = 'flex';
         } else {
             scrollBtn.style.display = 'none';
+        }
+
+        if (window.innerWidth <= 750) { // Only for mobile
+            const paginationContainer = document.getElementById('pagination');
+            if (!paginationContainer || getComputedStyle(paginationContainer).display === 'none') {
+                scrollBtn.style.bottom = '30px';
+                return;
+            };
+
+            const docHeight = document.documentElement.scrollHeight;
+            const viewportBottom = window.innerHeight + window.scrollY;
+            
+            const footerStop = docHeight - paginationContainer.offsetHeight;
+
+            if (viewportBottom >= footerStop) {
+                const newBottom = (viewportBottom - footerStop) + 37;
+                scrollBtn.style.bottom = `${newBottom}px`;
+            } else {
+                scrollBtn.style.bottom = '30px';
+            }
+        } else {
+            scrollBtn.style.bottom = '30px';
         }
     });
 
