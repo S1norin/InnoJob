@@ -1,8 +1,8 @@
 import { SERVER_URL } from "/web/config.js";
 
-if (!localStorage.getItem('userEmail')) {
-    window.location.href = '/log_in_page';
-}
+// if (!localStorage.getItem('userEmail')) {
+//     window.location.href = '/log_in_page';
+// }
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const mobileFiltersPanel = document.querySelector('.mobile-filters-panel');
     const mobileFiltersHideBtn = document.querySelector('.mobile-filters-hide');
     const mainContentWrapper = document.querySelector('.main_content');
-    const desktopFilters = document.querySelector('.filters-container');
+    const desktopFilters = document.querySelector('.filters-conteiner');
     
     function isMobile() {
         return window.innerWidth <= 750;
@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
             this.elements.vacanciesList = document.getElementById('vacancies-list');
             this.elements.pagination = document.getElementById('pagination');
             this.elements.allJobsText = document.querySelector('.all_jobs_text p');
-            this.elements.filterContainer = document.querySelector('.filters-container');
+            this.elements.filterContainer = document.querySelector('.filters-conteiner');
             this.elements.salaryInputs = document.querySelectorAll('.salary-inputs input');
             this.elements.clearFiltersBtn = document.getElementById('clear-filters');
             this.elements.searchInput = document.getElementById('search-input');
@@ -120,7 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             const syncCheckboxes = (sourceCheckbox) => {
-                const sourceContainer = sourceCheckbox.closest('.filters-container, .mobile-filters-panel');
+                const sourceContainer = sourceCheckbox.closest('.filters-conteiner, .mobile-filters-panel');
                 const targetContainer = sourceContainer.classList.contains('filters-conteiner')
                     ? this.elements.mobileFiltersPanel
                     : this.elements.filterContainer;
@@ -167,7 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             const syncSalaryInputs = (sourceInput, index) => {
-                const sourceContainer = sourceInput.closest('.filters-container, .mobile-filters-panel');
+                const sourceContainer = sourceInput.closest('.filters-conteiner, .mobile-filters-panel');
                 const isDesktop = sourceContainer.classList.contains('filters-conteiner');
                 const targetContainer = isDesktop ? this.elements.mobileFiltersPanel : this.elements.filterContainer;
 

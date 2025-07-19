@@ -1,8 +1,8 @@
 import { SERVER_URL } from "/web/config.js";
 
-if (!localStorage.getItem('userEmail')) {
-    window.location.href = '/log_in_page';
-}
+// if (!localStorage.getItem('userEmail')) {
+//     window.location.href = '/log_in_page';
+// }
 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const mobileFiltersPanel = document.querySelector('.mobile-filters-panel');
     const mobileFiltersHideBtn = document.querySelector('.mobile-filters-hide');
     const mainContentWrapper = document.querySelector('.main_content');
-    const desktopFilters = document.querySelector('.filters-container');
+    const desktopFilters = document.querySelector('.filters-conteiner');
     const searchContainer = document.querySelector('.search-container');
 
     function isMobile() {
@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
             this.elements.vacanciesList = document.getElementById('vacancies-list');
             this.elements.pagination = document.getElementById('pagination');
             this.elements.allJobsText = document.querySelector('.all_jobs_text p');
-            this.elements.filterContainer = document.querySelector('.filters-container');
+            this.elements.filterContainer = document.querySelector('.filters-conteiner');
             this.elements.clearFiltersBtn = document.getElementById('clear-filters');
             this.elements.searchInput = document.getElementById('search-input');
             this.elements.mobileFiltersPanel = document.querySelector('.mobile-filters-panel');
