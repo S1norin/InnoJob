@@ -249,9 +249,24 @@ document.addEventListener('DOMContentLoaded', function () {
             const eduLevel = educationLevel?.value || '';
             const eduStatus = educationStatus?.value || '';
             const desc = description?.value || '';
+            const isEditing = editingCardId !== null;
 
-            if (!eduLevel || !eduStatus || !desc || !selectedSkills.length) {
-                alert('Пожалуйста, заполните все обязательные поля');
+            const cardBeingEdited = isEditing ? userCards.find(c => c.id === editingCardId) : null;
+
+            let missingFields = [];
+            if (!eduLevel) missingFields.push("Уровень образования");
+            if (!eduStatus) missingFields.push("Статус образования");
+            if (!desc) missingFields.push("Описание");
+            if (selectedSkills.length === 0) missingFields.push("Навыки");
+            if (!currentPhotoFile && !(isEditing && cardBeingEdited?.photoFileName)) {
+                missingFields.push("Фото");
+            }
+            if (!currentCvFile && !(isEditing && cardBeingEdited?.cvFileName)) {
+                missingFields.push("Файл CV");
+            }
+
+            if (missingFields.length > 0) {
+                alert(`Пожалуйста, заполните все обязательные поля: ${missingFields.join(', ')}.`);
                 return;
             }
 
@@ -261,7 +276,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
-            const isEditing = editingCardId !== null;
             const url = isEditing ? `/users/${email}/cards/${editingCardId}` : `/users/${email}/cards`;
             const method = isEditing ? 'PATCH' : 'POST';
 
@@ -376,11 +390,6 @@ document.addEventListener('DOMContentLoaded', function () {
             </div>
             <div class="card-description">
                 <p>${cardData.description}</p>
-            </div>
-            <div class="card-files-info">
-                <small style="color: #666;"> 
-                     ${cardData.cvFileName}
-                </small>
             </div>
             <div class="buttoms">
                 <div class="cv-buttons-row">

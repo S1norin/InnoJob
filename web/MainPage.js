@@ -780,7 +780,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="skill-tags">
                             <span class="skill-tag">${vacancy.experience ?? ''}</span>
                         </div>
-                        <button class="apply-button" data-link="${vacancy.link ?? '#'}">Откликнуться</button>
+                        <button class="apply-button" data-link="${vacancy.link ?? '#'}">Посмотреть вакансию</button>
                     </div>
                 </div>
             `;
