@@ -132,7 +132,7 @@ body {
     flex-direction: column;
     align-items: center;
     width: 100%;
-    max-width: 700px;
+    max-width: 470px;
     font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
     padding: 0;
     gap: 25px;
@@ -670,4 +670,208 @@ textarea {
 .card-files-info {
     color: #555;
     font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
+}
+
+
+
+
+
+
+@media (max-width: 750px) {
+    body {
+        min-height: 100vh;
+        margin: 0;
+    }
+
+    .other_body {
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+        width: 100%; /* <-- Добавьте эту строку */
+    }
+
+    .fill_cards {
+        width: 88%;
+        gap: 20px;
+    }
+
+
+    /* Шапка */
+
+
+    .header {
+        height: 40px;
+        min-height: 0;
+        padding: 0;
+    }
+    .header-content {
+        height: 40px;
+        padding: 0 8px;
+        flex-wrap: nowrap;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .header-left {
+        gap: 10px;
+    }
+
+    .header-right {
+        gap: 3px;
+        margin-right: 0px;
+    }
+
+    .header-left h2 {
+        font-size: 0.8rem;
+    }
+    .header-left img {
+        width: 30px;
+    }
+    .header-right h2 {
+        font-size: 0.8rem;
+        padding: 10px 8px;
+    }
+
+
+    #cardsContainer {
+    grid-template-columns: repeat(1, 1fr);
+    }
+
+
+ /* 1. Блок фото и кнопки над полями имени и почты */
+    .profile-header {
+        flex-direction: column;
+        align-items: center; /* Центрируем содержимое */
+        gap: 20px;
+    }
+    
+    .profile-image {
+        order: -1; /* Перемещаем блок с фото вверх */
+        width: 100%;
+        align-items: center;
+    }
+
+    .profile-info {
+        width: 100%;
+        gap: 20px;
+    }
+
+    /* 2. Поля ввода на всю ширину, чтобы не выходили за рамки */
+    .form-group,
+    input[type="email"],
+    .name-input,
+    .form-select,
+    .form-textarea {
+        width: 100%;
+        box-sizing: border-box; /* Учитываем padding и border в ширине */
+    }
+
+    /* 3. Уровень образования над статусом */
+    .form-row {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .form-actions {
+        margin-top: 10px;
+    }
+
+    /* --- ИЗМЕНЕНИЯ ДЛЯ КАРТОЧЕК --- */
+    
+    /* 4. Карточки на всю ширину экрана */
+    #cardsContainer {
+        grid-template-columns: 1fr; /* Одна колонка для карточек */
+        padding: 0;
+        gap: 15px;
+    }
+
+    .cv-card {
+        width: 100%; /* Карточка занимает всю доступную ширину */
+        max-width: none;
+        height: auto; /* Автоматическая высота */
+        min-height: 520px;
+    }
+
+    /* Исправление опечатки в вашем коде (было .vc-card) */
+    .vc-card {
+        width: 100%;
+    }
+
+
+
+
+
+
+    /* Текст-заполнитель для фото ("Фото") */
+    .logo-place {
+        font-size: 0.8rem;
+    }
+
+    /* Имя и фамилия в карточке */
+    .job-title-info h2 {
+        font-size: 1rem; /* Сейчас ~17.5px. */
+    }
+
+    /* Детали в карточке (уровень образования и т.д.) */
+    .card-details {
+        font-size: 0.8rem; /* Сейчас ~13px. */
+    }
+
+    /* Описание "О себе" в карточке */
+    .card-description p {
+        font-size: 0.8rem; /* Сейчас ~14.5px. */
+    }
+
+    /* Теги с навыками в карточке */
+    .cv-skill-tag {
+        font-size: 0.8rem;
+    }
+
+    /* Текст на кнопках в карточке */
+    .apply-button {
+        font-size: 0.8rem;
+    }
+
+
+    /* --- ФОРМА РЕДАКТИРОВАНИЯ ПРОФИЛЯ --- */
+
+    /* Текст-заполнитель "Фото" */
+    .image-placeholder {
+        font-size: 0.8rem;
+    }
+    
+    /* Текст в выпадающих списках (select) */
+    .form-select {
+        font-size: 0.9rem; /* 16px */
+    }
+    
+    /* Текст в поле "О себе" (textarea) */
+    .form-textarea {
+        font-size: 0.9rem; /* ~14.5px */
+    }
+
+    /* Текст в поле для поиска навыков */
+    .skills-search {
+        font-size: 0.9rem; /* 16px */
+    }
+
+    /* Текст навыков в выпадающем списке */
+    .skills-option {
+        font-size: 0.9rem; /* ~14.5px */
+    }
+    
+    /* Теги с выбранными навыками */
+    .skill-tag {
+        font-size: 0.9rem;
+    }
+
+
+    /* Кнопки в форме ("Загрузить", "Сохранить") */
+    .upload-cv-btn,
+    .upload-photo-btn,
+    .save-btn {
+        font-size: 0.8rem;
+    }
+
+
+
 }

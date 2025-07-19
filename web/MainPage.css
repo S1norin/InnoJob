@@ -909,25 +909,6 @@ hr {
     }
 }
 
-/* Responsive стили */
-/* @media (max-width: 768px) {
-    .pagination {
-        padding: 12px 20px;
-        gap: 6px;
-    }
-
-    .page-btn {
-        width: 35px;
-        height: 35px;
-        font-size: 14px;
-    }
-
-    .arrow-btn {
-        width: 30px;
-        height: 30px;
-        font-size: 12px;
-    }
-} */
 
 /* ?? тех надписи */
 .loading, .error, .empty-state{
@@ -1034,7 +1015,7 @@ hr {
     }
 
 
-/* Шапка */
+    /* Шапка */
 
 
     .header {
@@ -1083,7 +1064,7 @@ hr {
 
 
 
-/* Поисковая строка */
+    /* Поисковая строка */
 
     .search-container {
         display: flex;
@@ -1119,7 +1100,7 @@ hr {
         justify-content: flex-end;
     }
 
-/* Фильтры */
+    /* Фильтры */
 
 
     .mobile-filter-btn {
@@ -1137,6 +1118,7 @@ hr {
         width: 100px;
         flex-shrink: 0;
         box-sizing: border-box;
+        margin-right: -1px;
     }
 
     .mobile-filters-panel { 
@@ -1242,7 +1224,7 @@ hr {
         margin-top: 0 !important;
     }
     
-/* ALL JOBS */
+    /* ALL JOBS */
 
     .main_content{
         width: 100%;
@@ -1264,7 +1246,7 @@ hr {
     }
 
     .all_jobs_text{
-        width: 60%;
+        width: 57%;
     }
 
     /* ?? отчистить все фильтры */

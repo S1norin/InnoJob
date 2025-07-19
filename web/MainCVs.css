@@ -968,9 +968,12 @@ hr {
         width: 100px;
         flex-shrink: 0;
         box-sizing: border-box;
+        margin-top: -17px;
+        margin-bottom: -17px;
+        margin-right: -1px;
     }
 
-    .mobile-filters-panel {
+    .mobile-filters-panel { 
         width: 93%; 
         border-radius: 15px;
         margin: 10px 0;
@@ -986,7 +989,7 @@ hr {
         flex-direction: column;
     }
 
-    .mobile-filters-hide {
+    .mobile-filters-hide {  
         bottom: 10px;                  
         left: 50%;                       
         transform: translateX(-50%);      
@@ -1051,21 +1054,33 @@ hr {
     .mobile-filters-panel.active { display: flex !important; }
     .cards { margin-top: 0 !important; }
 
-    .main_content {
+    
+    /* ALL JOBS */
+
+    .main_content{
         width: 100%;
     }
-    .all_jobs {
+
+    .all_jobs{
         width: 100%;
     }
+
+    /* ?? все вакансии */
     .all_jobs h2 {
+        margin: 0px;
         font-size: 1.2rem;
     }
+
+    /* ?? показано х из у вакансий */
     .all_jobs p {
         font-size: 0.9rem;
     }
-    .all_jobs_text {
-        width: 60%;
+
+    .all_jobs_text{
+        width: 57%;
     }
+
+    /* ?? отчистить все фильтры */
     .all_jobs button {
         min-height: 30px;
         height: auto;
@@ -1089,21 +1104,20 @@ hr {
         width: 100%;
     }
 
-    .pagination, #pagination {
-        display: flex;
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        overflow-y: hidden;
-        white-space: nowrap;
-        -webkit-overflow-scrolling: touch;
-        gap: 6px;
-        padding: 10px 10px;
+    .vacancy-card {
+        background-color: white;
+        border-radius: 15px;
+        padding: clamp(12px, 3vw, 20px);
+        width: 93%;
+        height: 520px;
         box-sizing: border-box;
-        justify-content: flex-start;
+        display: flex;
+        flex-direction: column;
     }
-    .pagination > *,
-    #pagination > * {
-        flex: 0 0 auto;
+
+    .pagination {
+        padding: 10px 12px;
+        gap: 5px;
     }
 
     .page-btn {
@@ -1111,12 +1125,32 @@ hr {
         height: 32px;
         font-size: 14px;
     }
+
     .arrow-btn {
         width: 28px;
         height: 28px;
         font-size: 12px;
     }
+
     .ellipsis {
         font-size: 14px;
+    }
+
+    .pagination, #pagination {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        overflow-y: hidden;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch; /* плавный скроллинг на iOS */
+        gap: 6px; /* или любое нужное расстояние */
+        padding: 10px 10px; /* необязательно, для «воздуха» */
+        box-sizing: border-box;
+        justify-content: flex-start; /* чтобы кнопки не прыгали по центру */
+    }
+
+    .pagination > *,
+    #pagination > * {
+        flex: 0 0 auto; /* предотвращает сжатие и перенос */
     }
 }

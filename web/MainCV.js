@@ -1,8 +1,8 @@
 import { SERVER_URL } from "/web/config.js";
 
-// if (!localStorage.getItem('userEmail')) {
-//     window.location.href = '/log_in_page';
-// }
+if (!localStorage.getItem('userEmail')) {
+    window.location.href = '/log_in_page';
+}
 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -22,12 +22,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isMobile()) {
             if (desktopFilters) desktopFilters.style.display = 'none';
             if (mobileFiltersPanel) mobileFiltersPanel.style.display = 'none';
-            if (searchContainer) searchContainer.style.display = 'flex';
+            if (mobileFilterBtn) mobileFilterBtn.style.display = 'block';
             if (mainContentWrapper) mainContentWrapper.style.marginTop = '0';
         } else {
             if (mobileFiltersPanel) mobileFiltersPanel.style.display = 'none';
             if (desktopFilters) desktopFilters.style.display = '';
-            if (searchContainer) searchContainer.style.display = 'none';
+            if (mobileFilterBtn) mobileFilterBtn.style.display = 'none';
             if (mainContentWrapper) mainContentWrapper.style.marginTop = '';
         }
     }
@@ -286,17 +286,51 @@ document.addEventListener('DOMContentLoaded', () => {
         },
 
         bindFilterEvents() {
+            const handleCheckboxChange = (checkbox) => {
+                const filterSection = checkbox.closest('.filter_section');
+                if (!filterSection) return;
+
+                const headerText = filterSection.querySelector('h2').textContent.toLowerCase();
+                const value = checkbox.value;
+                let filterKey;
+
+                if (headerText.includes('уровень')) {
+                    filterKey = 'education_level';
+                } else if (headerText.includes('статус')) {
+                    filterKey = 'education_full';
+                } else if (headerText.includes('навыки')) {
+                    filterKey = 'skills';
+                }
+
+                if (filterKey) {
+                    this.toggleFilter(this.filters[filterKey], value, checkbox.checked);
+                    this.currentPage = 1;
+                    localStorage.setItem('mainCVCurrentPage', this.currentPage);
+                    this.renderCVs();
+                }
+            };
+
+            const syncCheckboxes = (sourceCheckbox) => {
+                const sourceContainer = sourceCheckbox.closest('.filters-conteiner, .mobile-filters-panel');
+                const isDesktop = sourceContainer.classList.contains('filters-conteiner');
+                const targetContainer = isDesktop ? this.elements.mobileFiltersPanel : this.elements.filterContainer;
+
+                if (targetContainer) {
+                    const targetCheckbox = Array.from(targetContainer.querySelectorAll('input[type="checkbox"]'))
+                        .find(cb => cb.value === sourceCheckbox.value);
+                    if (targetCheckbox) {
+                        targetCheckbox.checked = sourceCheckbox.checked;
+                    }
+                }
+            };
+            
             const setupFilterListeners = (container) => {
                 if (!container) return;
                 container.addEventListener('change', (e) => {
                     const checkbox = e.target;
                     if (checkbox.tagName === 'INPUT' && checkbox.type === 'checkbox') {
-                        const filterKey = checkbox.closest('.filter_section').dataset.filterKey;
-                        const value = checkbox.value;
-                        this.toggleFilter(this.filters[filterKey], value, checkbox.checked);
-                        this.currentPage = 1;
-                        localStorage.setItem('mainCVCurrentPage', this.currentPage);
-                        this.renderCVs();
+                        syncCheckboxes(checkbox);
+                        handleCheckboxChange(checkbox);
                     }
                 });
             };

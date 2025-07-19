@@ -1,8 +1,8 @@
 import { SERVER_URL } from "/web/config.js";
 
-// if (!localStorage.getItem('userEmail')) {
-//     window.location.href = '/log_in_page';
-// }
+if (!localStorage.getItem('userEmail')) {
+    window.location.href = '/log_in_page';
+}
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -830,7 +830,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="skill-tags">
                             <span class="skill-tag">${vacancy.experience ?? ''}</span>
                         </div>
-                        <button class="apply-button" data-link="${vacancy.link ?? '#'}">Откликнуться</button>
+                        <button class="apply-button" data-link="${vacancy.link ?? '#'}">Посмотреть</button>
                     </div>
                 </div>
             `;
