@@ -244,3 +244,107 @@ input.error {
     background-color: #ffeaea;
     border-radius: 30px;
 }
+
+@media (max-width: 750px) {
+    body {
+        min-height: 100vh;
+        overflow: hidden;
+        margin: 0;
+    }
+    .header {
+        height: 40px;
+        min-height: 0;
+        padding: 0;
+    }
+    .header-content {
+        height: 40px;
+        padding: 0 12px;
+        flex-wrap: nowrap;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .header-left {
+        gap: 10px;
+    }
+    .header-left h2 {
+        font-size: 0.8rem;
+    }
+    .header-left img {
+        width: 30px;
+    }
+    
+    .other_body {
+        background-color: hsl(194, 39%, 94%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: calc(100vh - 40px);
+        width: 100%;
+        margin: 0 auto;
+        padding: 0;
+    }
+    .card {
+        width: 80%;
+        max-width: 386px;
+        height: 245px;
+        /* aspect-ratio: 380 / 300; */
+        background-color: white;
+        border-radius: 15px;
+        padding: 16px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .card_header {
+        padding: 10px 15px;
+        margin-top: 5px;
+        border-radius: 30px;
+        background-color: #f6fbff;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        gap: 3px;
+    }
+
+    .card_header h2 {
+        font-size: 0.9rem;
+        margin: 0;
+        padding: 0;
+        position: static;          /* Убрать абсолютное позиционирование */
+        transform: none;
+        white-space: nowrap;
+        color: #555;
+        font-family: 'headers', "Trebuchet MS", Helvetica, sans-serif;
+    }
+
+    .login-form {
+        display: flex;
+        flex-direction: column;
+        gap: 0px;
+    }
+
+    .login-form input::placeholder {
+        font-size: 0.8rem;
+    }
+
+    .login-form input {
+        font-size: 0.9rem;
+        padding: 14px 20px;
+        border-radius: 30px;
+        margin-top: 5px;
+        margin-bottom: 5px;
+    }
+    .login-form a {
+        margin-right: 8px;
+        margin-bottom: 7px;
+        margin-top: -2px;
+    }
+    .login-form button {
+        width: 80%;
+        margin: 14px auto 0;
+        font-size: 0.9rem;
+    }
+}

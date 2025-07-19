@@ -20,8 +20,8 @@
                 <h2>InnoJob</h2>
             </div>
             <div class="header-right">
+                <a href="/job_listing">Вакансии</a>
                 <a href="/user_profile">Профиль</a>
-                <a href="/job_listing_page">Вакансии</a>
                 <a href="#" class="logout-link" id="logout-btn">Выйти</a>
 
             </div>
@@ -29,6 +29,49 @@
     </header>
 
     <div class="other_body">
+        <div class="search-container" style="max-width: 1400px; margin: 0 auto;">
+            <input type="text" id="search-input" placeholder="Имя, фамилия, навыки...">
+            <div style="display: flex; justify-content: flex-end; flex-shrink: 0;">
+                <button id="mobile-filter-btn" class="mobile-filter-btn" style="display:none;">Фильтры</button>
+            </div>
+        </div>
+
+        <div class="mobile-filters-panel">
+            <div class="filters_header">
+                <img src="/pics/filter.png" alt="filters">
+                <h2>Фильтры</h2>
+            </div>
+
+            <div class="filter_section">
+                <div class="filter_section_header">
+                    <h2>Уровень образования</h2>
+                </div>
+                <div class="filter_variants"></div>
+                <button class="show-more-btn">Показать больше</button>
+            </div>
+            <hr>
+
+            <div class="filter_section">
+                <div class="filter_section_header">
+                    <h2>Статус Образования</h2>
+                </div>
+                <div class="filter_variants"></div>
+                <button class="show-more-btn">Показать больше</button>
+            </div>
+            <hr>
+
+            <!-- Location -->
+            <div class="filter_section">
+                <div class="filter_section_header">
+                    <h2>Навыки</h2>
+                </div>
+                <div class="filter_variants"></div>
+                <!-- для удобства в css не меняла классы для поисковой строки, просто скопируй ту же поисковую строку с теми же названиями -->
+                <button class="show-more-btn">Показать больше</button>
+            </div>
+            <button id="mobile-filters-hide" class="mobile-filters-hide">×</button>
+        </div>
+
 
         <div class="main_content">
             <div class="filters-conteiner">
