@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const mobileFiltersHideBtn = document.querySelector('.mobile-filters-hide');
     const mainContentWrapper = document.querySelector('.main_content');
     const desktopFilters = document.querySelector('.filters-conteiner');
-    
+
     function isMobile() {
         return window.innerWidth <= 750;
     }
@@ -31,16 +31,32 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (mobileFilterBtn && mobileFiltersPanel && mobileFiltersHideBtn) {
-        mobileFilterBtn.addEventListener('click', function() {
+        mobileFilterBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
             if (mobileFiltersPanel.style.display === 'none' || mobileFiltersPanel.style.display === '') {
                 mobileFiltersPanel.style.display = 'flex';
+            } else {
+                mobileFiltersPanel.style.display = 'none';
             }
         });
 
-        mobileFiltersHideBtn.addEventListener('click', function() {
-            if (isMobile()) mobileFiltersPanel.style.display = 'none';
+        mobileFiltersHideBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            if (isMobile()) {
+                mobileFiltersPanel.style.display = 'none';
+            }
+        });
+
+        mobileFiltersPanel.addEventListener('click', function (e) {
+            e.stopPropagation();
         });
     }
+
+    document.body.addEventListener('click', function () {
+        if (isMobile() && mobileFiltersPanel.style.display === 'flex') {
+            mobileFiltersPanel.style.display = 'none';
+        }
+    });
 
     window.addEventListener('resize', toggleFiltersVisibility); // !!!!!!!!!!!!!!!!
     toggleFiltersVisibility();
@@ -889,7 +905,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const docHeight = document.documentElement.scrollHeight;
             const viewportBottom = window.innerHeight + window.scrollY;
-            
+
             const footerStop = docHeight - paginationContainer.offsetHeight;
 
             if (viewportBottom >= footerStop) {

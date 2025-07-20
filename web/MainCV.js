@@ -12,7 +12,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const mobileFiltersHideBtn = document.querySelector('.mobile-filters-hide');
     const mainContentWrapper = document.querySelector('.main_content');
     const desktopFilters = document.querySelector('.filters-conteiner');
-    const searchContainer = document.querySelector('.search-container');
 
     function isMobile() {
         return window.innerWidth <= 750;
@@ -33,20 +32,35 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (mobileFilterBtn && mobileFiltersPanel && mobileFiltersHideBtn) {
-        mobileFilterBtn.addEventListener('click', function() {
+        mobileFilterBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
             if (mobileFiltersPanel.style.display === 'none' || mobileFiltersPanel.style.display === '') {
                 mobileFiltersPanel.style.display = 'flex';
+            } else {
+                mobileFiltersPanel.style.display = 'none';
             }
         });
 
-        mobileFiltersHideBtn.addEventListener('click', function() {
-            if (isMobile()) mobileFiltersPanel.style.display = 'none';
+        mobileFiltersHideBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            if (isMobile()) {
+                mobileFiltersPanel.style.display = 'none';
+            }
+        });
+
+        mobileFiltersPanel.addEventListener('click', function (e) {
+            e.stopPropagation();
         });
     }
 
+    document.body.addEventListener('click', function () {
+        if (isMobile() && mobileFiltersPanel.style.display === 'flex') {
+            mobileFiltersPanel.style.display = 'none';
+        }
+    });
+
     window.addEventListener('resize', toggleFiltersVisibility);
     toggleFiltersVisibility();
-
 
     const app = {
         elements: {},
@@ -113,29 +127,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (card && card.user_email) {
                         window.location.href = `mailto:${card.user_email}`;
                     }
-                const target = e.target;
-                if (!target.matches('.apply-button')) return;
-
-                const action = target.dataset.action;
-                const email = target.dataset.email;
-
-                switch (action) {
-                    case 'download':
-                        const cardId = target.dataset.id;
-                        const cvFileName = target.dataset.cv;
-                        if (email && cvFileName && cardId) {
-                            await this.downloadCV(email, cardId, cvFileName);
-                        } else {
-                            alert('CV не найдено для этой карточки.');
-                        }
-                        break;
-                    case 'contact':
-                        if (email) {
-                            window.location.href = `mailto:${email}`;
-                        } else {
-                            alert('Email для связи не найден.');
-                        }
-                        break;
                 }
             });
         },
@@ -198,7 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (mobileVariantsContainer) this.createCheckboxes(mobileVariantsContainer, educationFullSet, 'education_full');
                 }
             };
-            
+
             const desktopSections = this.elements.filterContainer.querySelectorAll('.filter_section');
             const mobileSections = this.elements.mobileFiltersPanel.querySelectorAll('.filter_section');
 
@@ -346,7 +337,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             };
-            
+
             const setupFilterListeners = (container) => {
                 if (!container) return;
                 container.addEventListener('change', (e) => {
@@ -371,7 +362,7 @@ document.addEventListener('DOMContentLoaded', () => {
         clearAllFilters() {
             this.elements.filterContainer.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
             this.elements.mobileFiltersPanel.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
-            
+
             if (this.elements.searchInput) this.elements.searchInput.value = '';
             this.searchTerm = '';
             this.filters = {
@@ -423,7 +414,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             this.elements.vacanciesList.innerHTML = paginatedCVs
-                .map((card, idx) => this.createCVCardHTML(card))
+                .map((card, idx) => this.createCVCardHTML(card, idx))
                 .join('');
             this.renderPagination(filteredCVs.length);
             if (this.elements.allJobsText) this.elements.allJobsText.textContent = `Показано ${Math.min(filteredCVs.length, end)} из ${filteredCVs.length} результатов`;
@@ -490,12 +481,12 @@ document.addEventListener('DOMContentLoaded', () => {
             this.elements.pagination.innerHTML = html;
         },
 
-        createCVCardHTML(card) {
+        createCVCardHTML(card, idx) {
             const photoUrl = card.photoFileName ? `${SERVER_URL}/users/photo/${card.user_email}/${card.card_id}` : '/pics/profile.png';
             const skillsHTML = card.skills.map(skill => `<div class="cv-skill-tag">${skill}</div>`).join('');
 
             return `
-                <div class="cv-card">
+                <div class="cv-card" data-idx="${idx}">
                     <div class="card-header">
                         <div class="logo-place">
                             <img src="${photoUrl}" alt="User photo" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
@@ -595,7 +586,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const docHeight = document.documentElement.scrollHeight;
             const viewportBottom = window.innerHeight + window.scrollY;
-            
+
             const footerStop = docHeight - paginationContainer.offsetHeight;
 
             if (viewportBottom >= footerStop) {
