@@ -112,20 +112,32 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             // Download and contact buttons
             this.elements.vacanciesList.addEventListener('click', async (e) => {
-                if (e.target.matches('.apply-button') && e.target.textContent.includes('Скачать CV')) {
-                    const cardIdx = e.target.closest('.cv-card').dataset.idx;
-                    const filteredCVs = this.filteredCVs();
-                    const card = filteredCVs[cardIdx];
-                    if (card && card.cvFileName && card.user_email && typeof card.card_id === 'number') {
+                const target = e.target.closest('.apply-button');
+                if (!target) return;
+
+                const cardElement = target.closest('.cv-card');
+                if (!cardElement) return;
+
+                const cardIndex = cardElement.dataset.idx;
+                if (cardIndex === undefined) return;
+
+                const card = this.filteredCVs()[cardIndex];
+                if (!card) return;
+
+                const action = target.dataset.action;
+
+                if (action === 'download') {
+                    if (card.cvFileName && card.user_email && typeof card.card_id === 'number') {
                         await this.downloadCV(card.user_email, card.card_id, card.cvFileName);
                     } else {
-                        alert('CV не найдено для этой карточки.');
+                        alert('Недостаточно данных для скачивания CV.');
                     }
-                } else if (e.target.matches('.apply-button') && e.target.textContent.includes('Связаться')) {
-                    const cardIdx = e.target.closest('.cv-card').dataset.idx;
-                    const card = this.filteredCVs()[cardIdx];
-                    if (card && card.user_email) {
-                        window.location.href = `mailto:${card.user_email}`;
+                } else if (action === 'contact') {
+                    if (card.user_email) {
+                        const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(card.user_email)}`;
+                        window.open(gmailUrl, '_blank');
+                    } else {
+                        alert('Email для связи не найден.');
                     }
                 }
             });
@@ -407,17 +419,22 @@ document.addEventListener('DOMContentLoaded', () => {
             const start = (this.currentPage - 1) * this.itemsPerPage;
             const end = start + this.itemsPerPage;
             const paginatedCVs = filteredCVs.slice(start, end);
-            if (paginatedCVs.length === 0) {
-                this.setUIState('empty');
-                if (this.elements.pagination) this.elements.pagination.innerHTML = '';
-                if (this.elements.allJobsText) this.elements.allJobsText.textContent = `No results for "${this.searchTerm}"`;
-                return;
+
+            if (this.elements.vacanciesList) {
+                if (paginatedCVs.length === 0) {
+                    this.setUIState('empty');
+                } else {
+                    this.elements.vacanciesList.innerHTML = paginatedCVs
+                        .map((card, index) => this.createCVCardHTML(card, start + index))
+                        .join('');
+                    this.setUIState('default');
+                }
             }
-            this.elements.vacanciesList.innerHTML = paginatedCVs
-                .map((card, idx) => this.createCVCardHTML(card, idx))
-                .join('');
+
+            if (this.elements.allJobsText) {
+                this.elements.allJobsText.textContent = `Показано ${filteredCVs.length} из ${this.allCVs.length} результатов`;
+            }
             this.renderPagination(filteredCVs.length);
-            if (this.elements.allJobsText) this.elements.allJobsText.textContent = `Показано ${Math.min(filteredCVs.length, end)} из ${filteredCVs.length} результатов`;
         },
 
         renderPagination(totalItems) {
