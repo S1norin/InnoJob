@@ -1,8 +1,12 @@
+*, *:before, *:after {
+  box-sizing: border-box;
+}
+
 
 @font-face {
     font-family: 'headers';
     src: url('/fonts/заголовки.woff2') format('woff2'),
-    url('/fonts/заголовки.woff') format('woff');
+        url('/fonts/заголовки.woff') format('woff');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -11,12 +15,13 @@
 @font-face {
     font-family: 'mains';
     src: url('/fonts/основной.woff2') format('woff2'),
-    url('/fonts/основной.woff') format('woff');
+        url('/fonts/основной.woff') format('woff');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
 }
-body{
+
+body {
     background-color: hsl(194, 39%, 94%);
     display: flex;
     flex-direction: column;
@@ -30,8 +35,8 @@ body{
 
 }
 
-.header{
-width: 100%;
+.header {
+    width: 100%;
 }
 
 
@@ -61,7 +66,7 @@ width: 100%;
     color: #ffffff;
     display: flex;
     align-items: right;
-    gap:1px;
+    gap: 1px;
     font-size: 17px;
     font-weight: normal;
     font-family: 'headers', "Trebuchet MS", Helvetica, sans-serif;
@@ -78,7 +83,7 @@ width: 100%;
     transition: opacity 0.2s;
 }
 
-.other_body{
+.other_body {
     background-color: hsl(194, 39%, 94%);
     display: flex;
     flex-direction: column;
@@ -106,7 +111,7 @@ width: 100%;
 }
 
 
-.card_header{
+.card_header {
     display: flex;
     position: relative;
     align-items: center;
@@ -131,10 +136,10 @@ width: 100%;
     font-family: 'headers', "Trebuchet MS", Helvetica, sans-serif;
 }
 
-.inputs{
+.inputs {
     margin-bottom: 0px;
     margin-top: 20px;
-    
+
 }
 
 .code-input-container {
@@ -148,16 +153,27 @@ width: 100%;
     font-size: 2em;
     text-align: center;
     border: 2px solid #e8f4fd;
-    border-radius: 8px;
+    border-radius: 4px;
     outline: none;
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
     font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
+    margin-right: 10px;
+}
+
+/* Чтобы последний input не имел margin-right */
+.code-input-container .code-input:last-child {
+    margin-right: 0;
 }
 
 .code-input::-webkit-outer-spin-button,
 .code-input::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
+}
+
+/* Firefox */
+.code-input[type=number] {
+    -moz-appearance: textfield;
 }
 
 .code-input:focus {
@@ -180,7 +196,7 @@ width: 100%;
 
 /* ?? Подтвердить */
 .login-form button {
-    width: 70%;
+    width: 100%;
     padding: 12px;
     border: none;
     display: flex;
@@ -203,3 +219,151 @@ width: 100%;
 .login-form button:hover {
     background-color: #008c00;
 }
+
+/* ?? ошибки */
+.error-message {
+    color: red;
+    font-size: 0.75em;
+    margin-top: 4px;
+    margin-bottom: 8px;
+    display: block;
+    padding-left: 2px;
+}
+
+input.error {
+    border: 2px solid red;
+    background-color: #ffeaea;
+    border-radius: 30px;
+}
+
+
+/* ?? еще нет аккаунта */
+.login-link {
+    margin-top: 10px;
+    font-size: 15px;
+    color: #555;
+    text-align: center;
+    font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
+}
+
+/* ?? зарегестрироваться */
+.login-link a {
+    color: #555;
+    text-decoration: none;
+    font-weight: bold;
+    font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
+}
+
+.login-link a:hover {
+    text-decoration: none;
+}
+
+@media (max-width: 750px) {
+    body {
+        min-height: 100vh;
+        overflow: hidden;
+        margin: 0;
+    }
+    .header {
+        height: 40px;
+        min-height: 0;
+        padding: 0;
+    }
+    .header-content {
+        height: 40px;
+        padding: 0 12px;
+        flex-wrap: nowrap;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .header-left {
+        gap: 10px;
+    }
+    .header-left h2 {
+        font-size: 0.8rem;
+    }
+    .header-left img {
+        width: 30px;
+    }
+    
+    .other_body {
+        background-color: hsl(194, 39%, 94%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: calc(100vh - 40px);
+        width: 100%;
+        margin: 0 auto;
+        padding: 0;
+    }
+    .card {
+        width: 80%;
+        max-width: 386px;
+        height: 245px;
+        background-color: white;
+        border-radius: 15px;
+        padding: 16px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .card_header {
+        padding: 10px 15px;
+        margin-top: 5px;
+        border-radius: 30px;
+        background-color: #f6fbff;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        gap: 3px;
+    }
+
+    .card_header h2 {
+        font-size: 0.9rem;
+        margin: 0;
+        padding: 0;
+        position: static;          /* Убрать абсолютное позиционирование */
+        transform: none;
+        white-space: nowrap;
+        color: #555;
+        font-family: 'headers', "Trebuchet MS", Helvetica, sans-serif;
+    }
+
+    
+    .login-form button {
+        width: 80%;
+        margin: 14px auto 0;
+        font-size: 0.9rem;
+    }
+
+    .code-input-container {
+        display: flex;
+        justify-content: center;   /* Центровка по горизонтали */
+        width: 100%;
+        gap: 0;                    /* Не используйте gap, если у вас margin-right у input */
+        margin: 0 auto;
+    }
+
+
+    .code-input { 
+        background: #fff !important;
+        font-size: 1em !important;
+        width: 37px !important;
+        height: 48px !important;
+        padding: 0 !important;
+        text-align: center !important;
+        border: 2px solid #e8f4fd !important;
+        outline: none !important;
+        box-sizing: border-box !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+
+    .code-input:last-child {
+        margin-right: 0;
+    }
+}
+

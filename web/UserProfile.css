@@ -1,7 +1,7 @@
 @font-face {
     font-family: 'headers';
     src: url('/fonts/заголовки.woff2') format('woff2'),
-    url('/fonts/заголовки.woff') format('woff');
+        url('/fonts/заголовки.woff') format('woff');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -10,7 +10,7 @@
 @font-face {
     font-family: 'mains';
     src: url('/fonts/основной.woff2') format('woff2'),
-    url('/fonts/основной.woff') format('woff');
+        url('/fonts/основной.woff') format('woff');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -81,11 +81,12 @@ body {
     font-family: 'headers', "Trebuchet MS", Helvetica, sans-serif;
 }
 
-/* ?? название */
 .header-right a {
     text-decoration: none;
-    font-family: 'headers', "Trebuchet MS", Helvetica, sans-serif;
 }
+
+/* ?? название */
+
 
 .header-left img {
     display: block;
@@ -96,13 +97,8 @@ body {
 .header-right {
     display: flex;
     align-items: center;
-    gap: 1rem;
-}
-
-.header-right a img {
-    display: block;
-    width: 26px;
-    aspect-ratio: 1 / 1;
+    gap: 3rem;
+    margin-right: 17px;
 }
 
 .header-content a:hover {
@@ -118,8 +114,9 @@ body {
     background-color: hsl(194, 39%, 94%);
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 50px;
-    margin-left: 30px;
     margin: 0 auto;
     align-items: flex-start;
     width: 100%;
@@ -135,9 +132,8 @@ body {
     flex-direction: column;
     align-items: center;
     width: 100%;
-    max-width: 700px;
+    max-width: 470px;
     font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
-    margin: 0 auto;
     padding: 0;
     gap: 25px;
     flex: 1;
@@ -148,13 +144,10 @@ body {
     flex: 1;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: repeat(3, auto);
     gap: 20px;
     background-color: hsl(194, 39%, 94%);
     padding: 0;
     margin: 0;
-    margin-left: 30px;
-    min-width: 800px;
     max-width: 1000px;
 }
 
@@ -291,31 +284,37 @@ body {
 
 .buttoms {
     display: flex;
-    gap: 10px;
-    margin-top: 15px;
-    margin-bottom: 0;
-    justify-content: space-between;
-    flex-wrap: wrap;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
 }
+
+.cv-buttons-row {
+    display: flex;
+    flex-direction: row;
+    gap: 12px;
+    width: 100%;
+    flex-wrap: nowrap;
+}
+
 
 /* ?? кнопки */
 .apply-button {
     background-color: #00bb00;
-    color: rgb(255, 255, 255);
+    color: #fff;
     border: none;
     border-radius: 30px;
-    font-size: clamp(0.3rem, 0.9vw, 0.65rem);
+    font-size: 15px;
     cursor: pointer;
-    transition: background-color 0.3s;
-    width: 30%;
-    min-width: 80px;
-    padding: 0.5rem 1rem;
-    margin: 2px;
+    transition: background 0.2s;
+    min-width: 0;
+    padding: 8px 20px;
     text-align: center;
-    display: inline-block;
-    font-weight: bold;
     font-family: 'headers', "Trebuchet MS", Helvetica, sans-serif;
+    box-sizing: border-box;
+    flex: 1 1 0;
 }
+
 
 .apply-button:hover {
     background-color: #008c00;
@@ -329,32 +328,12 @@ body {
     background-color: #c82333;
 }
 
-.add-cv-btn {
-    background-color: #00bb00;
-    border: none;
-    border-radius: 30px;
-    font-size: clamp(0.9rem, 2.5vw, 1rem);
-    cursor: pointer;
-    transition: background-color 0.3s;
-    min-width: 0;
-    padding: 0.5rem 1.5rem;
-    margin: 0;
-    text-align: center;
-    display: inline-block;
-}
-
-.add-cv-btn:hover {
-    background-color: #008c00;
-}
-
-/* Карточка заполнения CV */
 .profile-form {
     background-color: #ffffff;
+    padding: 30px;
     border-radius: 15px;
-    padding: clamp(12px, 3vw, 32px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     width: 100%;
-    max-width: 600px;
-    margin: 0 auto;
 }
 
 .profile-header {
@@ -375,7 +354,6 @@ body {
     gap: 10px;
 }
 
-/* ?? фото */
 .image-placeholder,
 .profile-photo {
     width: 120px;
@@ -467,7 +445,7 @@ input[type="email"]:focus,
 
 .form-group label de {
     color: rgb(0, 0, 0);
-    
+
 }
 
 .form-group {
@@ -670,12 +648,15 @@ textarea {
 /* ?? текст о себе */
 .form-textarea {
     width: 100%;
+    min-height: 150px;
+    max-height: 150px;
+    resize: none;
+    overflow-y: auto;
     padding: 15px;
     border: 1px solid #0c194b1a;
     border-radius: 8px;
     font-size: 14px;
     font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
-    min-height: 150px; 
     box-sizing: border-box;
     color: rgb(0, 0, 0);
 }
@@ -683,4 +664,214 @@ textarea {
 .form-textarea:focus {
     outline: none;
     border-color: #00bb00;
+}
+
+/* ?? СV не загружено */
+.card-files-info {
+    color: #555;
+    font-family: 'mains', "Trebuchet MS", Helvetica, sans-serif;
+}
+
+
+
+
+
+
+@media (max-width: 750px) {
+    body {
+        min-height: 100vh;
+        margin: 0;
+    }
+
+    .other_body {
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+        width: 100%; /* <-- Добавьте эту строку */
+    }
+
+    .fill_cards {
+        width: 88%;
+        gap: 20px;
+    }
+
+
+    /* Шапка */
+
+
+    .header {
+        height: 40px;
+        min-height: 0;
+        padding: 0;
+    }
+    .header-content {
+        height: 40px;
+        padding: 0 8px;
+        flex-wrap: nowrap;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .header-left {
+        gap: 10px;
+    }
+
+    .header-right {
+        gap: 3px;
+        margin-right: 0px;
+    }
+
+    .header-left h2 {
+        font-size: 0.8rem;
+    }
+    .header-left img {
+        width: 30px;
+    }
+    .header-right h2 {
+        font-size: 0.8rem;
+        padding: 10px 8px;
+    }
+
+
+    #cardsContainer {
+    grid-template-columns: repeat(1, 1fr);
+    }
+
+
+ /* 1. Блок фото и кнопки над полями имени и почты */
+    .profile-header {
+        flex-direction: column;
+        align-items: center; /* Центрируем содержимое */
+        gap: 20px;
+    }
+    
+    .profile-image {
+        order: -1; /* Перемещаем блок с фото вверх */
+        width: 100%;
+        align-items: center;
+    }
+
+    .profile-info {
+        width: 100%;
+        gap: 20px;
+    }
+
+    /* 2. Поля ввода на всю ширину, чтобы не выходили за рамки */
+    .form-group,
+    input[type="email"],
+    .name-input,
+    .form-select,
+    .form-textarea {
+        width: 100%;
+        box-sizing: border-box; /* Учитываем padding и border в ширине */
+    }
+
+    /* 3. Уровень образования над статусом */
+    .form-row {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .form-actions {
+        margin-top: 10px;
+    }
+
+    /* --- ИЗМЕНЕНИЯ ДЛЯ КАРТОЧЕК --- */
+    
+    /* 4. Карточки на всю ширину экрана */
+    #cardsContainer {
+        grid-template-columns: 1fr; /* Одна колонка для карточек */
+        padding: 0;
+        gap: 15px;
+    }
+
+    .cv-card {
+        width: 100%; /* Карточка занимает всю доступную ширину */
+        max-width: none;
+        height: auto; /* Автоматическая высота */
+        min-height: 520px;
+    }
+
+    /* Исправление опечатки в вашем коде (было .vc-card) */
+    .vc-card {
+        width: 100%;
+    }
+
+
+
+
+
+
+    /* Текст-заполнитель для фото ("Фото") */
+    .logo-place {
+        font-size: 0.8rem;
+    }
+
+    /* Имя и фамилия в карточке */
+    .job-title-info h2 {
+        font-size: 1rem; /* Сейчас ~17.5px. */
+    }
+
+    /* Детали в карточке (уровень образования и т.д.) */
+    .card-details {
+        font-size: 0.8rem; /* Сейчас ~13px. */
+    }
+
+    /* Описание "О себе" в карточке */
+    .card-description p {
+        font-size: 0.8rem; /* Сейчас ~14.5px. */
+    }
+
+    /* Теги с навыками в карточке */
+    .cv-skill-tag {
+        font-size: 0.8rem;
+    }
+
+    /* Текст на кнопках в карточке */
+    .apply-button {
+        font-size: 0.8rem;
+    }
+
+
+    /* --- ФОРМА РЕДАКТИРОВАНИЯ ПРОФИЛЯ --- */
+
+    /* Текст-заполнитель "Фото" */
+    .image-placeholder {
+        font-size: 0.8rem;
+    }
+    
+    /* Текст в выпадающих списках (select) */
+    .form-select {
+        font-size: 0.9rem; /* 16px */
+    }
+    
+    /* Текст в поле "О себе" (textarea) */
+    .form-textarea {
+        font-size: 0.9rem; /* ~14.5px */
+    }
+
+    /* Текст в поле для поиска навыков */
+    .skills-search {
+        font-size: 0.9rem; /* 16px */
+    }
+
+    /* Текст навыков в выпадающем списке */
+    .skills-option {
+        font-size: 0.9rem; /* ~14.5px */
+    }
+    
+    /* Теги с выбранными навыками */
+    .skill-tag {
+        font-size: 0.9rem;
+    }
+
+
+    /* Кнопки в форме ("Загрузить", "Сохранить") */
+    .upload-cv-btn,
+    .upload-photo-btn,
+    .save-btn {
+        font-size: 0.8rem;
+    }
+
+
+
 }

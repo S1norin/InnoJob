@@ -57,7 +57,12 @@ document.querySelector('.login-form').addEventListener('submit', async (e) => {
                         localStorage.setItem("userSurname", rest.join(' '));
                     }
                     localStorage.setItem("userEmail", email);
-                    window.location.href = "/job_listing";
+                    if (localStorage.getItem('employerFlow')) {
+                        localStorage.removeItem('employerFlow');
+                        window.location.href = "/cv_listing_page";
+                    } else {
+                        window.location.href = "/job_listing";
+                    }
                 });
         } else {
             showError(passwordInput, result.detail || result.message || "Ошибка входа", "password-error");

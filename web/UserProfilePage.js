@@ -1,4 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
+    if (!localStorage.getItem('userEmail')) {
+        window.location.href = '/log_in_page';
+    }
     // --- ЭЛЕМЕНТЫ ---
     const skillsSearch = document.getElementById('skillsSearch');
     const skillsDropdown = document.getElementById('skillsDropdown');
@@ -42,19 +45,33 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Only store user name/surname in localStorage
+    // Only store user email in localStorage
     function saveUserInfoToLocalStorage() {
         if (!checkLocalStorageSupport()) return;
-        if (nameInputs[0]) localStorage.setItem('userName', nameInputs[0].value);
-        if (nameInputs[1]) localStorage.setItem('userSurname', nameInputs[1].value);
         if (emailInput) localStorage.setItem('userEmail', emailInput.value);
     }
 
     function loadUserInfoFromLocalStorage() {
         if (emailInput) emailInput.value = localStorage.getItem('userEmail') || '';
-        if (nameInputs[0]) nameInputs[0].value = localStorage.getItem('userName') || '';
-        if (nameInputs[1]) nameInputs[1].value = localStorage.getItem('userSurname') || '';
+        // Имя и фамилию больше не трогаем из localStorage
         console.log('loadUserInfoFromLocalStorage, email:', emailInput ? emailInput.value : '(нет emailInput)');
+    }
+
+    // --- FETCH USER INFO FROM BACKEND ---
+    async function fetchUserInfo(email) {
+        try {
+            const res = await fetch(`/users/${encodeURIComponent(email)}/name`);
+            if (!res.ok) return { name: '', surname: '' };
+            const data = await res.json();
+            if (data.name) {
+                const [firstName, ...rest] = data.name.split(' ');
+                return { name: firstName || '', surname: rest.join(' ') || '' };
+            } else {
+                return { name: '', surname: '' };
+            }
+        } catch (e) {
+            return { name: '', surname: '' };
+        }
     }
 
     // --- FETCH CARDS FROM BACKEND ---
@@ -71,6 +88,12 @@ document.addEventListener('DOMContentLoaded', function () {
             const res = await fetch(`/users/${emailInput.value.trim()}/cards`);
             if (!res.ok) throw new Error('Ошибка загрузки карточек');
             const cards = await res.json();
+            // Получаем имя и фамилию из базы
+            const userInfo = await fetchUserInfo(emailInput.value.trim());
+            if (nameInputs[0]) nameInputs[0].value = userInfo.name;
+            if (nameInputs[1]) nameInputs[1].value = userInfo.surname;
+            if (nameInputs[0]) nameInputs[0].setAttribute('readonly', true);
+            if (nameInputs[1]) nameInputs[1].setAttribute('readonly', true);
             // Для каждой карточки подгружаем фото
             userCards = await Promise.all(cards.map(async card => {
                 let photoUrl = null;
@@ -90,7 +113,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     description: card.description,
                     skills: card.skills,
                     photoFile: null,
-                    photoUrl, // вот тут!
+                    photoUrl,
                     cvFile: null,
                     photoFileName: card.photo_name,
                     cvFileName: card.cv_name,
@@ -99,7 +122,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }));
         } catch (error) {
             userCards = [];
-            // alert('Ошибка загрузки карточек: ' + error.message); // Remove debug alert
         } finally {
             isLoadingCards = false;
             renderCards();
@@ -108,8 +130,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function clearLocalStorage() {
         if (!checkLocalStorageSupport()) return;
-        localStorage.removeItem('userName');
-        localStorage.removeItem('userSurname');
         localStorage.removeItem('userEmail');
     }
 
@@ -217,152 +237,102 @@ document.addEventListener('DOMContentLoaded', function () {
             selectedSkillsContainer.appendChild(skillTag);
         });
         selectedSkillsContainer.querySelectorAll('.skill-remove').forEach(btn => {
-            btn.addEventListener('click', function() {
+            btn.addEventListener('click', function () {
                 removeSkill(this.getAttribute('data-skill'));
             });
         });
     }
 
     // --- СОЗДАНИЕ/ОБНОВЛЕНИЕ КАРТОЧКИ С ОТПРАВКОЙ В БД ---
-    async function createCard() {
+    async function saveCard() {
         try {
-            // Validate required fields
             const eduLevel = educationLevel?.value || '';
             const eduStatus = educationStatus?.value || '';
-            const desc = description?.value.trim() || '';
-            const skills = selectedSkills.map(skill => skill.text);
-            const email = emailInput.value.trim();
-            if (!email) {
-                alert('Пожалуйста, укажите email');
+            const desc = description?.value || '';
+            const isEditing = editingCardId !== null;
+
+            const cardBeingEdited = isEditing ? userCards.find(c => c.id === editingCardId) : null;
+
+            let missingFields = [];
+            if (!eduLevel) missingFields.push("Уровень образования");
+            if (!eduStatus) missingFields.push("Статус образования");
+            if (!desc) missingFields.push("Описание");
+            if (selectedSkills.length === 0) missingFields.push("Навыки");
+            if (!currentPhotoFile && !(isEditing && cardBeingEdited?.photoFileName)) {
+                missingFields.push("Фото");
+            }
+            if (!currentCvFile && !(isEditing && cardBeingEdited?.cvFileName)) {
+                missingFields.push("Файл CV");
+            }
+
+            if (missingFields.length > 0) {
+                alert(`Пожалуйста, заполните все обязательные поля: ${missingFields.join(', ')}.`);
                 return;
             }
-            // if (!eduLevel || !eduStatus || !desc || skills.length === 0) {
-            //     alert('Пожалуйста, заполните все поля и выберите хотя бы один навык');
-            //     return;
-            // }
-            if (saveBtn) saveBtn.disabled = true;
-            let isNewCard = (editingCardId == null);
-            let cardId = null; // <-- объявляем cardId здесь
-            if (!isNewCard) {
-                // PATCH-запрос
-                cardId = editingCardId; // <-- присваиваем cardId
-                try {
-                    const updateResponse = await fetch(`/users/${email}/cards/${cardId}`, {
-                        method: 'PATCH',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            education_level: eduLevel,
-                            education_full: eduStatus,
-                            age: 0,
-                            description: desc,
-                            skills
-                        })
-                    });
-                    let updateData = {};
-                    let isJson = false;
-                    const contentType = updateResponse.headers.get('content-type');
-                    if (contentType && contentType.includes('application/json')) {
-                        updateData = await updateResponse.json();
-                        isJson = true;
-                    } else {
-                        updateData.message = await updateResponse.text();
-                    }
-                    if (!updateResponse.ok || (isJson && updateData.access === false)) {
-                        alert(updateData.message || 'Ошибка при обновлении карточки на сервере');
-                        return;
-                    }
-                    // После успешного обновления сбрасываем editingCardId
-                    editingCardId = null;
-                    if (saveBtn) saveBtn.textContent = 'Сохранить';
-                } catch (error) {
-                    alert('Ошибка при обновлении карточки: ' + error.message);
-                    return;
-                }
-            } else {
-                // POST-запрос
-                try {
-                    const createResponse = await fetch(`/users/${email}/cards`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            education_level: eduLevel,
-                            education_full: eduStatus,
-                            age: 0,
-                            description: desc,
-                            skills
-                        })
-                    });
-                    let createData = {};
-                    let isJson = false;
-                    const contentType = createResponse.headers.get('content-type');
-                    if (contentType && contentType.includes('application/json')) {
-                        createData = await createResponse.json();
-                        isJson = true;
-                    } else {
-                        createData.message = await createResponse.text();
-                    }
-                    if (!createResponse.ok || (isJson && createData.access === false)) {
-                        alert(createData.message || 'Ошибка при создании карточки на сервере');
-                        return;
-                    }
-                    cardId = createData.card_id; // <-- присваиваем cardId здесь
-                    if (cardId === undefined || cardId === null) {
-                        alert('Сервер не вернул card_id');
-                        await fetchUserCards();
-                        return;
-                    }
-                } catch (error) {
-                    alert('Ошибка при создании карточки: ' + error.message);
-                    return;
+
+            const email = emailInput.value.trim();
+            if (!email) {
+                alert('Email пользователя не найден.');
+                return;
+            }
+
+            const url = isEditing ? `/users/${email}/cards/${editingCardId}` : `/users/${email}/cards`;
+            const method = isEditing ? 'PATCH' : 'POST';
+
+            const cardData = {
+                education_level: eduLevel,
+                education_full: eduStatus,
+                description: desc,
+                skills: selectedSkills.map(s => s.value),
+                age: 0
+            };
+
+            const cardResponse = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(cardData)
+            });
+
+            if (!cardResponse.ok) {
+                const errorData = await cardResponse.json().catch(() => ({ detail: 'Не удалось сохранить карточку.' }));
+                throw new Error(errorData.detail);
+            }
+
+            const cardResult = await cardResponse.json();
+            const cardId = isEditing ? editingCardId : cardResult.card_id;
+
+            if (currentPhotoFile) {
+                const photoFormData = new FormData();
+                photoFormData.append('email', email);
+                photoFormData.append('photo', currentPhotoFile);
+                const photoResponse = await fetch(`/users/photo/${email}/${cardId}`, {
+                    method: 'POST',
+                    body: photoFormData
+                });
+
+                if (!photoResponse.ok) {
+                    alert('Карточка сохранена, но не удалось загрузить фото.');
                 }
             }
-            // 2. Загружаем файлы на сервер (только если есть новые файлы)
-            if (currentCvFile && cardId !== undefined && cardId !== null) {
-                try {
-                    const formData = new FormData();
-                    formData.append('email', email);
-                    formData.append('pdf_file', currentCvFile);
-                    const cvResponse = await fetch(`/users/cv/${email}/${cardId}`, {
-                        method: 'POST',
-                        body: formData
-                    });
-                    if (!cvResponse.ok) {
-                        const errText = await cvResponse.text();
-                        alert('Ошибка при загрузке CV: ' + errText);
-                        return;
-                    }
-                } catch (error) {
-                    alert(error.message);
-                    return;
+
+            if (currentCvFile) {
+                const cvFormData = new FormData();
+                cvFormData.append('email', email);
+                cvFormData.append('pdf_file', currentCvFile);
+                const cvResponse = await fetch(`/users/cv/${email}/${cardId}`, {
+                    method: 'POST',
+                    body: cvFormData
+                });
+                if (!cvResponse.ok) {
+                    alert('Карточка сохранена, но не удалось загрузить CV.');
                 }
             }
-            if (currentPhotoFile && cardId !== undefined && cardId !== null) {
-                try {
-                    const formData = new FormData();
-                    formData.append('email', email);
-                    formData.append('photo', currentPhotoFile);
-                    const photoResponse = await fetch(`/users/photo/${email}/${cardId}`, {
-                        method: 'POST',
-                        body: formData
-                    });
-                    if (!photoResponse.ok) {
-                        const errText = await photoResponse.text();
-                        alert('Ошибка при загрузке фото: ' + errText);
-                        return;
-                    }
-                } catch (error) {
-                    alert(error.message);
-                    return;
-                }
-            }
-            // 3. Обновляем интерфейс
+
             await fetchUserCards();
             clearForm();
-            saveUserInfoToLocalStorage();
+
         } catch (error) {
-            alert('Ошибка: ' + error.message);
-        } finally {
-            if (saveBtn) saveBtn.disabled = false;
+            alert(`Ошибка при сохранении карточки: ${error.message}`);
         }
     }
 
@@ -394,9 +364,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         const cvButtonText = cardData.cvFileName ? 'Скачать CV' : 'CV отсутствует';
         const cvButtonDisabled = cardData.cvFileName ? '' : 'disabled';
-        // Get global user name and surname
-        const userName = (nameInputs[0] && nameInputs[0].value) || localStorage.getItem('userName') || '';
-        const userSurname = (nameInputs[1] && nameInputs[1].value) || localStorage.getItem('userSurname') || '';
+        const userName = nameInputs[0] ? nameInputs[0].value : '';
+        const userSurname = nameInputs[1] ? nameInputs[1].value : '';
         cardDiv.innerHTML = `
             <div class="card-header">
                 <div class="logo-place">
@@ -422,15 +391,12 @@ document.addEventListener('DOMContentLoaded', function () {
             <div class="card-description">
                 <p>${cardData.description}</p>
             </div>
-            <div class="card-files-info">
-                <small style="color: #666;"> 
-                     ${cardData.cvFileName || 'CV не загружено'}
-                </small>
-            </div>
             <div class="buttoms">
-                <button class="apply-button" onclick="downloadCV(${cardData.id})" ${cvButtonDisabled}>${cvButtonText}</button>
-                <button class="apply-button" onclick="editCard(${cardData.id})">Редактировать</button>
-                <button class="apply-button delete-card" onclick="deleteCard(${cardData.id})">Удалить</button>
+                <div class="cv-buttons-row">
+                    <button class="apply-button" onclick="downloadCV(${cardData.id})" ${cvButtonDisabled}>${cvButtonText}</button>
+                    <button class="apply-button" onclick="editCard(${cardData.id})">Редактировать</button>
+                </div>
+                    <button class="apply-button delete-card" onclick="deleteCard(${cardData.id})">Удалить</button>
             </div>
         `;
         return cardDiv;
@@ -589,14 +555,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // --- СОБЫТИЯ ---
     if (saveBtn) {
-        saveBtn.addEventListener('click', function(e) {
+        saveBtn.addEventListener('click', function (e) {
             console.log('Нажата кнопка сохранения');
             e.preventDefault();
-            createCard();
+            saveCard();
         });
     }
     if (addCvBtn) {
-        addCvBtn.addEventListener('click', function(e) {
+        addCvBtn.addEventListener('click', function (e) {
             console.log('Нажата кнопка добавления CV');
             e.preventDefault();
             clearForm();
@@ -613,7 +579,7 @@ document.addEventListener('DOMContentLoaded', function () {
         uploadCvBtn.addEventListener('click', () => cvInput.click());
     }
     if (photoInput) {
-        photoInput.addEventListener('change', function() {
+        photoInput.addEventListener('change', function () {
             const file = this.files[0];
             if (file && ["image/png", "image/jpeg", "image/jpg"].includes(file.type)) {
                 if (file.size > 5 * 1024 * 1024) {
@@ -638,7 +604,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
     if (cvInput) {
-        cvInput.addEventListener('change', function() {
+        cvInput.addEventListener('change', function () {
             const file = this.files[0];
             if (file && file.type === "application/pdf") {
                 if (file.size > 10 * 1024 * 1024) {
@@ -659,24 +625,15 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
-    if (nameInputs[0]) {
-        nameInputs[0].addEventListener('input', function() {
-            localStorage.setItem('userName', this.value);
-        });
-    }
-    if (nameInputs[1]) {
-        nameInputs[1].addEventListener('input', function() {
-            localStorage.setItem('userSurname', this.value);
-        });
-    }
+    // Удаляю обработчики input для имени и фамилии, а также автосохранение этих полей в localStorage
 
     // Автосохранение при закрытии страницы
-    window.addEventListener('beforeunload', function() {
+    window.addEventListener('beforeunload', function () {
         saveToLocalStorage();
     });
 
     // Периодическое автосохранение каждые 30 секунд
-    setInterval(function() {
+    setInterval(function () {
         if (userCards.length > 0) {
             saveToLocalStorage();
         }

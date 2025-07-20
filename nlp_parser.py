@@ -61,7 +61,7 @@ for nlp in [nlp_en, nlp_ru]:
     ruler.add_patterns(job_title_patterns)
 
 
-# FIXED VACANCY DETECTION
+
 def is_vacancy(doc):
     """Check if document contains vacancy keywords"""
     if doc.lang_ == "en":
@@ -73,6 +73,7 @@ def is_vacancy(doc):
 
 def extract_job_title(doc):
     # First look for OCCUPATION entities
+    text = doc.text
     for ent in doc.ents:
         if ent.label_ == "OCCUPATION":
             return ent.text.capitalize()
@@ -83,297 +84,39 @@ def extract_job_title(doc):
         if token.text.lower() in job_keywords:
             # Get surrounding text (3 words before and after)
             start = max(0, token.i)
-            end = min(len(doc), token.i + 3)
+            end = min(len(doc), token.i + 4)
             return doc[start:end].text.capitalize()
 
-    # Fallback to first noun phrase (English only)
     if doc.lang_ == "en":
         for chunk in doc.noun_chunks:
             return chunk.text.capitalize()
-
-    if ("стажировк" in doc.text or "Cтажировк" in doc.text):
-        return "Стажёр"
-
-    return None
-
-
-def extract_company(doc):
-    companies = [
-        'Атомдата-Иннополис',
-        'Иннополис Девелопмент',
-        'АЙВИС',
-        'АйДи Решения',
-        'АйТиСфера',
-        'Ай Си Спейс',
-        'АйСиЭл Системные Технологии',
-        'АйСиЭл Софт',
-        'АйСиЭл Техно',
-        'АйСиЭл Электроникс',
-        'Ай-Теко Новые Технологии',
-        'АйТуБи',
-        'Ак Барс Цифровые Технологии',
-        'Аллока Аналитика',
-        'А-ТРЭКЕР',
-        'Бастрим',
-        'Батареон',
-        'Би Пи Эм Энвайронмент',
-        'Бипиум',
-        'БРИОЛОДЖИ',
-        'Вайс Сити Системс',
-        'Валадорус Софт',
-        'Вейвз Иннополис',
-        'Визиолоджи Технологии',
-        'ВРМ Групп',
-        'ВФ-Инно',
-        'Гемоскан',
-        'Гросс Диджитал',
-        'Джайвис',
-        'Джетс',
-        'ДжиДиСи Сервисез',
-        'ДиджиталБизФэктори',
-        'ДИОН СОФТ',
-        'Дуглис-СААС',
-        'Единые банковские технологии',
-        'ЕОРА ДАТА ЛАБ',
-        'Зед Софт Лабс',
-        'ЗенКар',
-        'Зинг',
-        'ИВКС',
-        'Индасофт Инновации',
-        'ИнноГеоТех',
-        'Иннодата',
-        'Иннокод',
-        'Иннополис 2023',
-        'Иннософт',
-        'Инностейдж ЦР',
-        'Инференс Технолоджис',
-        'Интеллектуальная видеоаналитика',
-        'ИТ ИКС 5 Технологии',
-        'Итерра-Модули',
-        'ИЦС Платформа',
-        'Касандра Груп',
-        'Контур Инновации',
-        'К-Проекты',
-        'Кьюми АйТи',
-        'Лемон Технолоджис Груп',
-        'Магнит ИТ Лаб',
-        'Маркетплейс-Технологии',
-        'Марс Технологии',
-        'МВС Индата',
-        'Медитека Диджитал',
-        'МедМаркет',
-        'Мобильная платформа',
-        'Мобильное решение',
-        'МОНЕТА ЛАБС',
-        'МТС Лаб',
-        'Навикей',
-        'Национальный Центр Информатизации',
-        'НИХАО',
-        'НовоГен',
-        'Новые облачные технологии',
-        'НПП Связь-Управление',
-        'Оптимус',
-        'Оргнефтехим АйТи',
-        'ОРЛАН Диджитал',
-        'Открытая мобильная платформа',
-        'Оун',
-        'Поуму',
-        'ПРМ Иннополис',
-        'ПСК СМАРТ ПАРК',
-        'Радиус Исследования',
-        'Райхлин Технологии',
-        'Риэль Цифровые Технологии',
-        'РМД',
-        'Роадар',
-        'Робософт',
-        'РТК Софт Лабс',
-        'РуНедра',
-        'Русланд Тех',
-        'Русдронопорт',
-        'РЭДМЭДРОБОТ ИННОВАЦИИ',
-        'Рэйлюкс',
-        'Сайберскейп инвестмент',
-        'СафДекор',
-        'Свежие решения',
-        'СДС Телеком',
-        'Синергия Софт',
-        'Сирин Групп',
-        'СИСТЭМСОФТ',
-        'СКБ Инфоматика',
-        'СМАРТФАРМ',
-        'Сорамитсу Лабс',
-        'СТУДИЯ ЛИДС',
-        'ТА-Информационные Технологии',
-        'ТатИТнефть',
-        'ТатМобайлИнформ СиДиСи',
-        'ТГТ Сервис',
-        'Техкрауд ЭйАй',
-        'ТИИД',
-        'ТРАКИНСТОК',
-        'Транспэрент Технолоджис',
-        'Трендпласт-М',
-        'Умная камера',
-        'Умные решения',
-        'Универсальные ИТ системы',
-        'ФармМедПолис РТ',
-        'ХайРус',
-        'ХайтекПарк',
-        'Цифровой Сервис Провайдер',
-        'ЦОК НТИ',
-        'Эвотэк-Мирай Геномикс',
-        'ЭЛСУР',
-        'ЭНЕРГОСОФТ',
-        'Эттон Груп',
-        'Эттон Нефтегазовые Решения',
-        'Юнителлер-РТИ',
-        'Acronis',
-        'ICL Services',
-        'ICL Soft',
-        'Uniteller',
-        'Эттон',
-        'Cognitive Pilot',
-        'HiRUS',
-        'ТаксНет',
-        'Татнефть Цифровые Технологии',
-        'Сорамитсу Лабс',
-        'Инфоматика',
-        'Sirin',
-        'red_mad_robot',
-        'RoadAR',
-        'Radius-etl.ru',
-        'Headmade',
-        'FIX',
-        'Мемориал',
-        'Lemon Technologies Group',
-        'Qummy',
-        'Контур',
-        'Digital Biz Factory',
-        'Ozon Tech'
-    ]
-    text = doc.text
-    for company in companies:
-        if company in text:
-            return company
-
-    text_lower = text.lower()
-    for company in companies:
-        if company.lower() in text_lower:
-            return company
-
-    return None
-
-
-def extract_location(doc):
-    locations = ['Innopolis', 'Kazan', 'Казань', 'Москва', 'Санкт-Петербург', 'Алматы', 'Нижний Новгород', 'Иннополис', 'Екатеринбург', 'Краснодар', 'Челябинск', 'Пермь', 'Ижевск', 'Ульяновск']
-    text = doc.text
-    for location in locations:
-        if location in text:
-            return location
-
-    text_lower = text.lower()
-    for location in locations:
-        if location.lower() in text_lower:
-            return location
-
-    return None
-
-
-def extract_salary(doc):
-    salary_patterns = [
-        # Pattern for ranges with currency
-        r"(?:з\/п|зарплата|оклад|от)\s*(\d[\d\s]*)\s*(?:до|-)\s*(\d[\d\s]*)\s*(р\.|руб|рублей|[$€]|USD|EUR)",
-        # Pattern for single value with currency
-        r"(?:з\/п|зарплата|оклад)\s*(\d[\d\s]*)\s*(р\.|руб|рублей|[$€]|USD|EUR)",
-        # Pattern for ranges without explicit currency (default to руб)
-        r"(\d[\d\s]*)\s*(?:до|-)\s*(\d[\d\s]*)\s*(?=\D|$)",
-    ]
-
-    text = doc.text.replace('\xa0', ' ').replace(',', '').replace('.', '')  # Normalize text
-
-    for pattern in salary_patterns:
-        matches = re.finditer(pattern, text, re.IGNORECASE)
-        for match in matches:
-            salary_from = int(match.group(1).replace(' ', '')) if match.group(1) else None
-            salary_to = int(match.group(2).replace(' ', '')) if len(match.groups()) > 1 and match.group(2) else None
-
-            # Currency handling - now returns 'руб' instead of '₽'
-            currency = None
-            if len(match.groups()) > 2 and match.group(3):
-                curr = match.group(3).lower()
-                if curr in ['р', 'р.', 'руб', 'рублей']:
-                    currency = 'руб'  # Changed from '₽' to 'руб'
-                elif curr == '$' or 'usd' in curr:
-                    currency = 'USD'
-                elif curr == '€' or 'eur' in curr:
-                    currency = 'EUR'
-
-            # Default to руб if no currency specified but numbers found
-            if not currency and (salary_from or salary_to):
-                currency = 'руб'  # Changed from '₽' to 'руб'
-
-            # Determine if monthly
-            salary_mode = "monthly" if any(word in text.lower() for word in ["месяц", "month"]) else None
-
-            return {
-                "salary_from": salary_from,
-                "salary_to": salary_to,
-                "salary_currency": currency,
-                "salary_mode": salary_mode
-            }
-
-    return {
-        "salary_from": None,
-        "salary_to": None,
-        "salary_currency": None,
-        "salary_mode": None
+    job_keywords = {
+        "Стажёр": ["стажировк", "cтажировк", "стажёр", "cтажёр"],
+        "developer": ["developer"],
+        "менеджер": ["менеджер"],
+        "разработчик": ["разработчик"],
+        "scientist": ["scientist"],
+        "маркетолог": ["маркетолог"],
+        "дизайнер": ["дизайнер"]
     }
 
-def extract_work_form(doc):
-    """Extract work form using pre-built matcher"""
-    if doc.lang_ == "en":
-        matches = work_form_matcher_en(doc)
-    else:  # Assume Russian
-        matches = work_form_matcher_ru(doc)
+    text_lower = text.lower()
 
-    for match_id, start, end in matches:
-        return doc[start:end].text
-    return None
-
-def extract_expirience(doc):
-    expirience_keywords = ["опыт работы", "опыт", "expirience"]
-    for token in doc:
-        if token.text.lower() in expirience_keywords:
-            # Get surrounding text (3 words before and after)
-            start = max(0, token.i)
-            end = min(len(doc), token.i + 5)
-            return re.sub(r'[^a-zA-Zа-яА-Я0-9\s]', '', doc[start:end].text.capitalize())
-    return None
+    for job, keywords in job_keywords.items():
+        for keyword in keywords:
+            if keyword in text_lower:
+                return job.capitalize()
+    return "Не указано"
 
 
 def parse_vacancy(text):
-    # Process with both pipelines
     text = text.replace("*", "")
     doc_ru = nlp_ru(text)
-    # For Russian text, English processing isn't needed
     result = {
         "is_vacancy": is_vacancy(doc_ru),
         "job_title": extract_job_title(doc_ru),
-        "company": extract_company(doc_ru),
-        "location": extract_location(doc_ru),
-        "experience": extract_expirience(doc_ru),
-        "description": " ".join([sent.text for sent in doc_ru.sents][:3]),
-        "work_form": extract_work_form(doc_ru),
+        "description": text
     }
-
-    # Add salary data if found
-    salary_data = extract_salary(doc_ru) or {
-                "salary_from": None,
-                "salary_to": None,
-                "salary_currency": None,
-                "salary_mode": None
-            }
-    result.update(salary_data)
-
     return result
 
 
