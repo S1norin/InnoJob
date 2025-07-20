@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>InnoJob</title>
-    <link rel="stylesheet" href="/web/LogInPage.css">
+    <link rel="stylesheet" href="/web/EmailPage.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 </head>
@@ -26,7 +26,7 @@
     <div class="other_body">
         <div class="card">
             <div class="card_header">
-                <h2>Войти в аккаунт</h2>
+                <h2>Восстановление пароля</h2>
             </div>
 
             <form class="login-form">
@@ -34,21 +34,13 @@
                     <input type="text" id="email" placeholder="Email" required>
                     <span class="error-message" id="email-error"></span>
 
-                    <input type="password" id="password" placeholder="Пароль" required>
-                    <span class="error-message" id="password-error"></span>
-
                 </div>
-                <a href="/email_page">Восстановить пароль</a>
-                <button type="submit">Войти</button>
+                <button type="forward">Далее</button>
             </form>
-
-            <div class="login-link">
-                <p>Ещё нет аккаунта? <a href="/sign_up_page">Зарегистрироваться</a></p>
-            </div>
         </div>
     </div>
 
-    <script type="module" src="/web/LogInPage.js"></script>
+    <script type="module" src="/web/EmailPage.js"></script>
 </body>
 
 </html>

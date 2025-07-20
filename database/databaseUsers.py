@@ -28,7 +28,8 @@ class UserManager:#Этот черт будет использоваться д�
             confirmation_code INTEGER,
             confirmation_code_created_at INTEGER,  
             is_confirmed BOOLEAN DEFAULT FALSE,
-            is_admin BOOLEAN DEFAULT FALSE
+            is_admin BOOLEAN DEFAULT FALSE,
+            is_log BOOLEAN DEFAULT FALSE
         );
         CREATE TABLE IF NOT EXISTS cards (
             user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
@@ -72,7 +73,7 @@ class UserManager:#Этот черт будет использоваться д�
         try:
             with self._get_connection() as conn:#НЕ ЗАБЫВАЕМ ПРО ПРЕКРАСНЕЙШУЮ КОНСТРУКЦИЮ
                 with conn.cursor() as cur:
-                    cur.execute(query, (name, email, hashed_password, "True"))#захерачиваем пользователя
+                    cur.execute(query, (name, email, hashed_password, "False"))#захерачиваем пользователя
                     user_id = cur.fetchone()[0]
                     return user_id#если понадобиться можно будет получат ид
         except psycopg2.IntegrityError:
@@ -221,8 +222,6 @@ class UserManager:#Этот черт будет использоваться д�
             with conn.cursor() as cur:
                 cur.execute(query, (user_email,))
 
-
-
     def change_password(self, mail, password):
         hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
         query = """
@@ -233,8 +232,6 @@ class UserManager:#Этот черт будет использоваться д�
         with self._get_connection() as conn:
             with conn.cursor() as cur:
                 cur.execute(query, (hashed_password, mail))
-
-
 
     def user_in_base(self, email):
         query = "SELECT id FROM users WHERE email = %s"
@@ -258,6 +255,50 @@ class UserManager:#Этот черт будет использоваться д�
                 else:
                     return None
 
+    def is_user_exist(self, email):
+        query = "SELECT id FROM users WHERE email = %s"
+        with self._get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(query, (email,))
+                result = cur.fetchone()
+                if result:
+                    return result
+                else:
+                    return None
+
+    def drop_user(self, email):
+        query = "DELETE FROM users WHERE email = %s;"
+        try:
+            with self._get_connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute(query, (email,))
+                    if cur.rowcount > 0:
+                        return
+                    else:
+                        return
+        except psycopg2.Error as e:
+            print(f"Ошибка БД при удалении пользователя: {e}")
+            raise
+    def is_login(self, email):
+        query = "SELECT is_log FROM users WHERE email = %s"
+        with self._get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(query, (email,))
+                result = cur.fetchone()
+                if result:
+                    return bool(result[0])
+                else:
+                    return None
+
+    def set_login_state(self, email, state):
+        query = """
+                    UPDATE users 
+                    SET is_log = %s
+                    WHERE email = %s
+                    """
+        with self._get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(query, (state, email))
 
     def get_user_card(self, email, card_number):
         query1 = "SELECT id, name FROM users WHERE email = %s;"
@@ -324,15 +365,25 @@ class UserManager:#Этот черт будет использоваться д�
             conn.rollback() # давай по новой миша все фигня
             raise
 
-    def delete_user_card(self, email, card_id):
-        query1 = "DELETE FROM skills WHERE user_id = %s AND card_id = %s;"
-        query2 = "DELETE FROM cards WHERE user_id = %s AND card_id = %s;"
+    def delete_user_card(self, email, card_number):
+        query1 = "DELETE FROM cards WHERE user_id = %s AND card_id = %s"  # умные запросы в базу данных
+        query2 = "DELETE FROM skills WHERE user_id = %s AND card_id = %s;"  # сносим нафиг все старые скилы которые были у юзера
+        update_higher_cards_query = """
+                UPDATE cards 
+                SET card_id = card_id - 1 
+                WHERE user_id = %s AND card_id > %s
+            """
+        update_higher_skills_query = """
+                UPDATE skills 
+                SET card_id = card_id - 1 
+                WHERE user_id = %s AND card_id > %s
+            """
         user_id = self.get_user_id(email)
         try:
             with self._get_connection() as conn:
                 with conn.cursor() as cur:
-                    cur.execute(query1, (user_id, card_id))
-                    cur.execute(query2, (user_id, card_id))
+                    cur.execute(query1, (user_id, card_number))
+                    cur.execute(query2, (user_id, card_number))
                     conn.commit()
         except psycopg2.Error as e:
             print(f"Ошибка БД при удалении информации о пользователе: {e}")
@@ -391,7 +442,7 @@ class UserManager:#Этот черт будет использоваться д�
                     # Build card dicts
                     card_dicts = []
                     for card in cards:
-                        card_id, level_of_education, education_full, age, description, cv_name, photo_name = card
+                        card_id, level_of_education, education_full, age, description, cv_name, photo_name, = card
                         card_dicts.append({
                             "card_id": card_id,
                             "education_level": level_of_education,
@@ -408,6 +459,50 @@ class UserManager:#Этот черт будет использоваться д�
             conn.rollback()
             raise
 
+    def get_literally_all_cards(self):
+        query1 = "SELECT id, name, email FROM users"
+        query2 = "SELECT card_id, level_of_education, education_full, age, description, cv_name, photo_name FROM cards WHERE user_id = %s ORDER BY card_id;"
+        query3 = "SELECT card_id, skill FROM skills WHERE user_id = %s;"
+        try:
+            with self._get_connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute(query1)
+                    result = cur.fetchall()
+                    all_cards = []
+                    for user in result:
+                        user_id = user[0]
+                        user_name = user[1]
+                        user_email = user[2]
+                        cur.execute(query2, (user_id,))
+                        cards = cur.fetchall()
+                        cur.execute(query3, (user_id,))
+                        skills_rows = cur.fetchall()
+                        # Map card_id to list of skills
+                        skills_map = {}
+                        for card_id, skill in skills_rows:
+                            skills_map.setdefault(card_id, []).append(skill)
+                        # Build card dicts
+                        card_dicts = []
+                        for card in cards:
+                            card_id, level_of_education, education_full, age, description, cv_name, photo_name = card
+                            card_dicts.append({
+                                "email": user_email,
+                                "name": user_name,
+                                "card_id": card_id,
+                                "education_level": level_of_education,
+                                "education_full": education_full,
+                                "age": age,
+                                "description": description,
+                                "cv_name": cv_name,
+                                "photo_name": photo_name,
+                                "skills": skills_map.get(card_id, [])
+                            })
+                        all_cards += card_dicts
+                    return all_cards
+        except psycopg2.Error as e:
+            print(f"Ошибка БД при получении всех карточек пользователя: {e}")
+            conn.rollback()
+            raise
     def get_is_admin(self, email):
         query = "SELECT is_admin FROM users WHERE email = %s;"
         try:
@@ -420,5 +515,19 @@ class UserManager:#Этот черт будет использоваться д�
                     return result[0]
         except psycopg2.Error as e:
             print(f"Ошибка БД при проверке пользователя: {e}")
+            raise
+
+    def get_name(self, email):
+        query1 = "SELECT name FROM users WHERE email = %s;"
+        try:
+            with self._get_connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute(query1, (email,))
+                    result = cur.fetchone()
+                    if not result:
+                        raise ValueError(f"Пользователь с email '{email}' не найден.")
+                    return result[0]
+        except psycopg2.Error as e:
+            print(f"Ошибка БД при получении имени пользователя: {e}")
             raise
 

@@ -209,8 +209,8 @@ class VacancyManager:
             try:
                 data = get_employer_data_sj(emp)
                 self.add_employer(data)
-            except Exception:
-                print('some error')
+            except Exception as e:
+                print(e)
 
     def find_employer(self, e_id, source):
         request = f"""SELECT id FROM employers WHERE employer_id='{e_id}' AND source={source}"""
@@ -275,5 +275,5 @@ class VacancyManager:
 #
 # db = VacancyManager(db_host, db_name, db_user, db_password, db_port)
 # print(*db.get_vac_list(), sep='\n')
-#
+# #
 

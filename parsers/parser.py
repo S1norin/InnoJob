@@ -1,8 +1,14 @@
 import requests
 from time import sleep
+from random import shuffle
 
 
 from parsers.parser_configs import *
+from config import vacancies_to_find
+
+COUNT = 0
+
+
 # from parsers.telegram_parser import parse_channel
 def get_params_hh():
     params = []
@@ -16,6 +22,7 @@ def get_params_hh():
         params.append(p)
     return params
 
+
 def get_params_sj():
     params = []
     for employer_id in employer_isd_sj:
@@ -26,7 +33,13 @@ def get_params_sj():
         })
     return params
 
+
 def get_data_superjob():
+    global COUNT
+
+    if COUNT >= vacancies_to_find - 1 != -2:
+        return []
+
     print("Запрос вакансий с SuperJob.ru...")
     params = get_params_sj()  # Новая функция для параметров SuperJob
     vacancies = []
@@ -53,26 +66,12 @@ def get_data_superjob():
 
         api_data = response.json()
         for vacancy_sj in api_data.get('objects', []):
-            #
-            #
-            #
-            #
-            # print(*[f"{i}: {vacancy_sj[i]}" for i in vacancy_sj.keys()], sep='\n')
-            # break
-
-
 
             # Основные поля
             name = vacancy_sj.get("profession", "Без названия")
             city_id = vacancy_sj.get('town', {}).get('id') if vacancy_sj.get('town') else None
-            #
-            # print(city_id)
-
 
             employer_id = vacancy_sj.get('client').get('id')
-
-
-
 
             # Обработка зарплаты
             salary_info = {
@@ -120,13 +119,24 @@ def get_data_superjob():
                 "picture": vacancy_sj.get("client", {}).get("logo", "#"),
                 "requirements": skills
             })
-
-        # Пауза между запросами
-        sleep(0.25)
+            if COUNT >= vacancies_to_find -1 != -2:
+                break
+            COUNT += 1
+        if vacancies_to_find == -1:
+            sleep(0.2)
+            continue
+        if COUNT >= vacancies_to_find - 1 and vacancies_to_find != -1:
+            break
 
     return vacancies
 
+
 def get_data_hh():
+    global COUNT
+
+    if COUNT >= vacancies_to_find - 1 != -2:
+        return []
+
     print("Запрос вакансий с HH.ru...")
     params = get_params_hh()
     vacancies = []
@@ -212,15 +222,25 @@ def get_data_hh():
                 "picture": picture if picture is not None else "#",
                 "requirements": requirements_list
             })
-        sleep(0.2)
+            if COUNT >= vacancies_to_find - 1 != -2:
+                break
+            COUNT += 1
+        if vacancies_to_find == -1:
+            sleep(0.2)
+            continue
+        if COUNT >= vacancies_to_find - 1 and vacancies_to_find != -1:
+            break
     return vacancies
+
 
 def get_main_data():
     data = []
     data.extend(get_data_hh())
     data.extend(get_data_superjob())
-    # data.extend(parse_channel('IUCareerFinder'))
+
+    shuffle(data)
     return data
+
 
 def get_employer_data_hh(e_id):
     response = requests.get(f'https://api.hh.ru/employers/{e_id}').json()
@@ -232,16 +252,18 @@ def get_employer_data_hh(e_id):
     }
     return data
 
+
 def get_employer_data_sj(e_id):
-    response = requests.get(f'https://api.superjob.ru/2.0/clients/{e_id}/', headers={"X-Api-App-Id": SUPERJOB_API_KEY}).json()
+    response = requests.get(f'https://api.superjob.ru/2.0/clients/{e_id}/',
+                            headers={"X-Api-App-Id": SUPERJOB_API_KEY}).json()
     # print(response)
     data = {
         'emp_id': response.get('id'),
         'name': response.get('title'),
-        'logo':  response.get('client_logo'),
+        'logo': response.get('client_logo'),
         'source': '2',
     }
-    if data['logo'] == None:
+    if data['logo'] is None:
         data['logo'] = "#"
     # print(*[f'{i}: {response[i]}' for i in response], sep='\n')
     # print(data)

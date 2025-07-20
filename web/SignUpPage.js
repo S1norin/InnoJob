@@ -29,6 +29,8 @@ document.querySelector('.login-form').addEventListener('submit', async (e) => {
         isValid = false;
     }
 
+
+
     if (!isValid) return;
 
     const userData = {
@@ -36,6 +38,7 @@ document.querySelector('.login-form').addEventListener('submit', async (e) => {
         email: email.value.trim(),
         password: password.value
     };
+
 
     try {
         const response = await fetch('/users/register', {
@@ -50,11 +53,18 @@ document.querySelector('.login-form').addEventListener('submit', async (e) => {
             localStorage.setItem("userName", firstName);
             localStorage.setItem("userSurname", lastName);
             localStorage.setItem("userEmail", userData.email);
-            alert("Регистрация прошла успешно.");
-            window.location.href = "/log_in_page";
+            localStorage.setItem("emailToConfirm", userData.email);
+            alert("Регистрация прошла успешно. Подтвердите почту.");
+            if (localStorage.getItem('employerFlow')) {
+                window.location.href = "/confirmation";
+            } else {
+                window.location.href = "/confirmation";
+            }
         } else {
             document.getElementById('email-error').textContent = result.detail || "Ошибка регистрации";
+
         }
+
 
     } catch (err) {
         console.error('Ошибка:', err);

@@ -7,76 +7,53 @@
     <title>InnoJob</title>
 
     <!-- Styles -->
-    <link rel="stylesheet" href="web/MainPage.css">
-    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"> -->
-
-    <!-- Fonts -->
-    <!-- <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Jockey+One&display=swap"
-        rel="stylesheet"> -->
+    <link rel="stylesheet" href="/web/MainPage.css">
 </head>
 
-<style>
-
-
-    /* .vacancy-card,
-    .search-container input,
-    .filter_variants,
-    .salary-inputs input {
-        font-family: "mains", sans-serif;
-    }
-
-    .apply-button,
-    .header-content,
-    .search-container button,
-    .all_jobs_text h2,
-    .all_jobs button,
-    .filters_header,
-    .filter_section {
-        font-family: "headers", sans-serif; 
-         } */
-
-    /* body, .filters_header h2{
-        font-family: "test", sans-serif;
-    } */
-</style>
 
 <body>
     <header class="header">
         <div class="header-content">
             <div class="header-left">
-                <!-- href to /logo does not actually take you anywhere meaningful -->
-                <a href="/logo">
+                <a href="/welcome">
                     <img src="pics/IU2.png" alt="IU2 Logo">
                 </a>
                 <h2>InnoJob</h2>
             </div>
             <div class="header-right">
-                <a href="/user_profile">
-                    <img src="/pics/profile.png" alt="profile">
-                </a>
-                <!-- Needs redirection to actual page that actually logs you out (on backend)-->
-                <!-- and then returns you to welcome page  -->
-                <a href="web/WelcomePage.html">
-                    <img src="/pics/logout.png" alt="logout">
-                </a>
+                <a href="/cv_listing_page">Резюме</a>
+                <a href="/user_profile">Профиль</a>
+                <a href="#" class="logout-link" id="logout-btn">Выйти</a>
+
             </div>
         </div>
     </header>
 
     <div class="other_body">
-        <div class="search-container">
+        <div class="search-container" style="max-width: 1400px; margin: 0 auto;">
             <input type="text" id="search-input" placeholder="Название вакансии...">
+            <div style="display: flex; justify-content: flex-end; flex-shrink: 0;">
+                <button id="mobile-filter-btn" class="mobile-filter-btn" style="display:none;">Фильтры</button>
+            </div>
         </div>
 
-        <div class="main_content">
-            <div class="filters-conteiner">
+
+        <div class="mobile-filters-panel">
                 <div class="filters_header">
                     <img src="/pics/filter.png" alt="filters">
                     <h2>Фильтры</h2>
                 </div>
+
+                <!-- Источник -->
+
+                <div class="filter_section">
+                    <div class="filter_section_header">
+                        <h2>Источник</h2>
+                    </div>
+                    <div class="filter_variants"></div>
+                    <button class="show-more-btn">Показать больше</button>
+                </div>
+                <hr>
 
                 <!-- Job Type -->
                 <div class="filter_section">
@@ -128,15 +105,93 @@
                     <div class="filter_variants"></div>
                     <button class="show-more-btn">Показать больше</button>
                 </div>
+                <button id="mobile-filters-hide" class="mobile-filters-hide">×</button>
+
+        </div>
+
+
+        <div class="main_content">
+            <div class="filters-conteiner">
+                <div class="filters_header">
+                    <img src="/pics/filter.png" alt="filters">
+                    <h2>Фильтры</h2>
+                </div>
+
+                <!-- Источник -->
+
+                <div class="filter_section">
+                    <div class="filter_section_header">
+                        <h2>Источник</h2>
+                    </div>
+                    <div class="filter_variants"></div>
+                    <button class="show-more-btn">Показать больше</button>
+                </div>
+                <hr>
+
+                <!-- Job Type -->
+                <div class="filter_section">
+                    <div class="filter_section_header">
+                        <h2>Тип работы</h2>
+                    </div>
+                    <div class="filter_variants"></div>
+                    <button class="show-more-btn">Показать больше</button>
+                </div>
+                <hr>
+
+                <!-- Required work experience -->
+                <div class="filter_section">
+                    <div class="filter_section_header">
+                        <h2>Опыт работы</h2>
+                    </div>
+                    <div class="filter_variants"></div>
+                    <button class="show-more-btn">Показать больше</button>
+                </div>
+                <hr>
+
+                <!-- Salary range -->
+                <div class="filter_section">
+                    <div class="filter_section_header">
+                        <h2>Зарплата</h2>
+                    </div>
+                    <div class="salary-inputs">
+                        <input type="text" placeholder="От...">
+                        <input type="text" placeholder="До...">
+                    </div>
+                </div>
+                <hr>
+
+                <!-- Location -->
+                <div class="filter_section">
+                    <div class="filter_section_header">
+                        <h2>Город</h2>
+                    </div>
+                    <div class="filter_variants"></div>
+                    <button class="show-more-btn">Показать больше</button>
+                </div>
+                <hr>
+
+                <!-- Company -->
+                <div class="filter_section">
+                    <div class="filter_section_header">
+                        <h2>Компания</h2>
+                    </div>
+                    <div class="filter_variants"></div>
+                    <button class="show-more-btn">Показать больше</button>
+                </div>
+                <hr>
+
+
             </div>
 
             <div class="cards">
-                <div class="all_jobs">
+                <div class="all_jobs" style="max-width: 1400px; margin: 0 auto;">
                     <div class="all_jobs_text">
                         <h2>Все вакансии</h2>
                         <p>Показано x из y результатов</p>
                     </div>
-                    <button id="clear-filters">Очистить все фильтры</button>
+                    <div style="display: flex; justify-content: flex-end; flex-shrink: 0;">
+                        <button id="clear-filters">Очистить все фильтры</button>
+                    </div>
                 </div>
 
                 <div class="vacancies" id="vacancies-list"></div>
@@ -144,6 +199,7 @@
             </div>
         </div>
     </div>
+
 
     <button id="scrollBtn">
         <img src="/pics/topbtn.png" alt="Наверх" style="width: 50%; height: 50%; opacity: 0;">

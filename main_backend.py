@@ -2,6 +2,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.staticfiles import StaticFiles
 from database.database import VacancyManager
+from database.telegram_database import TelegramManager
 from config import *
 from fastapi.responses import StreamingResponse, FileResponse
 import io
@@ -40,6 +41,8 @@ security = HTTPBasic()
 async def startup_event():
     app.state.vacancy_manager = VacancyManager(host=db_host, dbname=db_name, user=db_user, password=db_password, port=db_port)
     app.state.user_manager = UserManager(host=db_host, dbname=db_name, user=db_user, password=db_password, port=db_port)
+    app.state.telegram_manager = TelegramManager(host=db_host, dbname=db_name, user=db_user, password=db_password, port=db_port)
+    await app.state.telegram_manager.initialize()
     print("Подключение к БД установлено и менеджеры готовы!")
 
 
@@ -48,6 +51,9 @@ def get_user_manager(request: Request) -> UserManager:
 
 def get_vacancy_manager(request: Request) -> VacancyManager:
     return request.app.state.vacancy_manager
+
+def get_telegram_manager(request: Request) -> TelegramManager:
+    return request.app.state.telegram_manager
 
 
 async def verify_admin(
@@ -139,10 +145,26 @@ async def read_job_listing():
 async def read_welcome():
     return FileResponse('web/WelcomePage.html')
 
-@app.get("/user_profile")
-async def read_welcome():
-    return FileResponse('web/UserProfile.html')
+@app.get("/confirmation")
+async def read_confirm():
+    return FileResponse('web/ConfirmPage.html')
 
+@app.get("/email_page")
+async def read_email():
+    return FileResponse('web/EmailPage.html')
+
+@app.get("/password_page")
+async def read_password():
+    return FileResponse('web/PasswordPage.html')
+
+
+@app.get("/cv_listing_page")
+async def serve_cv_listing_page():
+    return FileResponse('web/MainCVs.html')
+
+@app.get("/user_profile")
+async def read_user_profile():
+    return FileResponse('web/UserProfile.html')
 
 @app.get("/vacancies")
 async def get_all_vacancies(db: VacancyManager = Depends(get_vacancy_manager)):
@@ -152,6 +174,25 @@ async def get_all_vacancies(db: VacancyManager = Depends(get_vacancy_manager)):
     except Exception as e:
         print(f"Server error getting vacancies: {e}")
         raise HTTPException(status_code=500, detail="Could not fetch vacancies.")
+
+@app.get("/telegram_vacancies")
+async def get_telegram_vacancies(db: TelegramManager = Depends(get_telegram_manager)):
+    try:
+        vacancies = await run_in_threadpool(db.get_vac_list)#по факту бахаем норм вызов получения джосона и чилим
+        return vacancies
+    except Exception as e:
+        print(f"Server error getting vacancies: {e}")
+        raise HTTPException(status_code=500, detail="Could not fetch vacancies.")
+
+@app.get("/cv_listing")
+async def get_all_cv_cards(db: UserManager = Depends(get_user_manager)):
+    try:
+        cards = await run_in_threadpool(db.get_literally_all_cards)
+        return cards
+    except Exception as e:
+        print(f"Server error getting all CV cards: {e}")
+        raise HTTPException(status_code=500, detail="Could not fetch CV cards.")
+
 
 @app.get("/cities")
 async def get_cities(db: VacancyManager = Depends(get_vacancy_manager)):
@@ -177,42 +218,64 @@ async def get_companies(db: VacancyManager = Depends(get_vacancy_manager)):
 async def test():
     return {"message": "Hello World"}
 
-async def create_password(user_mail, db: UserManager = Depends(get_user_manager)):
-    code = secrets.randbelow(900000)+100000
+
+async def send_email_utility(message: EmailMessage):
+    smtp_client = aiosmtplib.SMTP(hostname=SMTP_HOST, port=SMTP_PORT)
+    try:
+        await smtp_client.connect()
+        # Вызов starttls() УБРАН, так как aiosmtplib делает это автоматически
+
+        await smtp_client.login(SMTP_USER, SMTP_PASSWORD)
+        await smtp_client.send_message(message)
+
+        print(f"Сообщение успешно отправлено на адрес {message['To']}")
+
+    except aiosmtplib.SMTPException as e:
+        print(f"Ошибка SMTP при отправке письма: {e}")
+        # Для бэкенда важно не раскрывать детали ошибки пользователю
+        raise HTTPException(
+            status_code=500,
+            detail="Не удалось отправить письмо. Попробуйте позже."
+        )
+    finally:
+        if smtp_client.is_connected:
+            await smtp_client.quit()
+
+async def create_password(user_mail: str, db: UserManager = Depends(get_user_manager)):
+    code = secrets.randbelow(900000) + 100000
     await run_in_threadpool(db.set_confirmed_code, user_mail, code)
+    return {"detail": "Код подтверждения успешно отправлен."}
 
-
-async def send_verification(user_mail, db: UserManager = Depends(get_user_manager)):
+async def send_verification(user_mail: str, db: UserManager = Depends(get_user_manager)):
     code = await run_in_threadpool(db.get_confirmation_code, user_mail)
     if not code:
-        raise HTTPException(status_code=400, detail="Код подтверждения не найден")
+        raise HTTPException(status_code=400, detail="Код подтверждения не найден или истек.")
+
     message = EmailMessage()
     message["From"] = SMTP_USER
     message["To"] = user_mail
-    message["Subject"] = "Password"
-    message.set_content(f"Ваш код подтверждения: {code}")
+    message["Subject"] = "Ваш код подтверждения"
+    message.set_content(f"Здравствуйте!\n\nВаш код для подтверждения: {code}")
 
-    await aiosmtplib.send(
-        message,
-        hostname=SMTP_HOST,
-        port=SMTP_PORT,
-        username=SMTP_USER,
-        password=SMTP_PASSWORD,
-        use_tls=True,
-    )
+    await send_email_utility(message)
+
 
 #уже поинтереснее
 @app.post("/users/register")
 async def register_user(user_data: UserCreate, db: UserManager = Depends(get_user_manager)):
     try:
+        in_base = await run_in_threadpool(db.is_user_exist,email=user_data.email)
+        state = await run_in_threadpool(db.is_login, email = user_data.email)
+        if in_base and not(state):
+            await run_in_threadpool(db.drop_user, email=user_data.email)
         user_id = await run_in_threadpool(
             db.add_new_user,
             name=user_data.name, email=user_data.email, password=user_data.password
         )
-        #await create_password(user_data.email, db)
-        # verification disabled due to email troubles
-        # await send_verification(user_data.email, db)
+        await create_password(user_data.email, db)
+        await send_verification(user_data.email, db)
         return {"message": "User registered", "user_id": user_id}
+
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
@@ -227,7 +290,7 @@ async def upload_cv(
     email: str = Form(...),
     pdf_file: UploadFile = File(...)#получаем файл (эта важна)
 ):
-    pdf_content_bytes = await pdf_file.read()#захерачиваем его в бинарный вид чтобы не сохранять
+    pdf_content_bytes = await pdf_file.read()
 
     if not pdf_content_bytes:#если он пуст то нахер его
         raise HTTPException(
@@ -315,15 +378,25 @@ async def login_user(
         password=login_data.password
     )
     if is_correct and db.get_is_confirmed(login_data.email):#если да то говорим что все круто
+        await run_in_threadpool(db.set_login_state, email=login_data.email, state = True)
         return {"status": "success", "message": "Вход выполнен успешно"}
     elif not(db.get_is_confirmed(login_data.email)):
-        return {"status": "error", "message": "Код не подтвержден"}
+        return {"status": "error", "message": "Код не подтвержден. Пройдите регистрацию заново"}
     else:
         raise HTTPException(#в ином случае ну и пошло все в жопу
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Неверный email или пароль"
         )
 
+@app.post("/is_log")
+async def is_log(email: UserMail ,db: UserManager = Depends(get_user_manager)):
+    state:bool = await run_in_threadpool(db.is_login, email = email.mail)
+    return {"is_log": state}
+
+@app.post("/cancle_log")
+async def not_log(email: UserMail ,db: UserManager = Depends(get_user_manager)):
+    await run_in_threadpool(db.set_login_state, email = email.mail, state = False)
+    return {"user_status": False}
 
 # Named function this strange to avoid name collision with /login
 @app.get("/log_in_page")
@@ -349,29 +422,9 @@ async def read_signup():
 
     return FileResponse('web/SignUpPage.html')
 
-async def create_password(user_mail, db: UserManager = Depends(get_user_manager)):
-    code = secrets.randbelow(900000)+100000
-    await run_in_threadpool(db.set_confirmed_code, user_mail, code)
 
-
-async def send_verification(user_mail, db: UserManager = Depends(get_user_manager)):
-    code = await run_in_threadpool(db.get_confirmation_code, user_mail)
-    if not code:
-        raise HTTPException(status_code=400, detail="Код подтверждения не найден")
-    message = EmailMessage()
-    message["From"] = SMTP_USER
-    message["To"] = user_mail
-    message["Subject"] = "Password"
-    message.set_content(f"Ваш код подтверждения: {code}")
-
-    await aiosmtplib.send(
-        message,
-        hostname=SMTP_HOST,
-        port=SMTP_PORT,
-        username=SMTP_USER,
-        password=SMTP_PASSWORD,
-        use_tls=True,
-    )
+    # Используем нашу новую функцию-утилиту для отправки
+    await send_email_utility(message)
 
 @app.post("/login/confirm")
 async def check_password(data: ConfirmRequest, db: UserManager = Depends(get_user_manager)):
@@ -396,7 +449,6 @@ async def write_mail(data:UserMail, db: UserManager = Depends(get_user_manager))
         return {"access":True, "message":"User in base"}
     else:
         return {"access": False, "message": "User not in base"}
-
 
 
 @app.post("/change_password")
@@ -495,7 +547,6 @@ async def download_photo(
             detail="Внутренняя ошибка сервера при получении файла."
         )
 
-
 @app.post("/users/{user_email}/cards")
 async def add_user_card(user_email: str, data:CreateCard, db: UserManager = Depends(get_user_manager)):
     result = await run_in_threadpool(db.user_in_base, user_email) # проверяем что долбанафт есть в базе данных
@@ -504,7 +555,6 @@ async def add_user_card(user_email: str, data:CreateCard, db: UserManager = Depe
         return {"access":True, "message":"User in base", "card_id":card_id}
     else:
         return {"access": False, "message": "User not in base"}
-
 
 #endpoint for checking
 @app.get("/users/{user_email}/cards")
@@ -515,7 +565,6 @@ async def get_all_user_cards(user_email: str, db: UserManager = Depends(get_user
     except Exception as e:
         print(f"Server error getting all user cards: {e}")
         raise HTTPException(status_code=500, detail="Could not fetch user cards.")
-
 
 @app.get("/users/{user_email}/cards/{card_id}")
 async def get_user_card(user_email: str, card_id: int, db: UserManager = Depends(get_user_manager)):
@@ -540,12 +589,18 @@ async def edit_user_card(user_email: str, card_id: int, data:CreateCard, db: Use
     result = await run_in_threadpool(db.user_in_base, user_email) # проверяем что долбанафт есть в базе данных
     if result:
         await run_in_threadpool(db.edit_user_card, user_email, card_id, data.education_level, data.education_full, data.age, data.description, data.skills) # запихуиваем всю инфу в таблицу
-        return {"access":True, "message":"User in base"}
+        return {"access":True, "message": "User in base"}
     else:
         return {"access": False, "message": "User not in base"}
 
-
-
+@app.get("/users/{user_email}/name")
+async def get_user_card(user_email: str, db: UserManager = Depends(get_user_manager)):
+    try:
+        name = await run_in_threadpool(db.get_name, user_email)# получаем говно в виде словаря
+        return {"name":name} # Распихать полученное говно по параметрам модели UserInfo
+    except Exception as e:
+        print(f"Server error getting user info: {e}")
+        raise HTTPException(status_code=500, detail="Could not fetch user info.")
 
 
 
