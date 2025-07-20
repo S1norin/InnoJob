@@ -90,3 +90,7 @@ export const SERVER_URL = "http://localhost:8000";
 # Architecture
 
 [docs/architecture/architecture.md](docs/architecture/architecture.md)
+
+# Usefulness and Transition Report (for customer)
+
+[docs/reports/transition-report.md](docs/reports/transition-report.md)
