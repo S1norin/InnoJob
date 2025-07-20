@@ -94,3 +94,7 @@ export const SERVER_URL = "http://localhost:8000";
 # Usefulness and Transition Report (for customer)
 
 [docs/reports/transition-report.md](docs/reports/transition-report.md)
+
+# AI Usage Report (for customer)
+
+[docs/reports/ai-usage.md](docs/reports/ai-usage.md)
