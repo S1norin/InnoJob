@@ -22,3 +22,7 @@
 ## 6th Assignment
 
 - No AI used for writing assignment report
+
+## 7th Assignment
+
+- No AI was used for writing report
