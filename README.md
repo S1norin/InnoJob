@@ -6,7 +6,7 @@ InnoJob aggregates all vacancies from all headhunting sites that are available i
 
 ![Logo](pics/IU2.png)
 
-[innojob.ru](http://innojob.ru)
+[innojob.ru](http://innojob.ru) (Will be unavailable after August 2nd 2025)
 
 *Video Placeholder*
 
@@ -98,3 +98,7 @@ export const SERVER_URL = "http://localhost:8000";
 # AI Usage Report (for customer)
 
 [docs/reports/ai-usage.md](docs/reports/ai-usage.md)
+
+# Contacts
+
+Mikhail Krylov, DevOps - m.krylov@innopolis.university
