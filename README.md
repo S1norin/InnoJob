@@ -1,5 +1,3 @@
-Welcome to `sprint-4` branch
-
 # InnoJob - your last stop before you find your job in Innopolis SEZ!
 
 InnoJob aggregates all vacancies from all headhunting sites that are available in Innopolis Special Economic Zone
